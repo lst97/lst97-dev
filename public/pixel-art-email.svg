@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .pixel {
+            shape-rendering: crispEdges;
+        }
+    </style>
+    <!-- Envelope -->
+    <rect class="pixel" x="4" y="8" width="24" height="16" fill="#fffbeb"/>
+    <!-- Border -->
+    <rect class="pixel" x="4" y="8" width="24" height="2" fill="#2c2c2c"/>
+    <rect class="pixel" x="4" y="22" width="24" height="2" fill="#2c2c2c"/>
+    <rect class="pixel" x="4" y="8" width="2" height="16" fill="#2c2c2c"/>
+    <rect class="pixel" x="26" y="8" width="2" height="16" fill="#2c2c2c"/>
+    <!-- Flap -->
+    <rect class="pixel" x="6" y="10" width="20" height="2" fill="#a8a8a8"/>
+    <rect class="pixel" x="8" y="12" width="16" height="2" fill="#a8a8a8"/>
+    <rect class="pixel" x="10" y="14" width="12" height="2" fill="#a8a8a8"/>
+</svg> 

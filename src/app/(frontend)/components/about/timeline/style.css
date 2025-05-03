@@ -1,0 +1,213 @@
+/* Terminal content animation */
+.terminal-update .retro-content > div {
+  animation: terminal-text-flicker 0.4s ease-in-out forwards;
+}
+
+.terminal-update .retro-content > div:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.terminal-update .retro-content > div:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.terminal-update .retro-content > div:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+@keyframes terminal-text-flicker {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  10% {
+    opacity: 0.8;
+  }
+  15% {
+    opacity: 0.2;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  30% {
+    opacity: 0.4;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Only keep what's absolutely necessary */
+.pixel-notch {
+  clip-path: polygon(0 0, 50% 0, 100% 50%, 100% 100%, 50% 100%, 0 50%);
+}
+
+.retro-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.retro-glow {
+  text-shadow: 0 0 5px var(--retro-text-color);
+}
+
+/* Radar animations */
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes radar-dot-blink {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+/* Make sure the radar is visible over other elements */
+.horizontal-timeline .radar-animation,
+.vertical-timeline .radar-animation {
+  z-index: 20;
+  position: relative;
+}
+
+/* Fix for animation bug in Safari/iOS */
+.animate-ping {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Timeline styles */
+.timeline-container {
+  --line-thickness: 6px;
+  --marker-thickness: 4px;
+  --line-spacing: clamp(60px, 8vh, 80px);
+  --year-width: clamp(60px, 10vw, 80px);
+  --connector-height: clamp(30px, 5vh, 40px);
+  --tooltip-min-width: 300px;
+  --pixel-notch-size: 8px;
+  --retro-bg-color: #ffe580;
+  --retro-text-color: #b58900;
+  --color-border-rgb: 44, 44, 44; /* RGB value of the border color */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.timeline-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 20px;
+}
+
+/* Z-index layering system for timeline elements */
+.timeline-container {
+  position: relative;
+}
+
+/* Base layer - the timeline line */
+.timeline-container .timeline-line {
+  z-index: 5;
+}
+
+/* Second layer - the event markers */
+.timeline-marker {
+  z-index: 8;
+  position: relative;
+}
+
+/* Third layer - the active events */
+.timeline-vertical .bg-secondary {
+  position: relative;
+  z-index: 7;
+}
+
+/* Top layer - the sticky header */
+.timeline-vertical .sticky-year {
+  position: sticky;
+  top: 0;
+  height: 64px;
+  z-index: 30;
+  margin: 0;
+  padding: 0;
+  width: calc(100% + 3rem);
+  margin-left: -0.5rem;
+  margin-right: -1.5rem;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.timeline-vertical .sticky-year > div {
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  padding-left: 2rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Current year marker needs higher z-index than the line but lower than sticky header */
+.current-year-marker {
+  z-index: 10;
+  overflow: visible !important;
+}
+
+/* Truncate text with ellipsis */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Active timeline event styles */
+.timeline-vertical .bg-secondary {
+  border-radius: 0.25rem;
+  box-shadow: 0 0 0 1px rgba(var(--color-border-rgb), 0.1);
+}
+
+/* Fix for event containers - ensure they don't overlap with the year label */
+.timeline-vertical .space-y-3 {
+  margin-top: 0.5rem;
+}
+
+/* Custom styling for scrollable container */
+@media (max-width: 768px) {
+  .timeline-container {
+    max-height: 60vh;
+  }
+}
+
+/* Add smooth scroll behavior to the timeline */
+.timeline-container {
+  scroll-behavior: smooth;
+}

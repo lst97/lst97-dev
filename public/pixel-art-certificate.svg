@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .pixel {
+            shape-rendering: crispEdges;
+        }
+    </style>
+    <!-- Certificate paper -->
+    <rect class="pixel" x="8" y="8" width="16" height="16" fill="#fffbeb"/>
+    <!-- Border -->
+    <rect class="pixel" x="8" y="8" width="16" height="2" fill="#2c2c2c"/>
+    <rect class="pixel" x="8" y="22" width="16" height="2" fill="#2c2c2c"/>
+    <rect class="pixel" x="8" y="8" width="2" height="16" fill="#2c2c2c"/>
+    <rect class="pixel" x="22" y="8" width="2" height="16" fill="#2c2c2c"/>
+    <!-- Lines -->
+    <rect class="pixel" x="12" y="12" width="8" height="2" fill="#a8a8a8"/>
+    <rect class="pixel" x="12" y="16" width="8" height="2" fill="#a8a8a8"/>
+    <!-- Seal -->
+    <rect class="pixel" x="14" y="18" width="4" height="4" fill="#f7d02c"/>
+</svg> 

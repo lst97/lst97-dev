@@ -1,0 +1,22 @@
+@keyframes blink-triangle {
+  to {
+    visibility: hidden;
+  }
+}
+
+.blinking-triangle:hover::before {
+  --triangle-size: 8px;
+  --triangle-width: 12px;
+  --triangle-color: #000;
+
+  content: '';
+  display: inline-block;
+  margin-left: 4px;
+  margin-right: 4px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: var(--triangle-size) 0 var(--triangle-size) var(--triangle-width);
+  border-color: transparent transparent transparent var(--triangle-color);
+  animation: blink-triangle 1s steps(2, start) infinite;
+}

@@ -1,0 +1,40 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Backend and CMS Architecture
+
+This project uses PayloadCMS as a headless CMS with Next.js API routes for data access.
+
+## PayloadCMS Integration
+
+PayloadCMS is configured in [src/payload.config.ts](mdc:src/payload.config.ts) and provides:
+
+1. Content management via admin panel at `/admin`
+2. GraphQL API for querying content
+3. REST API for CRUD operations
+
+## Data Collections
+
+Collections (data models) are defined in [src/collections](mdc:src/collections) directory.
+
+## API Routes
+
+The project has several API categories:
+
+1. **PayloadCMS API** - Located at `src/app/(payload)/api/[...slug]`
+2. **Frontend API Routes** - Located at `src/app/(frontend)/api/`
+   - `/wakatime` - Integration with WakaTime API for code statistics
+
+## Authentication
+
+PayloadCMS provides built-in authentication and user management.
+
+## Database
+
+The project uses PostgreSQL (via Vercel Postgres) as configured in the PayloadCMS setup.
+
+## TypeScript Types
+
+PayloadCMS generates TypeScript types for collections in [src/payload-types.ts](mdc:src/payload-types.ts).

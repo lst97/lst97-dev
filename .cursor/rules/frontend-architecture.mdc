@@ -1,0 +1,40 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Frontend Architecture
+
+The frontend is built using Next.js 15 with React 19 and uses a combination of Tailwind CSS v4 and CSS modules for styling.
+
+## Key Frontend Files
+
+- [src/app/(frontend)/layout.tsx](mdc:src/app/(frontend)/layout.tsx) - Main layout component
+- [src/app/(frontend)/page.tsx](mdc:src/app/(frontend)/page.tsx) - Home page component
+- [src/app/(frontend)/globals.css](mdc:src/app/(frontend)/globals.css) - Global CSS styles with Tailwind imports
+- [src/app/(frontend)/landing.module.css](mdc:src/app/(frontend)/landing.module.css) - CSS modules for the landing page
+
+## Page Structure
+
+Pages are organized in the `src/app/(frontend)/pages` directory with each page having its own directory:
+
+- `/pages/welcome` - Welcome page
+- `/pages/about` - About page
+- `/pages/projects` - Projects page
+- `/pages/services` - Services page
+
+## Component Organization
+
+Components are organized in `src/app/(frontend)/components` by feature or function:
+
+- `/components/common` - Reusable components
+- `/components/animation` - Animation-related components
+- `/components/main` - Main content components
+
+## Styling Approach
+
+The project uses:
+1. Tailwind CSS v4 for utility classes
+2. CSS modules for component-specific styles
+3. Custom utility classes defined in globals.css
+4. Theme variables for light/dark mode in globals.css

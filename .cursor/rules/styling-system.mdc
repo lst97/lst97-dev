@@ -1,0 +1,56 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Styling System
+
+The project uses a custom styling system built on Tailwind CSS v4 with theme variables and custom utility classes.
+
+## Theme System
+
+The site supports light and dark themes defined in [src/app/(frontend)/globals.css](mdc:src/app/(frontend)/globals.css):
+
+```css
+/* Light Theme (default) */
+:root {
+  --background-color: rgb(253, 246, 227);
+  --card-background: #fffbeb;
+  --text-color: #2c2c2c;
+  --border-color: #2c2c2c;
+  --accent-color: #b58900;
+  /* other variables */
+}
+
+/* Dark Theme */
+[data-theme='dark'] {
+  --background-color: rgb(253, 246, 227);
+  --card-background: #3a3a3a;
+  --text-color: #fff3c4;
+  --border-color: #b58900;
+  --accent-color: #b58900;
+  /* other variables */
+}
+```
+
+## Custom Utility Classes
+
+The project defines several custom utility classes in globals.css:
+
+- `bg-background-light` / `bg-background-dark` - Background colors
+- `no-scrollbar` - Hides scrollbars across browsers
+- `pixel-underline` / `pixel-strikethrough` - Custom text decoration styles
+- Solarized color palette classes (e.g., `solarized-yellow`, `solarized-blue`)
+
+## CSS Architecture
+
+1. **Global Styles**: [globals.css](mdc:src/app/(frontend)/globals.css) contains global styles and utility classes
+2. **Component Styles**: CSS modules are used for component-specific styles (e.g., [landing.module.css](mdc:src/app/(frontend)/landing.module.css))
+3. **Tailwind Integration**: The project uses Tailwind CSS v4 via PostCSS configuration
+
+## Animation System
+
+The project uses Framer Motion for animations, particularly on the landing page:
+- Page transitions
+- Hover effects
+- Scroll-based animations

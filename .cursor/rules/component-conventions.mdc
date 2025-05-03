@@ -1,0 +1,65 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Component Conventions
+
+This project follows specific patterns and conventions for React components.
+
+## Component Organization
+
+Components are organized in `src/app/(frontend)/components` by feature or function:
+
+- `common/` - Reusable UI components
+  - `Links` - Custom link components
+  - `layout/` - Layout components
+  - `terminal/` - Terminal-related components
+  - `timeline/` - Timeline components
+- `animation/` - Animation components
+- Feature-specific folders (e.g., `about/`, `projects/`, `services/`)
+
+## Component Structure
+
+Components typically follow this structure:
+
+1. Client components use the `'use client'` directive at the top
+2. Imports are grouped by:
+   - External libraries
+   - Internal components
+   - Styles/CSS modules
+3. Components use TypeScript with explicit typing
+
+Example from [page.tsx](mdc:src/app/(frontend)/page.tsx):
+
+```tsx
+'use client'
+
+import { PkmLink } from '@/frontend/components/common/Links'
+import Image from 'next/image'
+import styles from '@/frontend/landing.module.css'
+import { motion, useScroll, useTransform } from 'framer-motion'
+
+export default function LandingPage() {
+  // Component logic
+}
+```
+
+## Animation Patterns
+
+The project uses Framer Motion for animations with these common patterns:
+
+1. Page transitions with `initial`, `animate`, and `transition` props
+2. Interactive animations with `whileHover` and `whileTap` variants
+3. Scroll-based animations using `useScroll` and `useTransform`
+
+## Image Handling
+
+Images use Next.js Image component with pixel art assets stored in the public directory.
+
+## Styling Approach
+
+Components use a combination of:
+1. CSS modules for component-specific styles
+2. Tailwind utility classes
+3. Framer Motion for animations

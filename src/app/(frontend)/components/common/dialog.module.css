@@ -1,0 +1,190 @@
+.dialogOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.75);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	backdrop-filter: blur(4px);
+}
+
+.dialogContent {
+	background: var(--card-background);
+	border: 4px solid var(--border-color);
+	box-shadow: 8px 8px 0 var(--shadow-color);
+	padding: 2rem;
+	max-width: 90%;
+	width: 600px;
+	max-height: 90vh;
+	overflow-y: auto;
+	position: relative;
+	animation: dialogAppear 0.3s ease-out;
+}
+
+.dialogContent::before {
+	content: "";
+	position: absolute;
+	top: -4px;
+	left: -4px;
+	right: -4px;
+	bottom: -4px;
+	border: 2px solid var(--border-color);
+	pointer-events: none;
+}
+
+.closeButton {
+	position: absolute;
+	top: 1rem;
+	right: 1rem;
+	width: 32px;
+	height: 32px;
+	border: 2px solid var(--border-color);
+	background: var(--card-background);
+	color: var(--text-color);
+	font-size: 1.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 2px 2px 0 var(--shadow-color);
+}
+
+.closeButton:hover {
+	transform: translate(-1px, -1px);
+	box-shadow: 3px 3px 0 var(--shadow-color);
+}
+
+.closeButton:active {
+	transform: translate(1px, 1px);
+	box-shadow: 1px 1px 0 var(--shadow-color);
+}
+
+.dialogTitle {
+	font-family: "Press Start 2P", monospace;
+	font-size: 1.5rem;
+	color: var(--text-color);
+	margin-bottom: 1.5rem;
+	padding-right: 2rem;
+}
+
+.dialogImage {
+	width: 100%;
+	height: auto;
+	border: 2px solid var(--border-color);
+	margin-bottom: 1.5rem;
+}
+
+.dialogDescription {
+	font-family: monospace;
+	font-size: 1rem;
+	color: var(--text-color);
+	line-height: 1.6;
+	margin-bottom: 1.5rem;
+}
+
+.dialogSection {
+	margin-bottom: 1.5rem;
+}
+
+.dialogSubtitle {
+	font-family: "Press Start 2P", monospace;
+	font-size: 1rem;
+	color: var(--text-color);
+	margin-bottom: 1rem;
+}
+
+.dialogTags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
+}
+
+.dialogTag {
+	background: var(--accent-color);
+	color: var(--card-background);
+	padding: 0.25rem 0.75rem;
+	font-family: monospace;
+	font-size: 0.9rem;
+	border: 1px solid var(--border-color);
+}
+
+.dialogFeatures {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.dialogFeatures li {
+	font-family: monospace;
+	font-size: 0.9rem;
+	color: var(--text-color);
+	margin-bottom: 0.5rem;
+	padding-left: 1.5rem;
+	position: relative;
+}
+
+.dialogFeatures li::before {
+	content: "→";
+	position: absolute;
+	left: 0;
+	color: var(--accent-color);
+}
+
+.dialogActions {
+	display: flex;
+	gap: 1rem;
+	margin-top: 2rem;
+}
+
+.dialogButton {
+	padding: 0.75rem 1.5rem;
+	font-family: "Press Start 2P", monospace;
+	font-size: 0.8rem;
+	color: var(--button-text-color);
+	background: var(--button-background);
+	border: 2px solid var(--border-color);
+	cursor: pointer;
+	text-decoration: none;
+	transition: all 0.2s ease;
+	box-shadow: 4px 4px 0 var(--shadow-color);
+	flex: 1;
+	text-align: center;
+}
+
+.dialogButton:hover {
+	transform: translate(-2px, -2px);
+	box-shadow: 6px 6px 0 var(--shadow-color);
+}
+
+@keyframes dialogAppear {
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@media (max-width: 768px) {
+	.dialogContent {
+		width: 95%;
+		padding: 1.5rem;
+	}
+
+	.dialogTitle {
+		font-size: 1.2rem;
+	}
+
+	.dialogButton {
+		font-size: 0.7rem;
+		padding: 0.5rem 1rem;
+	}
+}

@@ -1,0 +1,1087 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Colors */
+  --color-primary: #b58900;
+  --color-primary-light: #d4a373;
+  --color-primary-dark: #a85519;
+  --color-secondary: #ffe580;
+  --color-secondary-light: #fff3c4;
+  --color-secondary-dark: #ffe580;
+  --color-accent: #d3ba55;
+  --color-accent-light: #e6d17a;
+  --color-accent-dark: #d3ba55;
+
+  --color-background: #fdf6e3;
+  --color-background-dark: #3a3a3a;
+
+  --color-text: #2c2c2c;
+  --color-text-light: #fff3c4;
+
+  --color-card: #fffbeb;
+  --color-card-dark: #3a3a3a;
+
+  --color-border: #2c2c2c;
+  --color-border-dark: #b58900;
+
+  --color-button: #2c2c2c;
+  --color-button-text: #fff3c4;
+
+  --color-hover: #fff3c4;
+  --color-hover-dark: #2c2c2c;
+
+  /* Pokemon Type Colors (as --color-pkm-*) */
+  --color-pkm-normal-bg: #a8a878;
+  --color-pkm-normal-text: #fff;
+  --color-pkm-fire-bg: #f08030;
+  --color-pkm-fire-text: #fff;
+  --color-pkm-water-bg: #6890f0;
+  --color-pkm-water-text: #fff;
+  --color-pkm-electric-bg: #f8d030;
+  --color-pkm-electric-text: #000;
+  --color-pkm-grass-bg: #78c850;
+  --color-pkm-grass-text: #fff;
+  --color-pkm-ice-bg: #98d8d8;
+  --color-pkm-ice-text: #000;
+  --color-pkm-fighting-bg: #c03028;
+  --color-pkm-fighting-text: #fff;
+  --color-pkm-poison-bg: #a040a0;
+  --color-pkm-poison-text: #fff;
+  --color-pkm-ground-bg: #e0c068;
+  --color-pkm-ground-text: #000;
+  --color-pkm-flying-bg: #a890f0;
+  --color-pkm-flying-text: #fff;
+  --color-pkm-psychic-bg: #f85888;
+  --color-pkm-psychic-text: #fff;
+  --color-pkm-bug-bg: #a8b820;
+  --color-pkm-bug-text: #fff;
+  --color-pkm-rock-bg: #b8a038;
+  --color-pkm-rock-text: #fff;
+  --color-pkm-ghost-bg: #705898;
+  --color-pkm-ghost-text: #fff;
+  --color-pkm-dragon-bg: #7038f8;
+  --color-pkm-dragon-text: #fff;
+  --color-pkm-dark-bg: #705848;
+  --color-pkm-dark-text: #fff;
+  --color-pkm-steel-bg: #b8b8d0;
+  --color-pkm-steel-text: #000;
+  --color-pkm-fairy-bg: #ee99ac;
+  --color-pkm-fairy-text: #000;
+
+  /* Improved status colors to better match the warm, golden-amber color scheme */
+  --color-success: #4caf50; /* A warm, readable green */
+  --color-success-light: #81c784;
+  --color-success-dark: #388e3c;
+
+  --color-error: #d7263d; /* A deep, warm red (less harsh than pure red) */
+  --color-error-light: #ff7b89;
+  --color-error-dark: #a0132b;
+
+  --color-warning: #ffb300; /* A rich amber, fits the palette */
+  --color-warning-light: #ffe082;
+  --color-warning-dark: #b28704;
+
+  --color-info: #1976d2; /* A soft, readable blue */
+  --color-info-light: #64b5f6;
+  --color-info-dark: #115293;
+
+  /* Shadows */
+  --shadow: rgba(44, 44, 44, 0.3);
+  --shadow-dark: rgba(181, 137, 0, 0.2);
+
+  --text-shadow: rgba(44, 44, 44, 0.2);
+  --text-shadow-dark: rgba(181, 137, 0, 0.3);
+
+  /* Fonts */
+  --font-mono: 'Roboto Mono', monospace;
+  --font-pixel: 'Press Start 2P', monospace;
+
+  /* Gradients */
+  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+  --background-image-gradient-conic: conic-gradient(
+    from 180deg at 50% 50%,
+    var(--tw-gradient-stops)
+  );
+
+  /* Evening gradient (dark theme) */
+  --evening-gradient: linear-gradient(
+    180deg,
+    rgb(56, 92, 165) 0%,
+    /* Dark blue (top) */ rgb(78, 124, 204) 15%,
+    /* Medium blue */ rgb(122, 159, 224) 30%,
+    /* Light blue */ rgb(243, 145, 78) 60%,
+    /* Sunset orange */ rgb(251, 153, 58) 75%,
+    /* Medium amber */ rgb(246, 173, 85) 85%,
+    /* Light amber */ rgb(254, 215, 170) 100% /* Very light amber (bottom) */
+  );
+
+  /* Day gradient (light theme) */
+  --day-gradient: linear-gradient(
+    180deg,
+    rgb(135, 206, 250) 0%,
+    /* Light sky blue (top) */ rgb(173, 216, 230) 15%,
+    /* Light blue */ rgb(224, 242, 254) 30%,
+    /* Very light blue */ rgb(245, 244, 250) 60%,
+    /* White-ish */ rgb(253, 230, 138) 75%,
+    /* Light amber */ rgb(252, 211, 77) 85%,
+    /* Medium amber */ rgb(251, 191, 36) 100% /* Amber (bottom) */
+  );
+
+  /* New hover transition values */
+  --hover-transition: all 0.2s ease-in-out;
+}
+
+/* =================== 
+   Base Layer Styles 
+   =================== */
+@layer base {
+  /* Border color compatibility for Tailwind v4 */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+
+  /* Base HTML elements */
+  html {
+    @apply text-lg leading-8 h-full antialiased;
+
+    @media (max-width: 1024px) {
+      @apply text-base leading-6;
+    }
+  }
+
+  body {
+    @apply h-full m-0 font-sans;
+    background-color: var(--color-background);
+    color: var(--color-text);
+  }
+
+  #app {
+    @apply h-full;
+  }
+
+  /* Base Typography */
+  h1 {
+    @apply text-6xl leading-tight font-bold my-10;
+
+    @media (max-width: 1024px) {
+      @apply text-4xl leading-10 my-6;
+    }
+
+    @media (max-width: 768px) {
+      @apply text-3xl leading-9;
+    }
+
+    @media (max-width: 400px) {
+      @apply text-2xl leading-8;
+    }
+  }
+
+  p {
+    @apply my-6;
+  }
+
+  /* Images and SVG */
+  img {
+    @apply max-w-full h-auto block;
+  }
+
+  svg {
+    @apply align-middle;
+  }
+
+  /* Lists */
+  ul {
+    @apply list-[square] list-inside;
+  }
+
+  ol {
+    @apply list-decimal list-inside;
+  }
+}
+
+/* =================== 
+   Component Styles
+   =================== */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded px-4 py-2 text-base font-medium transition-colors;
+    background-color: var(--color-button);
+    color: var(--color-button-text);
+  }
+
+  .btn-primary {
+    @apply hover:opacity-90 focus:ring-2 focus:ring-primary focus:outline-none;
+  }
+
+  .card {
+    @apply rounded-lg shadow p-4;
+    background-color: var(--color-card);
+  }
+
+  .pixel-underline {
+    @apply no-underline;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='5'%3E%3Cpath d='M0 3 Q10 1 20 2.5 Q35 4 45 2 Q55 0 65 2 Q80 4 90 2.5 Q95 2 100 3' stroke='blue' stroke-width='1' fill='none'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='5'%3E%3Cpath d='M0 2 Q15 4 25 2 Q40 0 50 2.5 Q60 4 75 1 Q85 3.5 95 1.5 Q98 1 100 2' stroke='blue' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-position:
+      0 95%,
+      0 95%;
+    background-size:
+      100px 3px,
+      100px 3px;
+    background-repeat: repeat-x, repeat-x;
+  }
+
+  .pixel-strikethrough {
+    @apply no-underline;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='5'%3E%3Cpath d='M0 3 Q10 1 20 2.5 Q35 4 45 2 Q55 0 65 2 Q80 4 90 2.5 Q95 2 100 3' stroke='red' stroke-width='1' fill='none'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='5'%3E%3Cpath d='M0 2 Q15 4 25 2 Q40 0 50 2.5 Q60 4 75 1 Q85 3.5 95 1.5 Q98 1 100 2' stroke='red' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-position:
+      0 50%,
+      0 50%;
+    background-size:
+      100px 3px,
+      90px 4px;
+    background-repeat: repeat-x;
+  }
+
+  /* Retro pixel border utility for cards/items */
+  .pixel-border {
+    @apply border-[4px] border-gray-400 border-b-border border-r-border;
+    border-style: outset;
+  }
+
+  /* New pixel art utilities */
+  .pixel-corners {
+    position: relative;
+  }
+
+  .pixel-corners::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 4px;
+    background-color: var(--color-accent);
+  }
+
+  .pixel-corners::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 4px;
+    background-color: var(--color-accent);
+  }
+
+  /* Additional corner pixels using pseudo-elements from the children */
+  .pixel-corners > span:first-child {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    height: 4px;
+    background-color: var(--color-accent);
+  }
+
+  .pixel-corners > span:last-child {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 4px;
+    height: 4px;
+    background-color: var(--color-accent);
+  }
+
+  /* Scanline effect for CRT look */
+  .pixel-scanlines {
+    position: relative;
+  }
+
+  .pixel-scanlines::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.1) 0px,
+      rgba(0, 0, 0, 0.1) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    background-size: 100% 4px;
+    opacity: 0.1;
+    z-index: 1;
+  }
+
+  /* Image pixelated rendering */
+  .image-pixelated {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
+
+  /* Pixel grid background */
+  .pixel-grid-bg {
+    background-image:
+      linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.05;
+  }
+
+  /* Noise texture for retro feel */
+  .bg-pixel-noise {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    pointer-events: none;
+  }
+
+  /* Pixel art background patterns for icon containers */
+  .pixel-pattern-1,
+  .pixel-pattern-2,
+  .pixel-pattern-3,
+  .pixel-pattern-4 {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .pixel-pattern-1 {
+    background-image:
+      linear-gradient(to right, var(--color-accent) 2px, transparent 2px),
+      linear-gradient(to bottom, var(--color-accent) 2px, transparent 2px);
+    background-size: 8px 8px;
+    background-position: -1px -1px;
+  }
+
+  .pixel-pattern-2 {
+    background-image: radial-gradient(var(--color-accent) 2px, transparent 2px);
+    background-size: 10px 10px;
+    background-position: 0 0;
+  }
+
+  .pixel-pattern-3 {
+    background-image:
+      linear-gradient(
+        45deg,
+        transparent 7px,
+        var(--color-accent) 7px,
+        var(--color-accent) 9px,
+        transparent 9px
+      ),
+      linear-gradient(
+        -45deg,
+        transparent 7px,
+        var(--color-accent) 7px,
+        var(--color-accent) 9px,
+        transparent 9px
+      );
+    background-size: 16px 16px;
+  }
+
+  .pixel-pattern-4 {
+    background-image:
+      linear-gradient(
+        to right,
+        transparent 2px,
+        var(--color-accent) 2px,
+        var(--color-accent) 4px,
+        transparent 4px
+      ),
+      linear-gradient(
+        to bottom,
+        transparent 2px,
+        var(--color-accent) 2px,
+        var(--color-accent) 4px,
+        transparent 4px
+      );
+    background-size: 8px 8px;
+  }
+
+  /* Pixel icon container with animated border */
+  .pixel-icon-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pixel-icon-container > * {
+    position: relative;
+    z-index: 2; /* Ensure icon stays above background patterns */
+  }
+
+  .pixel-icon-container::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    z-index: 0;
+    /* Changed gradient direction to 45deg and adjusted stops for a less heavy pattern */
+    background-image: linear-gradient(
+      45deg,
+      transparent 2px,
+      var(--color-accent) 2px,
+      var(--color-accent) 4px,
+      transparent 4px
+    );
+    background-size: 8px 8px;
+    /* Added opacity to make the pattern less visible */
+    opacity: 0.2;
+  }
+}
+
+/* =================== 
+   Utility Layer
+   =================== */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-scrollbar {
+    /* Chrome, Safari and Opera */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .landing-gradient {
+    background: var(--day-gradient);
+  }
+
+  .dark .landing-gradient {
+    background: var(--evening-gradient);
+  }
+
+  /* Experience container background pattern */
+  .cross-grid-pattern {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cross-grid-pattern::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      linear-gradient(
+        45deg,
+        transparent 45%,
+        var(--color-border) 45%,
+        var(--color-border) 55%,
+        transparent 55%
+      ),
+      linear-gradient(
+        -45deg,
+        transparent 45%,
+        var(--color-border) 45%,
+        var(--color-border) 55%,
+        transparent 55%
+      );
+    background-size: 12px 12px;
+    background-position:
+      0 0,
+      6px 0;
+    opacity: 0.05;
+    pointer-events: none;
+  }
+
+  /* Pokemon Type Colors (as --color-pkm-*) */
+  .bg-pkm-normal-bg {
+    background-color: var(--color-pkm-normal-bg);
+  }
+  .text-pkm-normal-text {
+    color: var(--color-pkm-normal-text);
+  }
+
+  .bg-pkm-fire-bg {
+    background-color: var(--color-pkm-fire-bg);
+  }
+  .text-pkm-fire-text {
+    color: var(--color-pkm-fire-text);
+  }
+
+  .bg-pkm-water-bg {
+    background-color: var(--color-pkm-water-bg);
+  }
+  .text-pkm-water-text {
+    color: var(--color-pkm-water-text);
+  }
+
+  .bg-pkm-electric-bg {
+    background-color: var(--color-pkm-electric-bg);
+  }
+  .text-pkm-electric-text {
+    color: var(--color-pkm-electric-text);
+  }
+
+  .bg-pkm-grass-bg {
+    background-color: var(--color-pkm-grass-bg);
+  }
+  .text-pkm-grass-text {
+    color: var(--color-pkm-grass-text);
+  }
+
+  .bg-pkm-ice-bg {
+    background-color: var(--color-pkm-ice-bg);
+  }
+  .text-pkm-ice-text {
+    color: var(--color-pkm-ice-text);
+  }
+
+  .bg-pkm-fighting-bg {
+    background-color: var(--color-pkm-fighting-bg);
+  }
+  .text-pkm-fighting-text {
+    color: var(--color-pkm-fighting-text);
+  }
+
+  .bg-pkm-poison-bg {
+    background-color: var(--color-pkm-poison-bg);
+  }
+  .text-pkm-poison-text {
+    color: var(--color-pkm-poison-text);
+  }
+
+  .bg-pkm-ground-bg {
+    background-color: var(--color-pkm-ground-bg);
+  }
+  .text-pkm-ground-text {
+    color: var(--color-pkm-ground-text);
+  }
+
+  .bg-pkm-flying-bg {
+    background-color: var(--color-pkm-flying-bg);
+  }
+  .text-pkm-flying-text {
+    color: var(--color-pkm-flying-text);
+  }
+
+  .bg-pkm-psychic-bg {
+    background-color: var(--color-pkm-psychic-bg);
+  }
+  .text-pkm-psychic-text {
+    color: var(--color-pkm-psychic-text);
+  }
+
+  .bg-pkm-bug-bg {
+    background-color: var(--color-pkm-bug-bg);
+  }
+  .text-pkm-bug-text {
+    color: var(--color-pkm-bug-text);
+  }
+
+  .bg-pkm-rock-bg {
+    background-color: var(--color-pkm-rock-bg);
+  }
+  .text-pkm-rock-text {
+    color: var(--color-pkm-rock-text);
+  }
+
+  .bg-pkm-ghost-bg {
+    background-color: var(--color-pkm-ghost-bg);
+  }
+  .text-pkm-ghost-text {
+    color: var(--color-pkm-ghost-text);
+  }
+
+  .bg-pkm-dragon-bg {
+    background-color: var(--color-pkm-dragon-bg);
+  }
+  .text-pkm-dragon-text {
+    color: var(--color-pkm-dragon-text);
+  }
+
+  .bg-pkm-dark-bg {
+    background-color: var(--color-pkm-dark-bg);
+  }
+  .text-pkm-dark-text {
+    color: var(--color-pkm-dark-text);
+  }
+
+  .bg-pkm-steel-bg {
+    background-color: var(--color-pkm-steel-bg);
+  }
+  .text-pkm-steel-text {
+    color: var(--color-pkm-steel-text);
+  }
+
+  .bg-pkm-fairy-bg {
+    background-color: var(--color-pkm-fairy-bg);
+  }
+  .text-pkm-fairy-text {
+    color: var(--color-pkm-fairy-text);
+  }
+
+  /* Text decorations */
+  [text-decoration='underline'],
+  [text-decoration-line='underline'] {
+    text-decoration: none;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='5'%3E%3Cpath d='M0 3 Q10 1 20 2.5 Q35 4 45 2 Q55 0 65 2 Q80 4 90 2.5 Q95 2 100 3' stroke='blue' stroke-width='1' fill='none'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='5'%3E%3Cpath d='M0 2 Q15 4 25 2 Q40 0 50 2.5 Q60 4 75 1 Q85 3.5 95 1.5 Q98 1 100 2' stroke='blue' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-position:
+      0 95%,
+      0 95%;
+    background-size:
+      100px 3px,
+      90px 4px;
+    background-repeat: repeat-x;
+  }
+
+  [text-decoration='line-through'],
+  [text-decoration-line='line-through'] {
+    text-decoration: none;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='5'%3E%3Cpath d='M0 3 Q10 1 20 2.5 Q35 4 45 2 Q55 0 65 2 Q80 4 90 2.5 Q95 2 100 3' stroke='red' stroke-width='1' fill='none'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='5'%3E%3Cpath d='M0 2 Q15 4 25 2 Q40 0 50 2.5 Q60 4 75 1 Q85 3.5 95 1.5 Q98 1 100 2' stroke='red' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-position:
+      0 50%,
+      0 50%;
+    background-size:
+      100px 3px,
+      90px 4px;
+    background-repeat: repeat-x;
+  }
+
+  /* Solarized color palette */
+  .solarized-base03 {
+    @apply text-[rgb(0,43,54)];
+  }
+  .solarized-base02 {
+    @apply text-[rgb(7,54,66)];
+  }
+  .solarized-base01 {
+    @apply text-[rgb(88,110,117)];
+  }
+  .solarized-base00 {
+    @apply text-[rgb(101,123,131)];
+  }
+  .solarized-base0 {
+    @apply text-[rgb(131,148,150)];
+  }
+  .solarized-base1 {
+    @apply text-[rgb(147,161,161)];
+  }
+  .solarized-base2 {
+    @apply text-[rgb(238,232,213)];
+  }
+  .solarized-base3 {
+    @apply text-[#fdf6e3];
+  }
+  .solarized-yellow {
+    @apply text-primary;
+  }
+  .solarized-orange {
+    @apply text-[rgb(203,75,22)];
+  }
+  .solarized-red {
+    @apply text-[rgb(220,50,47)];
+  }
+  .solarized-magenta {
+    @apply text-[rgb(211,54,130)];
+  }
+  .solarized-violet {
+    @apply text-[rgb(108,113,196)];
+  }
+  .solarized-blue {
+    @apply text-[rgb(38,139,210)];
+  }
+  .solarized-cyan {
+    @apply text-[rgb(42,161,152)];
+  }
+  .solarized-green {
+    @apply text-[rgb(133,153,0)];
+  }
+
+  /* Diagonal lines pattern */
+  .bg-diagonal-lines {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--color-border) 0 2px,
+      transparent 2px 20px
+    );
+    background-size: 40px 40px;
+  }
+  /* Horizontal lines pattern */
+  .bg-horizontal-lines {
+    background-image: repeating-linear-gradient(
+      0deg,
+      var(--color-accent) 0 2px,
+      transparent 2px 24px
+    );
+    background-size: 100% 24px;
+  }
+  /* Vertical lines pattern */
+  .bg-vertical-lines {
+    background-image: repeating-linear-gradient(
+      90deg,
+      var(--color-primary) 0 2px,
+      transparent 2px 24px
+    );
+    background-size: 24px 100%;
+  }
+  /* Grid pattern */
+  .bg-grid-lines {
+    background-image:
+      repeating-linear-gradient(0deg, var(--color-border) 0 2px, transparent 2px 24px),
+      repeating-linear-gradient(90deg, var(--color-border) 0 2px, transparent 2px 24px);
+    background-size: 24px 24px;
+  }
+  /* Dots pattern */
+  .bg-dots {
+    background-image: radial-gradient(var(--color-accent) 1.5px, transparent 1.5px);
+    background-size: 18px 18px;
+  }
+
+  /* Pixel art icon hover effects */
+  .pixel-shimmer-hover {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pixel-shimmer-hover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(181, 137, 0, 0.2) 50%,
+      transparent 100%
+    );
+    background-size: 200px 100%;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none;
+  }
+
+  .pixel-shimmer-hover:hover::after {
+    opacity: 1;
+    animation: pixelShimmer 1s infinite linear;
+  }
+
+  /* Pixel border effects */
+  .pixel-border-animated {
+    position: relative;
+  }
+
+  .pixel-border-animated::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--color-accent) 0,
+      var(--color-accent) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    padding: 4px;
+    pointer-events: none;
+    animation: pixelBorderRotate 4s linear infinite;
+  }
+
+  @keyframes pixelBorderRotate {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 16px 0;
+    }
+  }
+
+  /* Pixel glow effect */
+  .pixel-glow {
+    box-shadow: 0 0 0 4px var(--color-accent);
+    transition: box-shadow 0.3s ease-in-out;
+  }
+
+  .pixel-glow:hover {
+    box-shadow:
+      0 0 10px 2px var(--color-accent),
+      0 0 20px 6px rgba(181, 137, 0, 0.3);
+  }
+
+  /* 3D card flip utilities */
+  .perspective-500 {
+    perspective: 500px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
+  /* Animation for progress bar in tech cards */
+  @keyframes progressBar {
+    0% {
+      width: 0%;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+
+  .animate-progress-bar {
+    animation: progressBar 1.5s ease-out forwards;
+  }
+
+  /* Small bounce animation for icons */
+  @keyframes bounceMini {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  .animate-bounce-mini {
+    animation: bounceMini 0.8s ease-in-out infinite;
+  }
+}
+
+/* =================== 
+   Animations
+   =================== */
+/* Cloud animations */
+@keyframes floatCloud1 {
+  0% {
+    transform: translateX(-100%) translateY(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.8;
+  }
+  95% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(100vw) translateY(-15px);
+    opacity: 0;
+  }
+}
+
+@keyframes floatCloud2 {
+  0% {
+    transform: translateX(-100%) translateY(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.8;
+  }
+  95% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(100vw) translateY(-20px);
+    opacity: 0;
+  }
+}
+
+@keyframes floatCloud3 {
+  0% {
+    transform: translateX(-100%) translateY(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.8;
+  }
+  95% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(100vw) translateY(-10px);
+    opacity: 0;
+  }
+}
+
+@keyframes floatCloud4 {
+  0% {
+    transform: translateX(-100%) translateY(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.8;
+  }
+  95% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(100vw) translateY(-25px);
+    opacity: 0;
+  }
+}
+
+/* General floating animation */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+/* Timeline animations */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  75%,
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.footer-grid-pattern {
+  background-image:
+    linear-gradient(
+      45deg,
+      transparent 45%,
+      var(--color-border) 45%,
+      var(--color-border) 55%,
+      transparent 55%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 45%,
+      var(--color-border) 45%,
+      var(--color-border) 55%,
+      transparent 55%
+    );
+  background-size: 16px 16px;
+  opacity: 0.04;
+}
+
+.grass-scroll {
+  animation: battleScroll 20s linear infinite;
+}
+
+@keyframes battleScroll {
+  0% {
+    background-position-x: 0;
+  }
+  100% {
+    background-position-x: 1000px;
+  }
+}
+
+.grass-scroll-bg {
+  background: repeat-x
+    url(https://png.pngtree.com/png-clipart/20230920/ourmid/pngtree-green-grass-clipart-png-image_10141193.png);
+  background-size: auto 150%;
+  background-position: bottom;
+}
+
+.press-start-2p-regular {
+  font-family: 'Press Start 2P', system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.vt323-regular {
+  font-family: 'VT323', monospace;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@keyframes pixelShimmer {
+  0% {
+    background-position: -100px;
+  }
+  100% {
+    background-position: 100px;
+  }
+}
+
+::selection {
+  background: var(--color-secondary);
+  color: var(--color-text);
+}
+
+::-moz-selection {
+  background: var(--color-secondary);
+  color: var(--color-text);
+}
+
+/* Add pixel-borders class if it doesn't exist */
+
+.pixel-borders {
+  position: relative;
+  border-style: solid;
+  border-width: 4px;
+  box-shadow: 0 0 0 4px rgba(44, 44, 44, 0.5);
+  image-rendering: pixelated;
+}
+
+.pixel-borders::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: transparent;
+  z-index: -1;
+}

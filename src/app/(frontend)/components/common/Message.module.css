@@ -1,0 +1,52 @@
+.message {
+	padding: 2rem;
+	margin-bottom: 3rem;
+	border: 4px solid var(--border-color);
+	box-shadow: 8px 8px 0 var(--shadow-color);
+	font-family: "Press Start 2P", monospace;
+	font-size: 1.8rem;
+	line-height: 1.8;
+	text-align: center;
+	position: relative;
+	transition: all 0.3s ease;
+}
+
+.message::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-image: linear-gradient(
+		45deg,
+		transparent 45%,
+		var(--border-color) 45%,
+		var(--border-color) 55%,
+		transparent 60%
+	);
+	background-size: 16px 16px;
+	opacity: 0.05;
+	pointer-events: none;
+}
+
+.success {
+	background: var(--card-background);
+	color: var(--text-color);
+	border-color: #7cc57f;
+	background: #97eb9a;
+}
+
+.error {
+	background: var(--card-background);
+	color: var(--text-color);
+	border-color: #e77e74;
+	background: #ffc9c0;
+}
+
+@media (max-width: 768px) {
+	.message {
+		font-size: 1.4rem;
+		padding: 1.5rem;
+	}
+}

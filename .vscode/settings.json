@@ -36,5 +36,20 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     }
-  }
+  },
+  "cSpell.words": [
+    "apexcharts",
+    "casestudy",
+    "COOLDOWN",
+    "Cpath",
+    "Meteo",
+    "Nextdotjs",
+    "payloadcms",
+    "Reactjs",
+    "scanlines",
+    "wakatime",
+    "xaxis",
+    "yaxis"
+  ],
+  "css.customData": [".vscode/tailwind.json"]
 }

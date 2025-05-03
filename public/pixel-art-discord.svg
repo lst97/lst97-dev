@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .pixel {
+            shape-rendering: crispEdges;
+        }
+    </style>
+    <!-- Discord shape -->
+    <rect class="pixel" x="8" y="8" width="16" height="16" fill="#5865F2"/>
+    <!-- Eyes -->
+    <rect class="pixel" x="12" y="12" width="4" height="4" fill="#ffffff"/>
+    <rect class="pixel" x="16" y="12" width="4" height="4" fill="#ffffff"/>
+    <!-- Smile -->
+    <rect class="pixel" x="12" y="18" width="8" height="2" fill="#ffffff"/>
+</svg> 

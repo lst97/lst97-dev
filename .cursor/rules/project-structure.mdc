@@ -1,0 +1,23 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Structure
+
+This is a Next.js 15 web application with Tailwind CSS for styling and PayloadCMS for content management.
+
+## Main Directories
+
+- [src/app/(frontend)](mdc:src/app/(frontend)) - Contains frontend components, pages, styles, and utilities
+- [src/app/(payload)](mdc:src/app/(payload)) - Contains PayloadCMS admin panel and API routes
+- [src/collections](mdc:src/collections) - PayloadCMS collections (data models)
+- [public](mdc:public) - Static assets
+
+## Key Configuration Files
+
+- [next.config.mjs](mdc:next.config.mjs) - Next.js configuration
+- [postcss.config.ts](mdc:postcss.config.ts) - PostCSS configuration for Tailwind
+- [tsconfig.json](mdc:tsconfig.json) - TypeScript configuration
+- [package.json](mdc:package.json) - Project dependencies
+- [payload.config.ts](mdc:src/payload.config.ts) - PayloadCMS configuration
