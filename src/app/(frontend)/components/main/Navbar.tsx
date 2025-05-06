@@ -6,11 +6,11 @@ import { AsciiTextGenerator } from '@/frontend/components/common/generators/Asci
 import { motion } from 'framer-motion'
 import { useScroll as useScrollContext } from '@/frontend/contexts/ScrollContext'
 import { routes } from '@/frontend/constants/routes'
-import Link from 'next/link'
 import '@/frontend/styles/blinking-triangle.css'
 import { ReleaseNote } from '@/frontend/components/dialog/ReleaseNote'
 import classNames from 'classnames'
 import { usePathname } from 'next/navigation'
+import { NavigationLink } from '@/frontend/components/ui/Links'
 
 // Shared style constants
 const navLinkClass =
@@ -183,43 +183,43 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
 
           <div className="flex flex-col gap-6 w-full max-w-md">
             <motion.div variants={itemVariants}>
-              <Link
+              <NavigationLink
                 href={routes.home}
                 ref={firstLinkRef}
                 className={navLinkClass}
                 onClick={onClose}
               >
                 HOME
-              </Link>
+              </NavigationLink>
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Link href={routes.resources} className={navLinkClass} onClick={onClose}>
+              <NavigationLink href={routes.resources} className={navLinkClass} onClick={onClose}>
                 RESOURCES
-              </Link>
+              </NavigationLink>
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Link href={routes.projects} className={navLinkClass} onClick={onClose}>
+              <NavigationLink href={routes.projects} className={navLinkClass} onClick={onClose}>
                 PROJECTS
-              </Link>
+              </NavigationLink>
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Link href={routes.about} className={navLinkClass} onClick={onClose}>
+              <NavigationLink href={routes.about} className={navLinkClass} onClick={onClose}>
                 ABOUT
-              </Link>
+              </NavigationLink>
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Link href={routes.services} className={navLinkClass} onClick={onClose}>
+              <NavigationLink href={routes.services} className={navLinkClass} onClick={onClose}>
                 SERVICES
-              </Link>
+              </NavigationLink>
             </motion.div>
           </div>
 
           <motion.div variants={itemVariants} className="mt-10 flex gap-6">
-            <Link
+            <NavigationLink
               href="https://github.com/lst97"
               className="p-4 border-4 border-gray-800 bg-amber-100 hover:bg-amber-200 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)]"
               aria-label="GitHub Profile"
@@ -227,9 +227,9 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
               rel="noopener noreferrer"
             >
               <Image src="/github-pixel-art-icon.svg" alt="" width={32} height={32} />
-            </Link>
+            </NavigationLink>
 
-            <Link
+            <NavigationLink
               href="https://www.linkedin.com/in/lst97/"
               className="p-4 border-4 border-gray-800 bg-amber-100 hover:bg-amber-200 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)]"
               aria-label="LinkedIn Profile"
@@ -237,7 +237,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
               rel="noopener noreferrer"
             >
               <Image src="/linkedin-pixel-art-icon.svg" alt="" width={32} height={32} />
-            </Link>
+            </NavigationLink>
           </motion.div>
         </div>
       </motion.div>
@@ -269,7 +269,7 @@ const ReleaseNoteButton = ({ onClick }: { onClick: () => void }) => {
 const NavbarLogo = () => {
   return (
     <div className="md:h-full p-10 flex items-center justify-center border-r border-gray-800 overflow-hidden cursor-pointer transition-colors hover:bg-amber-100">
-      <Link
+      <NavigationLink
         href={routes.welcome}
         className="w-full h-full flex items-center justify-center no-underline text-gray-800"
         aria-label="LST97 Home"
@@ -281,7 +281,7 @@ const NavbarLogo = () => {
         <span className="hidden md:block">
           <AsciiTextGenerator text="LST97" />
         </span>
-      </Link>
+      </NavigationLink>
     </div>
   )
 }
@@ -318,6 +318,7 @@ const TabletNavLinks = ({ currentPath }: { currentPath: string }) => {
     { href: routes.projects, label: 'PROJECTS' },
     { href: '/pages/services', label: 'SERVICES' },
     { href: routes.about, label: 'ABOUT' },
+    { href: '/pages/test-navigation', label: 'TEST' },
   ]
 
   return (
@@ -326,13 +327,13 @@ const TabletNavLinks = ({ currentPath }: { currentPath: string }) => {
         {navLinks.map((link) => {
           const isActive = currentPath === link.href
           return (
-            <Link
+            <NavigationLink
               key={link.href}
               href={link.href}
               className={classNames(tabletNavLinkBaseClass, isActive && 'bg-amber-100 shadow-md')}
             >
               {link.label}
-            </Link>
+            </NavigationLink>
           )
         })}
       </div>
@@ -347,6 +348,7 @@ const DesktopNavLinks = ({ currentPath }: { currentPath: string }) => {
     { href: routes.projects, label: 'PROJECTS' },
     { href: '/pages/services', label: 'SERVICES' },
     { href: routes.about, label: 'ABOUT' },
+    { href: '/pages/test-navigation', label: 'TEST NAV' },
   ]
 
   return (
@@ -355,13 +357,13 @@ const DesktopNavLinks = ({ currentPath }: { currentPath: string }) => {
         {navLinks.map((link) => {
           const isActive = currentPath === link.href
           return (
-            <Link
+            <NavigationLink
               key={link.href}
               href={link.href}
               className={classNames(desktopNavLinkBaseClass, isActive && 'bg-amber-100 shadow-md')}
             >
               {link.label}
-            </Link>
+            </NavigationLink>
           )
         })}
       </div>
@@ -373,7 +375,7 @@ const DesktopNavLinks = ({ currentPath }: { currentPath: string }) => {
 const SocialLinks = () => {
   return (
     <div className="flex">
-      <Link
+      <NavigationLink
         href="https://github.com/lst97"
         className={classNames(socialIconLinkClass, 'sm:h-8 sm:w-8 md:h-10 md:w-10')}
         aria-label="GitHub Profile"
@@ -387,8 +389,8 @@ const SocialLinks = () => {
           height={24}
           className="hover:brightness-200 sm:w-5 sm:h-5 md:w-6 md:h-6"
         />
-      </Link>
-      <Link
+      </NavigationLink>
+      <NavigationLink
         href="https://www.linkedin.com/in/lst97/"
         className={classNames(socialIconLinkClass, 'sm:h-8 sm:w-8 md:h-10 md:w-10')}
         aria-label="LinkedIn Profile"
@@ -402,7 +404,7 @@ const SocialLinks = () => {
           height={24}
           className="hover:brightness-200 sm:w-5 sm:h-5 md:w-6 md:h-6"
         />
-      </Link>
+      </NavigationLink>
     </div>
   )
 }
@@ -410,7 +412,7 @@ const SocialLinks = () => {
 // GetStartedButton component
 const GetStartedButton = () => {
   return (
-    <Link
+    <NavigationLink
       href={routes.home}
       className={classNames(
         'border border-gray-800 bg-amber-500 text-amber-50',
@@ -423,7 +425,7 @@ const GetStartedButton = () => {
       )}
     >
       GET STARTED →
-    </Link>
+    </NavigationLink>
   )
 }
 

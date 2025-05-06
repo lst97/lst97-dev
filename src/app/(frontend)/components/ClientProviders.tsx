@@ -2,13 +2,19 @@
 
 import { ThemeProvider } from 'next-themes'
 import { ReactNode } from 'react'
-import { ReactQueryProvider, TooltipProvider } from '@/frontend/providers'
+import {
+  NavigationProgressProvider,
+  ReactQueryProvider,
+  TooltipProvider,
+} from '@/frontend/providers'
 
 export default function ClientProviders({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem>
       <ReactQueryProvider>
-        <TooltipProvider>{children}</TooltipProvider>
+        <NavigationProgressProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </NavigationProgressProvider>
       </ReactQueryProvider>
     </ThemeProvider>
   )

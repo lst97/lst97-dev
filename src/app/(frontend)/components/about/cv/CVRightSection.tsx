@@ -3,6 +3,7 @@ import { CVRightSideSection } from '@/frontend/models/CV'
 import { Marker } from './Marker'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { NavigationLink } from '@/frontend/components/ui/Links'
 
 // Reusable component for title with marker
 const TitleMarker: React.FC<{
@@ -148,7 +149,7 @@ export const CVRightSection = React.memo<CVRightSectionProps>(({ section, inView
                 variants={sectionItemVariants}
                 custom={project.bulletPoints.length}
               >
-                <Link
+                <NavigationLink
                   href={project.action.link}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -156,7 +157,7 @@ export const CVRightSection = React.memo<CVRightSectionProps>(({ section, inView
                   aria-label={`${project.action.title} for ${project.title}`}
                 >
                   {project.action.title}
-                </Link>
+                </NavigationLink>
               </motion.div>
             )}
 
@@ -169,7 +170,7 @@ export const CVRightSection = React.memo<CVRightSectionProps>(({ section, inView
 
       {section.action && (
         <motion.div variants={sectionItemVariants} custom={section.items.length}>
-          <Link
+          <NavigationLink
             href={section.action.link}
             target="_blank"
             rel="noopener noreferrer"
@@ -177,7 +178,7 @@ export const CVRightSection = React.memo<CVRightSectionProps>(({ section, inView
             aria-label={section.action.title}
           >
             {section.action.title}
-          </Link>
+          </NavigationLink>
         </motion.div>
       )}
     </motion.div>

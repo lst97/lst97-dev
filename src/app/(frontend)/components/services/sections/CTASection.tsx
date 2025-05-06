@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
 import { routes } from '@/frontend/constants/routes'
+import { NavigationLink } from '@/frontend/components/ui/Links'
 /**
  * Props for the CTASection component.
  */
@@ -49,7 +49,7 @@ const CTASection: React.FC<CTASectionProps> = () => (
             </div>
 
             <div className="relative inline-block animate-bounce-mini bg-secondary">
-              <Link
+              <NavigationLink
                 href={routes.contact}
                 className="inline-block px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 font-['Press_Start_2P'] text-sm sm:text-base md:text-[1.2rem] text-button-text-color bg-button-background border-8 border-border 
                        cursor-pointer no-underline transition-all duration-200 shadow-[3px_3px_0_var(--shadow-color)] sm:shadow-[4px_4px_0_var(--shadow-color)] md:shadow-[6px_6px_0_var(--shadow-color)] 
@@ -60,7 +60,7 @@ const CTASection: React.FC<CTASectionProps> = () => (
                   Start a Project
                   <span className="ml-2 inline-block">→</span>
                 </span>
-              </Link>
+              </NavigationLink>
 
               {/* Pixel button glow effect */}
               <div className="absolute -inset-1 bg-accent-color/30 blur-sm -z-10 pixel-shimmer-hover"></div>

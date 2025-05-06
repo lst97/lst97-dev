@@ -22,7 +22,7 @@ This API endpoint handles contact form submissions and sends emails using NodeMa
    EMAIL_USER=your-email@gmail.com
    EMAIL_APP_PASSWORD=your-app-password
    EMAIL_RECIPIENT=recipient-email@example.com
-   RECAPTCHA_SECRET_KEY=your-recaptcha-secret-key
+   TURNSTILE_SECRET_KEY=your-turnstile-secret-key
    ```
 
 4. Uncomment the NodeMailer code in `route.ts` after setting up the environment variables.
@@ -39,7 +39,7 @@ Send a POST request to this endpoint with the following data structure:
     "budget": "5000-10000",
     "content": "I'm interested in your services...",
     "source": "Google",
-    "recaptchaToken": "verified-recaptcha-token"
+    "turnstileToken": "verified-turnstile-token"
   }
 }
 ```
@@ -62,4 +62,4 @@ Error:
   "success": false,
   "error": "Error message details"
 }
-``` 
+```

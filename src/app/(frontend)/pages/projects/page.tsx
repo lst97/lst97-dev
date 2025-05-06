@@ -7,9 +7,10 @@ import Image from 'next/image'
 import { Dialog } from '@/frontend/components/common/Dialog'
 import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
 import { Button } from '@/frontend/components/ui/Buttons'
-import Link from 'next/link'
 import { Project } from '@/frontend/components/projects/ProjectCard'
 import { ProjectExplorer } from '@/frontend/components/projects'
+import { NavigationLink } from '@/frontend/components/ui/Links'
+import { routes } from '@/frontend/constants/routes'
 
 // Sample project data
 const projects: Project[] = [
@@ -104,7 +105,7 @@ const ContactSection: React.FC = () => (
       Have a project in mind? I&apos;d love to help bring your ideas to life.
     </p>
     <Button asChild variant="pixel" className="z-1">
-      <Link href="/contact">Get in Touch</Link>
+      <NavigationLink href={routes.contact}>Get in Touch</NavigationLink>
     </Button>
     {/* Images at the bottom left and right for mobile, flex for sm+ */}
     <div className="w-full h-16 sm:h-auto relative flex-none">

@@ -520,9 +520,6 @@ const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({
 }) => {
   // Extract languages data with proper typing
   const processedLanguages = useMemo(() => {
-    // For debugging
-    console.log('Languages in TechnicalSkills:', languages)
-
     if (!languages) return []
 
     let languagesArray: WakaTimeDataItem[] | null = null

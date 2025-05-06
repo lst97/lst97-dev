@@ -5,13 +5,13 @@ import { ContactSubmissionForm } from '@/frontend/models/forms/ContactSubmission
 import { ApiResponse } from '@/frontend/api'
 
 export function useContactForm(referralSources: string[]) {
-  const [recaptchaToken, setRecaptchaToken] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
   const [message, setMessage] = useState<{ type: string; text: string } | null>(null)
   const [isSuccess, setIsSuccess] = useState(false)
 
   // TanStack Query mutation for form submission
   const mutation = useMutation({
-    mutationFn: async (data: ContactSubmissionForm & { recaptchaToken: string }) => {
+    mutationFn: async (data: ContactSubmissionForm & { turnstileToken: string }) => {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
@@ -56,24 +56,24 @@ export function useContactForm(referralSources: string[]) {
       source: '',
     },
     onSubmit: async ({ value }) => {
-      if (!recaptchaToken) {
-        setMessage({ type: 'error', text: 'Please complete the reCAPTCHA verification' })
+      if (!turnstileToken) {
+        setMessage({ type: 'error', text: 'Please complete the Turnstile verification' })
         return
       }
       setIsSuccess(false)
       setMessage(null)
-      await mutation.mutateAsync({ ...value, recaptchaToken })
-      // Reset form and recaptcha on success
+      await mutation.mutateAsync({ ...value, turnstileToken })
+      // Reset form and turnstile on success
       if (!mutation.error) {
         form.reset()
-        setRecaptchaToken('')
+        setTurnstileToken('')
       }
     },
   })
 
-  // reCAPTCHA handler
-  const handleReCaptchaVerify = useCallback((token: string) => {
-    setRecaptchaToken(token)
+  // Turnstile handler
+  const handleTurnstileVerify = useCallback((token: string) => {
+    setTurnstileToken(token)
   }, [])
 
   return {
@@ -82,8 +82,8 @@ export function useContactForm(referralSources: string[]) {
     isSuccess,
     message,
     setMessage,
-    handleReCaptchaVerify,
+    handleTurnstileVerify,
     referralSources,
-    recaptchaToken,
+    turnstileToken,
   }
 }

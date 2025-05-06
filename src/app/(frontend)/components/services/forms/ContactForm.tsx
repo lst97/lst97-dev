@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   FaCheckCircle,
   FaSpinner,
@@ -9,7 +9,7 @@ import {
   FaDollarSign,
   FaCommentAlt,
 } from 'react-icons/fa'
-import ReCaptcha from '../../common/ReCaptcha'
+import Turnstile from '../../security/Turnstile'
 import { PixelInput, PixelSelect } from '@/frontend/components/ui/Inputs'
 import { contactFormSchema } from '@/frontend/components/services/forms/schemas'
 import { ZodError } from 'zod'
@@ -26,7 +26,7 @@ interface ContactFormWithPixelUIProps {
   formErrors?: { [key in keyof ContactSubmissionForm]?: string }
   isSuccess: boolean
   isSending: boolean
-  onVerifyReCaptcha: (token: string) => void
+  onVerifyTurnstile: (token: string) => void
   setFormErrors?: (errors: { [key in keyof ContactSubmissionForm]?: string }) => void
   form?: any // Simplify to avoid complex TypeScript errors
 }
@@ -74,7 +74,7 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
   formErrors: propFormErrors,
   isSuccess,
   isSending,
-  onVerifyReCaptcha,
+  onVerifyTurnstile,
   setFormErrors,
   form,
 }) => {
@@ -306,41 +306,53 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
             </div>
           </div>
 
-          {usingTanStackForm ? (
-            // @ts-ignore
-            <form.Field
-              name="source"
-              children={(field: any) => (
-                <PixelSelect
-                  label="Where did you find me?"
-                  id="source"
-                  options={referralOptions}
-                  value={field.state.value}
-                  onChange={(value) => field.handleChange(value)}
-                  error={field.state.meta.errors?.[0]}
-                  placeholder="Select an option"
-                  fullWidth
-                />
-              )}
-            />
-          ) : (
-            <PixelSelect
-              label="Where did you find me?"
-              id="source"
-              options={referralOptions}
-              value={formData?.source || ''}
-              onChange={handleSelectChange}
-              error={propFormErrors?.source}
-              placeholder="Select an option"
-              fullWidth
-            />
-          )}
+          <div id="source-field">
+            {usingTanStackForm ? (
+              // @ts-ignore
+              <form.Field
+                name="source"
+                children={(field: any) => (
+                  <PixelSelect
+                    label="Where did you find me?"
+                    id="source"
+                    options={referralOptions}
+                    value={field.state.value || ''}
+                    onChange={(value) => {
+                      if (value) {
+                        field.handleChange(value)
+                      }
+                    }}
+                    error={field.state.meta.errors?.[0]}
+                    placeholder="Select an option"
+                    fullWidth
+                  />
+                )}
+              />
+            ) : (
+              <PixelSelect
+                label="Where did you find me?"
+                id="source"
+                options={referralOptions}
+                value={formData?.source || ''}
+                onChange={(value) => {
+                  if (value && handleSelectChange) {
+                    handleSelectChange(value)
+                  }
+                }}
+                error={propFormErrors?.source}
+                placeholder="Select an option"
+                fullWidth
+              />
+            )}
+          </div>
 
-          <ReCaptcha
-            siteKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
-            onVerify={onVerifyReCaptcha}
-            action="contact_form"
-          />
+          <div id="turnstile-container">
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+              onVerify={onVerifyTurnstile}
+              action="contact_form"
+            />
+          </div>
 
           <button
             type="submit"
@@ -351,25 +363,7 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
           </button>
 
           <p className="text-xs text-[#666] text-center mt-4">
-            This form is protected by reCAPTCHA and the Google{' '}
-            <a
-              href="https://policies.google.com/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--color-accent)] hover:underline"
-            >
-              Privacy Policy
-            </a>{' '}
-            and{' '}
-            <a
-              href="https://policies.google.com/terms"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--color-accent)] hover:underline"
-            >
-              Terms of Service
-            </a>{' '}
-            apply.
+            This form is protected by Cloudflare Turnstile to detect and prevent spam.
           </p>
         </form>
       )}

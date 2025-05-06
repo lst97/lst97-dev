@@ -122,11 +122,6 @@ export async function fetchWakaTimeStats(): Promise<{
       human_readable_range: '',
     }
 
-    // Log the data for debugging
-    console.log('Languages data structure:', languages)
-    console.log('Editors data structure:', editors)
-    console.log('OS data structure:', operatingSystems)
-
     return {
       languages,
       editors,

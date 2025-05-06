@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fa'
 import { routes } from '@/frontend/constants/routes'
 import { contact } from '@/frontend/constants/data/contact'
+import { NavigationLink } from '@/frontend/components/ui/Links'
 
 const navLinks = [
   { href: routes.home, icon: FaCode, text: 'Home' },
@@ -52,13 +53,13 @@ export const Footer = () => (
         </h3>
         <div className="flex flex-col gap-8">
           {navLinks.map((link) => (
-            <Link
+            <NavigationLink
               key={link.href}
               href={link.href}
               className="press-start-2p-regular text-sm text-text no-underline transition-all flex items-center gap-4 hover:text-accent hover:translate-x-1"
             >
               <link.icon /> {link.text}
-            </Link>
+            </NavigationLink>
           ))}
         </div>
       </div>
@@ -69,13 +70,13 @@ export const Footer = () => (
         </h3>
         <div className="flex flex-col gap-8">
           {serviceLinks.map((link) => (
-            <Link
+            <NavigationLink
               key={link.href}
               href={link.href}
               className="press-start-2p-regular text-sm text-text no-underline transition-all flex items-center gap-4 hover:text-accent hover:translate-x-1"
             >
               <link.icon /> {link.text}
-            </Link>
+            </NavigationLink>
           ))}
         </div>
       </div>
@@ -86,17 +87,17 @@ export const Footer = () => (
         </h3>
         <div className="flex flex-col gap-8">
           {connectLinks.map((link) => (
-            <Link
+            <NavigationLink
               key={link.href}
               href={link.href}
               className="press-start-2p-regular text-sm text-text no-underline transition-all flex items-center gap-4 hover:text-accent hover:translate-x-1"
             >
               <link.icon /> {link.text}
-            </Link>
+            </NavigationLink>
           ))}
         </div>
         <div className="flex gap-8 mt-8">
-          <Link href="https://github.com/lst97" target="_blank" rel="noopener noreferrer">
+          <NavigationLink href="https://github.com/lst97" target="_blank" rel="noopener noreferrer">
             <Image
               src="/github-pixel-art-icon.svg"
               alt="GitHub"
@@ -104,8 +105,12 @@ export const Footer = () => (
               height={32}
               className="transition-all hover:scale-110"
             />
-          </Link>
-          <Link href="https://www.linkedin.com/in/lst97/" target="_blank" rel="noopener noreferrer">
+          </NavigationLink>
+          <NavigationLink
+            href="https://www.linkedin.com/in/lst97/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Image
               src="/linkedin-pixel-art-icon.svg"
               alt="LinkedIn"
@@ -113,12 +118,13 @@ export const Footer = () => (
               height={32}
               className="transition-all hover:scale-110"
             />
-          </Link>
+          </NavigationLink>
         </div>
       </div>
     </div>
     <div className="mt-16 pt-8 border-t-2 border-dashed border-[var(--color-border)] text-center font-['Press_Start_2P'] text-base text-[var(--text-color)] relative z-10">
       <p>© {new Date().getFullYear()} lst97.dev | All rights reserved</p>
+      <p>Made with ❤️ by Nelson Lai</p>
     </div>
   </footer>
 )

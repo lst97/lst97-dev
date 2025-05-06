@@ -1,80 +1,13 @@
-import { Metadata } from 'next'
-import { ContentDisplay } from '@/frontend/components/common/display/ContentDisplay'
-import { PlainDialog } from '@/frontend/components/ui/Dialogs'
-import { Post } from '@/frontend/models/Post'
-import Image from 'next/image'
-import { Tag } from '@/frontend/components/ui/Tags'
-import { generatePostMetadata } from './generateMetadata'
-import dynamic from 'next/dynamic'
+'use client'
+
 import React from 'react'
-
-// Server-side data fetching for the post
-async function getPost(slug: string): Promise<Post | null> {
-  try {
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000'
-    const url = `${baseUrl}/api/custom/posts/by-slug?slug=${encodeURIComponent(slug)}`
-    const response = await fetch(url, { next: { revalidate: 3600 } }) // Cache for 1 hour
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch post: ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    return data.data
-  } catch (error) {
-    console.error('Error fetching post:', error)
-    return null
-  }
-}
-
-// Generate metadata for the page
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}): Promise<Metadata> {
-  const post = await getPost((await params).slug)
-  return generatePostMetadata({ post, params })
-}
-
-// JSON-LD structured data for the post
-function generateBlogPostStructuredData(post: Post, slug: string) {
-  if (!post) return null
-
-  const baseUrl = process.env.BASE_URL || 'https://lst97.dev'
-  const postUrl = `${baseUrl}/pages/resources/${slug}`
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.title,
-    description: post.description,
-    image: post.featuredImage ? [post.featuredImage] : [],
-    datePublished: post.publishedDate,
-    dateModified: post.lastUpdatedDate || post.publishedDate,
-    author: {
-      '@type': 'Person',
-      name: post.author?.name || 'Nelson Lai',
-      url: 'https://github.com/lst97',
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'LST97',
-      logo: {
-        '@type': 'ImageObject',
-        url: `${baseUrl}/logo.png`,
-      },
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': postUrl,
-    },
-    keywords: [...(post.categories || []), ...(post.tags || [])].join(', '),
-  }
-}
+import { Post } from '@/frontend/models/Post'
+import { ContentDisplay } from '@/frontend/components/common/display/ContentDisplay'
+import { Tag } from '@/frontend/components/ui/Tags'
+import Image from 'next/image'
 
 // Loading state component
-const LoadingState = () => (
+export const LoadingState = () => (
   <div className="flex flex-col items-center justify-center min-h-[50vh]">
     <div className="animate-spin h-10 w-10 border-4 border-[var(--color-accent)] border-t-transparent rounded-full"></div>
     <div className="mt-4 font-['Press_Start_2P'] text-sm">Loading content...</div>
@@ -82,7 +15,7 @@ const LoadingState = () => (
 )
 
 // Error state component
-const ErrorState = ({ message }: { message: string }) => (
+export const ErrorState = ({ message }: { message: string }) => (
   <div className="flex flex-col items-center justify-center min-h-[50vh]">
     <Image
       src="/anthropology-skeleton-icon.svg"
@@ -98,7 +31,7 @@ const ErrorState = ({ message }: { message: string }) => (
 )
 
 // Post header component
-const PostHeader = ({
+export const PostHeader = ({
   post,
   cacheComponent,
 }: {
@@ -205,7 +138,7 @@ const PostHeader = ({
 )
 
 // Post content component
-const PostContent = ({ post }: { post: Post | null }) => (
+export const PostContent = ({ post }: { post: Post | null }) => (
   <div className="mx-auto max-w-7xl bg-[var(--color-card)] dark:bg-[var(--color-card-dark)] border-4 border-[var(--color-border)] dark:border-[var(--color-border-dark)] shadow-[8px_8px_0_var(--shadow)] rounded-md p-4 sm:p-6 relative  pixel-scanlines">
     {/* Grid pattern overlay */}
     <div
@@ -216,69 +149,3 @@ const PostContent = ({ post }: { post: Post | null }) => (
     <ContentDisplay attributes={[post].filter(Boolean) as Post[]} type="post" />
   </div>
 )
-
-// Cache information dialog
-const CacheInfoDialog = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
-  <PlainDialog open={open} onClose={onClose} title='Meaning of the "cached" and "fresh"'>
-    <div className="flex flex-col gap-4 font-['Press_Start_2P']">
-      <p className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
-        This page uses React Query for data fetching, which implements an intelligent caching
-        system.
-      </p>
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
-          If the content is already in React Query's cache then it is marked as{' '}
-        </span>
-        <span className="inline-block pixel-borders">
-          <span className="bg-[var(--color-secondary)] px-2 py-1 font-['Press_Start_2P'] text-xs text-[var(--color-text)]">
-            cache
-          </span>
-        </span>
-        <span className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
-          else it's marked as
-        </span>
-        <span className="inline-block pixel-borders">
-          <span className="bg-[var(--color-primary)] px-2 py-1 font-['Press_Start_2P'] text-xs text-[var(--color-text)]">
-            fresh
-          </span>
-        </span>
-      </div>
-      <p className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
-        React Query automatically manages cache invalidation based on staleTime and cacheTime
-        settings. By default, data becomes stale after a few minutes and is refetched when needed.
-      </p>
-      <p className="text-[var(--color-text)] dark:text-[var(--color-text-light)] bg-[var(--color-hover)] dark:bg-[var(--color-hover-dark)] p-2 border-l-4 border-[var(--color-accent)]">
-        To force a fresh fetch, you can refresh the page while holding Shift or Ctrl key (depends on
-        your browser).
-      </p>
-    </div>
-  </PlainDialog>
-)
-
-// Main component for Server Component
-export default async function ResourcePage({ params }: { params: Promise<{ slug: string }> }) {
-  const post = await getPost((await params).slug)
-
-  // Create a dynamic client component for the page content
-  const ClientResourceContent = dynamic(() => import('./ClientResourceContent'), {
-    loading: () => <LoadingState />,
-    ssr: true,
-  })
-
-  return (
-    <>
-      {/* Add JSON-LD structured data */}
-      {post && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(generateBlogPostStructuredData(post, (await params).slug)),
-          }}
-        />
-      )}
-
-      {/* Client component wrapper */}
-      <ClientResourceContent post={post} slug={(await params).slug} />
-    </>
-  )
-}

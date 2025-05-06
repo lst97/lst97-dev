@@ -872,17 +872,6 @@ const PixelArtAnimation: React.FC<PixelArtAnimationProps> = ({
     },
   )
 
-  // Add debug feedback if needed
-  React.useEffect(() => {
-    if (debug) {
-      console.log('Animation state:', {
-        isInitialized,
-        squareCount: squareStates.length,
-        viewportDimensions: viewportDimensionsRef.current,
-      })
-    }
-  }, [debug, isInitialized, squareStates.length])
-
   return (
     squares.length <= MAX_SQUARES && (
       <div

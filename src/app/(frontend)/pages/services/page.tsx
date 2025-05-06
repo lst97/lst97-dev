@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import Navbar from '@/frontend/components/main/Navbar'
 import { ScrollProvider } from '@/frontend/contexts/ScrollContext'
 import {
@@ -207,7 +207,7 @@ const Services = () => {
   const [isProjectShowcaseOpen, setIsProjectShowcaseOpen] = useState(false)
 
   // Use the contact form hook
-  const { form, isSending, isSuccess, message, setMessage, handleReCaptchaVerify } =
+  const { form, isSending, isSuccess, message, setMessage, handleTurnstileVerify } =
     useContactForm(referralSources)
 
   useEffect(() => {
@@ -318,7 +318,7 @@ const Services = () => {
                   form={form}
                   isSuccess={isSuccess}
                   isSending={isSending}
-                  onVerifyReCaptcha={handleReCaptchaVerify}
+                  onVerifyTurnstile={handleTurnstileVerify}
                   referralSources={referralSources}
                 />
               </div>

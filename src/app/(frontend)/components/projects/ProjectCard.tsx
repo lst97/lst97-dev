@@ -2,9 +2,9 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { Button } from '@/frontend/components/ui/Buttons'
-import Link from 'next/link'
-import { FaGithub, FaExternalLinkAlt, FaBookOpen } from 'react-icons/fa'
 import { Tags } from '@/frontend/components/ui/Tags'
+import { NavigationLink } from '@/frontend/components/ui/Links'
+import { FaBookOpen, FaExternalLinkAlt, FaGithub } from 'react-icons/fa'
 
 export interface Project {
   id: number
@@ -101,20 +101,20 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenCaseStu
         <div className="flex flex-wrap justify-between gap-4">
           {project.demoUrl && (
             <Button asChild variant="pixel">
-              <Link href={project.demoUrl} target="_blank" rel="noopener noreferrer">
+              <NavigationLink href={project.demoUrl} target="_blank" rel="noopener noreferrer">
                 <div className="flex items-center">
                   <FaExternalLinkAlt className="mr-2" /> <div>Demo</div>
                 </div>
-              </Link>
+              </NavigationLink>
             </Button>
           )}
           {project.repoUrl && (
             <Button asChild variant="pixel">
-              <Link href={project.repoUrl} target="_blank" rel="noopener noreferrer">
+              <NavigationLink href={project.repoUrl} target="_blank" rel="noopener noreferrer">
                 <div className="flex items-center">
                   <FaGithub className="mr-2" /> <div>Code</div>
                 </div>
-              </Link>
+              </NavigationLink>
             </Button>
           )}
           {project.category === 'case-study' && onOpenCaseStudy && (

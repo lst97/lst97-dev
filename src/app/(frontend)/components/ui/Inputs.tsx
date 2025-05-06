@@ -145,6 +145,9 @@ export const PixelSelect = React.forwardRef<HTMLButtonElement, PixelSelectProps>
       ? options.find((option) => option.value === value)?.label
       : placeholder
 
+    // This ensures value is never undefined which can cause issues with Radix UI Select
+    const safeValue = value || ''
+
     return (
       <div className={`flex flex-col gap-2 ${fullWidth ? 'w-full' : ''}`}>
         {label && (
@@ -155,7 +158,7 @@ export const PixelSelect = React.forwardRef<HTMLButtonElement, PixelSelectProps>
             {label}
           </label>
         )}
-        <Select.Root value={value} onValueChange={onChange} disabled={disabled}>
+        <Select.Root value={safeValue} onValueChange={onChange} disabled={disabled}>
           <Select.Trigger
             id={selectId}
             ref={ref}
