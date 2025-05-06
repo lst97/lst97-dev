@@ -1,7 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback } from 'react'
 import { Post } from '@/frontend/models/Post'
-import { httpClient } from '@/frontend/api/Api'
-import { CMS_API_PATHS } from '@/frontend/constants/ApiPaths'
+import { CMS_API_PATHS } from '@/frontend/constants/api-paths'
+import { useQuery } from '@tanstack/react-query'
+
+// Cache expiration time (30 minutes)
+const CACHE_EXPIRATION = 30 * 60 * 1000
 
 interface UsePostsReturn {
   posts: Post[]
@@ -9,136 +12,111 @@ interface UsePostsReturn {
   isLoading: boolean
   error: Error | null
   refetch: () => void
-  isCached: boolean
 }
 
-interface ApiResponse {
-  data: Post | Post[]
+interface UsePostsOptions {
+  id?: string
+  slug?: string
 }
 
-interface PostsCache {
-  [documentId: string]: {
-    data: Post
-    timestamp: number
-  }
-}
+export const usePosts = (options?: UsePostsOptions | string): UsePostsReturn => {
+  // Handle string parameter for backward compatibility
+  const opts = typeof options === 'string' ? { id: options } : options || {}
 
-// Cache utility functions
-const CACHE_EXPIRATION = 30 * 60 * 1000 // 30 minutes
-const POSTS_CACHE_KEY = 'posts_cache'
+  const { id, slug } = opts
 
-const getCache = (): PostsCache => {
-  try {
-    const cache = localStorage.getItem(POSTS_CACHE_KEY)
-    return cache ? JSON.parse(cache) : {}
-  } catch (error) {
-    console.error('Error reading from cache:', error)
-    return {}
-  }
-}
-
-const setInCache = (posts: Post | Post[]): void => {
-  try {
-    const cache = getCache()
-    const timestamp = Date.now()
-
-    if (Array.isArray(posts)) {
-      posts.forEach((post) => {
-        cache[post.documentId] = { data: post, timestamp }
-      })
-    } else {
-      cache[posts.documentId] = { data: posts, timestamp }
-    }
-
-    localStorage.setItem(POSTS_CACHE_KEY, JSON.stringify(cache))
-  } catch (error) {
-    console.error('Error writing to cache:', error)
-  }
-}
-
-const getFromCache = (documentId?: string): { data: Post | Post[]; timestamp: number } | null => {
-  try {
-    const cache = getCache()
-
-    if (documentId) {
-      const entry = cache[documentId]
-      return entry && isValidCache(entry.timestamp) ? entry : null
-    }
-
-    // For all posts, check if any exist and are valid
-    const validEntries = Object.values(cache).filter((entry) => isValidCache(entry.timestamp))
-    return validEntries.length > 0
-      ? {
-          data: validEntries.map((entry) => entry.data),
-          timestamp: Math.min(...validEntries.map((e) => e.timestamp)),
-        }
-      : null
-  } catch (error) {
-    console.error('Error reading from cache:', error)
-    return null
-  }
-}
-
-const isValidCache = (timestamp: number): boolean => {
-  return Date.now() - timestamp < CACHE_EXPIRATION
-}
-
-export const usePosts = (slug?: string): UsePostsReturn => {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [post, setPost] = useState<Post | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
-  const [isCached, setIsCached] = useState(false)
-
-  const fetchData = useCallback(async () => {
+  // Fetch posts from API
+  const fetchPosts = useCallback(async (): Promise<Post | Post[]> => {
     try {
-      setIsLoading(true)
-      setError(null)
+      let endpoint = CMS_API_PATHS.POSTS.GET_ALL
 
-      // Try to get from cache first
-      const cachedEntry = getFromCache(slug)
-
-      if (cachedEntry) {
-        if (slug) {
-          setPost(cachedEntry.data as Post)
-          setPosts([])
-        } else {
-          setPosts(cachedEntry.data as Post[])
-          setPost(null)
-        }
-        setIsCached(true)
-        setIsLoading(false)
-        return
-      }
-
-      setIsCached(false)
-
-      // Fetch from API if not in cache or cache expired
-      const { data } = await httpClient.cms_authenticated.get<ApiResponse>(
-        slug ? CMS_API_PATHS.POSTS.GET_BY_ID(slug) : CMS_API_PATHS.POSTS.GET_ALL,
-      )
-
+      // Determine endpoint based on provided parameters
       if (slug) {
-        const postData = data.data as Post
-        setPost(postData)
-        setPosts([])
-        setInCache(postData)
-      } else {
-        const postsData = data.data as Post[]
-        setPosts(postsData)
-        setPost(null)
-        setInCache(postsData)
+        endpoint = CMS_API_PATHS.POSTS.GET_BY_SLUG(slug)
+      } else if (id) {
+        endpoint = CMS_API_PATHS.POSTS.GET_BY_ID(id)
       }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch posts'))
-    } finally {
-      setIsLoading(false)
+
+      const response = await fetch(endpoint)
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch posts: ${response.status} ${response.statusText}`)
+      }
+
+      const responseData = await response.json()
+
+      // All custom API endpoints return data in a data property
+      const data = responseData.data
+
+      if (!data) {
+        console.error('Unexpected response structure:', responseData)
+        throw new Error('Unexpected API response structure')
+      }
+
+      // Process the posts
+      if (Array.isArray(data) && data.length > 0) {
+        return data.map((post: Post) => ({
+          ...post,
+          // For list view, content is empty and readtime is already calculated
+          // If readtime doesn't exist, use a default value
+          readtime: post.readtime || 5,
+          slug: post.slug || '',
+        }))
+      } else if (data) {
+        // Single post - ensure readtime is calculated if missing
+        return {
+          ...data,
+          readtime:
+            data.readtime ||
+            (data.content && data.content.length > 0 ? calculateReadTime(data.content) : 5),
+          slug: data.slug || '',
+        }
+      }
+
+      return []
+    } catch (error) {
+      console.error('Error fetching posts:', error)
+      throw error
     }
-  }, [slug])
+  }, [id, slug])
 
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
+  // Use React Query for data fetching and caching
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['posts', id, slug],
+    queryFn: fetchPosts,
+    staleTime: CACHE_EXPIRATION, // Use cache expiration as stale time
+  })
 
-  return { posts, post, isLoading, error, refetch: fetchData, isCached }
+  const isSinglePostRequest = id !== undefined || slug !== undefined
+
+  // Return the processed data in the expected format
+  return {
+    posts: isSinglePostRequest ? [] : Array.isArray(data) ? data : [],
+    post: isSinglePostRequest ? (Array.isArray(data) ? null : data) || null : null,
+    isLoading,
+    error: error as Error | null,
+    refetch,
+  }
+}
+
+// Helper function to calculate read time from rich text content
+// Assumes 200 words per minute reading speed
+function calculateReadTime(content: any[]): number {
+  if (!content || !Array.isArray(content)) return 1
+
+  let wordCount = 0
+
+  // Process rich text to count words
+  content.forEach((node) => {
+    if (node.children) {
+      node.children.forEach((child: any) => {
+        if (typeof child.text === 'string') {
+          wordCount += child.text.split(/\s+/).filter(Boolean).length || 0
+        }
+      })
+    }
+  })
+
+  // Calculate read time - minimum 1 minute
+  return Math.max(1, Math.ceil(wordCount / 200))
 }

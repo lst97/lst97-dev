@@ -173,7 +173,7 @@ export const CVRightSection = React.memo<CVRightSectionProps>(({ section, inView
             href={section.action.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block py-1 md:py-2 px-2 md:px-4 bg-[color:var(--color-button)] border-2 border-[#4a4a4a] text-[color:var(--color-button-text)] font-mono text-[10px] md:text-xs no-underline transition-all duration-200 mt-2 md:mt-4 ml-2 md:ml-4 min-h-6 cursor-pointer hover:bg-[#4a4a4a] hover:border-[color:var(--color-hover)] hover:translate-y-[-2px]"
+            className="inline-block py-1 md:py-2 px-2 md:px-4 bg-[color:var(--color-button)] border-2 border-[#4a4a4a] text-[color:var(--color-button-text)] font-['Press_Start_2P'] text-[10px] md:text-xs no-underline transition-all duration-200 mt-2 md:mt-4 ml-2 md:ml-4 min-h-6 cursor-pointer hover:bg-[#4a4a4a] hover:border-[color:var(--color-hover)] hover:translate-y-[-2px]"
             aria-label={section.action.title}
           >
             {section.action.title}

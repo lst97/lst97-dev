@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createSuccessResponse, createErrorResponse, HttpStatus, CACHE_CONTROL } from '../index'
 
 /**
  * API route that proxies requests to the GitHub README Stats service
@@ -53,17 +54,30 @@ export async function GET(request: NextRequest) {
     // Get the content type from the original response
     const contentType = response.headers.get('content-type')
 
-    // Return the proxied response with appropriate headers
-    return new NextResponse(response.body, {
-      status: response.status,
-      statusText: response.statusText,
+    // For SVG responses, we return the raw SVG with appropriate headers
+    if (contentType?.includes('image/svg+xml')) {
+      return new NextResponse(response.body, {
+        status: HttpStatus.OK,
+        headers: {
+          'Content-Type': contentType,
+          'Cache-Control': CACHE_CONTROL.MEDIUM, // Cache for 5 minutes
+        },
+      })
+    }
+
+    // For JSON responses, we use our standardized format
+    const data = await response.json()
+    return NextResponse.json(createSuccessResponse(data), {
+      status: HttpStatus.OK,
       headers: {
-        'Content-Type': contentType || 'image/svg+xml',
-        'Cache-Control': 'public, max-age=600', // Cache for 10 minutes
+        'Cache-Control': CACHE_CONTROL.MEDIUM,
       },
     })
   } catch (error) {
     console.error('Error fetching GitHub stats:', error)
-    return NextResponse.json({ error: 'Failed to fetch GitHub stats' }, { status: 500 })
+    return NextResponse.json(
+      createErrorResponse('GITHUB_API_ERROR', 'Failed to fetch GitHub stats'),
+      { status: HttpStatus.INTERNAL_SERVER_ERROR },
+    )
   }
 }

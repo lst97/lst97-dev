@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import '@/app/(frontend)/styles/clouds.css'
+import '@/frontend/styles/clouds.css'
 import Image from 'next/image'
 
 interface CloudProps {

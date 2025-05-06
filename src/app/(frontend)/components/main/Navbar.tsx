@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
-import { CloseIconButton } from '@/app/(frontend)/components/ui/Buttons'
+import { CloseIconButton } from '@/frontend/components/ui/Buttons'
 import { AsciiTextGenerator } from '@/frontend/components/common/generators/Ascii'
 import { motion } from 'framer-motion'
 import { useScroll as useScrollContext } from '@/frontend/contexts/ScrollContext'

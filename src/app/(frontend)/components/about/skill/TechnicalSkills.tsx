@@ -1,17 +1,34 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { ApexOptions } from 'apexcharts'
-import { LanguageData, EditorData, OperatingSystemData } from '@/frontend/models/Wakatime'
+import {
+  LanguageData,
+  EditorData,
+  OperatingSystemData,
+  BaseBarData,
+} from '@/frontend/models/Wakatime'
 import { motion } from 'framer-motion'
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 })
 
+// Define interfaces for various possible data structures
+interface WakaTimeDataItem {
+  name: string
+  percent: number
+  hours: number
+  [key: string]: any // For other fields like color, text, etc.
+}
+
+interface NestedData {
+  data?: WakaTimeDataItem[] | { data?: WakaTimeDataItem[] }
+}
+
 interface TechnicalSkillsProps {
-  languages?: LanguageData
-  editors?: EditorData
-  operatingSystems?: OperatingSystemData
+  languages?: LanguageData | NestedData
+  editors?: EditorData | NestedData
+  operatingSystems?: OperatingSystemData | NestedData
   inView?: boolean
   isLoading?: boolean
   error?: string
@@ -501,12 +518,100 @@ const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({
   isLoading = false,
   error,
 }) => {
-  const processedLanguages =
-    languages?.data.sort((a, b) => b.percent - a.percent).slice(0, 10) || []
+  // Extract languages data with proper typing
+  const processedLanguages = useMemo(() => {
+    // For debugging
+    console.log('Languages in TechnicalSkills:', languages)
+
+    if (!languages) return []
+
+    let languagesArray: WakaTimeDataItem[] | null = null
+
+    // Case 1: Direct array
+    if (Array.isArray(languages)) {
+      languagesArray = languages as WakaTimeDataItem[]
+    }
+    // Case 2: { data: [...] }
+    else if (languages.data && Array.isArray(languages.data)) {
+      languagesArray = languages.data as WakaTimeDataItem[]
+    }
+    // Case 3: { data: { data: [...] } }
+    else {
+      const nestedData = languages as NestedData
+      if (
+        nestedData.data &&
+        typeof nestedData.data === 'object' &&
+        !Array.isArray(nestedData.data)
+      ) {
+        const doubleNestedData = nestedData.data as { data?: WakaTimeDataItem[] }
+        if (doubleNestedData.data && Array.isArray(doubleNestedData.data)) {
+          languagesArray = doubleNestedData.data
+        }
+      }
+    }
+
+    return languagesArray
+      ? [...languagesArray].sort((a, b) => b.percent - a.percent).slice(0, 10)
+      : []
+  }, [languages])
+
+  // Similarly prepare editors data
+  const processedEditors = useMemo(() => {
+    if (!editors) return []
+
+    let editorsArray: WakaTimeDataItem[] | null = null
+
+    if (Array.isArray(editors)) {
+      editorsArray = editors as WakaTimeDataItem[]
+    } else if (editors.data && Array.isArray(editors.data)) {
+      editorsArray = editors.data as WakaTimeDataItem[]
+    } else {
+      const nestedData = editors as NestedData
+      if (
+        nestedData.data &&
+        typeof nestedData.data === 'object' &&
+        !Array.isArray(nestedData.data)
+      ) {
+        const doubleNestedData = nestedData.data as { data?: WakaTimeDataItem[] }
+        if (doubleNestedData.data && Array.isArray(doubleNestedData.data)) {
+          editorsArray = doubleNestedData.data
+        }
+      }
+    }
+
+    return editorsArray || []
+  }, [editors])
+
+  // Similarly prepare OS data
+  const processedOS = useMemo(() => {
+    if (!operatingSystems) return []
+
+    let osArray: WakaTimeDataItem[] | null = null
+
+    if (Array.isArray(operatingSystems)) {
+      osArray = operatingSystems as WakaTimeDataItem[]
+    } else if (operatingSystems.data && Array.isArray(operatingSystems.data)) {
+      osArray = operatingSystems.data as WakaTimeDataItem[]
+    } else {
+      const nestedData = operatingSystems as NestedData
+      if (
+        nestedData.data &&
+        typeof nestedData.data === 'object' &&
+        !Array.isArray(nestedData.data)
+      ) {
+        const doubleNestedData = nestedData.data as { data?: WakaTimeDataItem[] }
+        if (doubleNestedData.data && Array.isArray(doubleNestedData.data)) {
+          osArray = doubleNestedData.data
+        }
+      }
+    }
+
+    return osArray || []
+  }, [operatingSystems])
 
   return (
     <motion.div
-      className="relative bg-[#fffbeb] border-4 border-[#2c2c2c] p-8 my-4 shadow-[8px_8px_0_#2c2c2c] before:content-[''] before:absolute before:-top-1 before:-left-1 before:-right-1 before:-bottom-1 before:border-2 before:border-[#2c2c2c] before:pointer-events-none after:content-[''] after:absolute after:inset-0 after:bg-[linear-gradient(45deg,transparent_45%,#2c2c2c_45%,#2c2c2c_55%,transparent_55%),linear-gradient(-45deg,transparent_45%,#2c2c2c_45%,#2c2c2c_55%,transparent_55%)] after:bg-[length:8px_8px] after:bg-[position:0_0,4px_0] after:opacity-10 after:pointer-events-none"
+      className="relative bg-[#fffbeb] border-4 border-[#2c2c2c] p-8 my-4 shadow-[8px_8px_0_#2c2c2c] before:content-[''] before:-top-1 before:-left-1 before:-right-1 before:-bottom-1 before:border-2 before:border-[#2c2c2c] before:pointer-events-none after:content-[''] after:absolute after:inset-0 after:bg-[linear-gradient(45deg,transparent_45%,#2c2c2c_45%,#2c2c2c_55%,transparent_55%),linear-gradient(-45deg,transparent_45%,#2c2c2c_45%,#2c2c2c_55%,transparent_55%)] after:bg-[length:8px_8px] after:bg-[position:0_0,4px_0] after:opacity-10 after:pointer-events-none"
       initial="hidden"
       animate={inView ? 'visible' : 'hidden'}
       variants={containerVariants}
@@ -538,7 +643,7 @@ const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({
               <h4 className="font-['Press_Start_2P'] text-base text-[#2c2c2c] mb-4 text-center uppercase tracking-wider">
                 Code Editors
               </h4>
-              <DonutChart title="Code Editors" data={editors?.data || []} inView={inView} />
+              <DonutChart title="Code Editors" data={processedEditors} inView={inView} />
             </motion.div>
             <motion.div
               className="bg-[rgba(44,44,44,0.05)] p-4 border-2 border-[#2c2c2c] lg:flex-1 lg:min-w-[300px]"
@@ -547,11 +652,7 @@ const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({
               <h4 className="font-['Press_Start_2P'] text-base text-[#2c2c2c] mb-4 text-center uppercase tracking-wider">
                 Operating Systems
               </h4>
-              <DonutChart
-                title="Operating Systems"
-                data={operatingSystems?.data || []}
-                inView={inView}
-              />
+              <DonutChart title="Operating Systems" data={processedOS} inView={inView} />
             </motion.div>
           </motion.div>
           <motion.div
@@ -568,8 +669,8 @@ const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({
 
       <AccessibilityDataTable
         languages={processedLanguages}
-        editors={editors?.data}
-        operatingSystems={operatingSystems?.data}
+        editors={processedEditors}
+        operatingSystems={processedOS}
       />
     </motion.div>
   )

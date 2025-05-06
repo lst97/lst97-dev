@@ -1,0 +1,59 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Development Guidelines
+
+This project follows specific development practices and guidelines to ensure code quality and consistency.
+
+## Package Management
+
+Always use pnpm for package management:
+
+```bash
+# Install dependencies
+pnpm install
+
+# Add a new dependency
+pnpm add package-name
+
+# Add a dev dependency
+pnpm add -D package-name
+
+# Run scripts
+pnpm dev
+```
+
+## TypeScript Best Practices
+
+1. Always use explicit typing rather than inferred types
+2. Create and use interfaces for complex data structures
+3. Use type guards for narrowing types
+4. Prefer `type` over `interface` for most type definitions
+5. Use discriminated unions for complex state management
+
+## Code Organization
+
+1. Group imports with external libraries first, then internal imports
+2. Use barrel exports (`index.ts`) for cleaner imports
+3. Keep component files focused on a single responsibility
+4. Use consistent naming conventions:
+   - PascalCase for components and types
+   - camelCase for variables, functions, and instances
+   - UPPER_CASE for constants
+
+## Performance Optimization
+
+1. Use React.memo for expensive components
+2. Implement proper dependency arrays in useEffect and useMemo
+3. Use Next.js Image component for optimized images
+4. Implement code splitting via dynamic imports
+5. Use the React profiler to identify performance bottlenecks
+
+## Styling Conventions
+
+1. Use Tailwind utility classes for standard styling
+2. Use CSS modules for component-specific styles
+3. Follow the theme system for colors and spacing
+4. Keep CSS modules alongside their component files

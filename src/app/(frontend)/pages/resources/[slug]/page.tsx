@@ -2,26 +2,210 @@
 import { Dashboard } from '@/frontend/components/main/Dashboard'
 import { ContentDisplay } from '@/frontend/components/common/display/ContentDisplay'
 import { useState, use } from 'react'
-import { PlainDialog } from '@/app/(frontend)/components/ui/Dialogs'
+import { PlainDialog } from '@/frontend/components/ui/Dialogs'
 import { LoadingSpinner } from '@/frontend/components/common/LoadingSpinner'
 import styles from '@/frontend/components/common/layout/layout.module.css'
 import { Post } from '@/frontend/models/Post'
 import { usePosts } from '@/frontend/hooks/usePosts'
-import categoryStyles from '@/frontend/components/common/items/notes.module.css'
+import { CacheStatus } from '@/frontend/components/utils/CacheStatus'
+import { motion } from 'framer-motion'
+import Image from 'next/image'
+import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
+import { Tags, Tag } from '@/frontend/components/ui/Tags'
 
+// Loading state component
+const LoadingState = () => (
+  <div className="flex flex-col items-center justify-center min-h-[50vh]">
+    <LoadingSpinner />
+    <div className="mt-4 font-['Press_Start_2P'] text-sm">Loading content...</div>
+  </div>
+)
+
+// Error state component
+const ErrorState = ({ message }: { message: string }) => (
+  <div className="flex flex-col items-center justify-center min-h-[50vh]">
+    <Image
+      src="/anthropology-skeleton-icon.svg"
+      alt="Error"
+      width={100}
+      height={100}
+      className="m-4"
+    />
+    <div className="text-[var(--color-error)] font-['Press_Start_2P'] text-sm mt-4">
+      Error loading content: {message}
+    </div>
+  </div>
+)
+
+// Post header component
+const PostHeader = ({
+  post,
+  cacheComponent,
+}: {
+  post: Post | null
+  cacheComponent: React.ReactNode
+}) => (
+  <div className="mx-auto max-w-7xl bg-[var(--color-card)] dark:bg-[var(--color-card-dark)] border-4 border-[var(--color-border)] dark:border-[var(--color-border-dark)] shadow-[8px_8px_0_var(--shadow)] rounded-md mb-8 relative overflow-hidden ">
+    {/* Pixel noise overlay */}
+    <div
+      className="bg-pixel-noise absolute inset-0 pointer-events-none z-0 opacity-10"
+      aria-hidden="true"
+    />
+
+    {/* Horizontal lines overlay */}
+    <div
+      className="pointer-events-none absolute inset-0 z-0 opacity-10 bg-horizontal-lines"
+      aria-hidden="true"
+    />
+
+    {/* Cache status indicator */}
+    <div className="absolute top-2 right-2 z-10">{cacheComponent}</div>
+
+    <div className="flex flex-col sm:flex-row gap-4 m-4 justify-between relative z-1">
+      <div className="flex-1">
+        <div className="flex flex-wrap items-center gap-4 mb-4">
+          <h1 className="font-['Press_Start_2P'] text-xl sm:text-2xl text-[var(--color-text)] dark:text-[var(--color-text-light)]">
+            {post?.title}
+          </h1>
+
+          {post?.categories && post.categories.length > 0 && (
+            <div className="flex gap-2 flex-wrap">
+              {post.categories.map((category, index) => (
+                <Tag
+                  key={`category-${index}`}
+                  label={category}
+                  type={
+                    [
+                      'normal',
+                      'fire',
+                      'water',
+                      'electric',
+                      'grass',
+                      'ice',
+                      'fighting',
+                      'poison',
+                      'ground',
+                      'flying',
+                      'psychic',
+                      'bug',
+                      'rock',
+                      'ghost',
+                      'dragon',
+                      'dark',
+                      'steel',
+                      'fairy',
+                    ][index % 18] || 'normal'
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <p className="font-['Press_Start_2P'] text-[var(--color-text)] dark:text-[var(--color-text-light)] mb-4 opacity-80">
+          {post?.description}
+        </p>
+
+        <div className="flex flex-wrap items-center gap-4 text-sm font-['Press_Start_2P']">
+          <span className="flex items-center gap-1">
+            <span className="text-[var(--color-accent)]">📅</span>{' '}
+            <span className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
+              {new Date(post?.publishedDate ?? '').toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </span>
+          </span>
+
+          <span className="flex items-center gap-1">
+            <span className="text-[var(--color-accent)]">⏱️</span>{' '}
+            <span className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
+              {post?.readtime} min read
+            </span>
+          </span>
+
+          <span className="flex items-center gap-1">
+            <span className="text-[var(--color-accent)]">👁️</span>{' '}
+            <span className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
+              {post?.views} views
+            </span>
+          </span>
+
+          <span className="flex items-center gap-1">
+            <span className="text-[var(--color-accent)]">❤️</span>{' '}
+            <span className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
+              {post?.likes} likes
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
+// Post content component
+const PostContent = ({ post }: { post: Post | null }) => (
+  <div className="mx-auto max-w-7xl bg-[var(--color-card)] dark:bg-[var(--color-card-dark)] border-4 border-[var(--color-border)] dark:border-[var(--color-border-dark)] shadow-[8px_8px_0_var(--shadow)] rounded-md p-4 sm:p-6 relative  pixel-scanlines">
+    {/* Grid pattern overlay */}
+    <div
+      className="pointer-events-none absolute inset-0 z-0 opacity-5 bg-grid-lines"
+      aria-hidden="true"
+    />
+
+    <ContentDisplay attributes={[post].filter(Boolean) as Post[]} type="post" />
+  </div>
+)
+
+// Cache information dialog
+const CacheInfoDialog = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
+  <PlainDialog open={open} onClose={onClose} title='Meaning of the "cached" and "fresh"'>
+    <div className="flex flex-col gap-4 font-['Press_Start_2P']">
+      <p className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
+        This page uses React Query for data fetching, which implements an intelligent caching
+        system.
+      </p>
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
+          If the content is already in React Query's cache then it is marked as{' '}
+        </span>
+        <span className="inline-block pixel-borders">
+          <span className="bg-[var(--color-secondary)] px-2 py-1 font-['Press_Start_2P'] text-xs text-[var(--color-text)]">
+            cache
+          </span>
+        </span>
+        <span className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
+          else it's marked as
+        </span>
+        <span className="inline-block pixel-borders">
+          <span className="bg-[var(--color-primary)] px-2 py-1 font-['Press_Start_2P'] text-xs text-[var(--color-text)]">
+            fresh
+          </span>
+        </span>
+      </div>
+      <p className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
+        React Query automatically manages cache invalidation based on staleTime and cacheTime
+        settings. By default, data becomes stale after a few minutes and is refetched when needed.
+      </p>
+      <p className="text-[var(--color-text)] dark:text-[var(--color-text-light)] bg-[var(--color-hover)] dark:bg-[var(--color-hover-dark)] p-2 border-l-4 border-[var(--color-accent)]">
+        To force a fresh fetch, you can refresh the page while holding Shift or Ctrl key (depends on
+        your browser).
+      </p>
+    </div>
+  </PlainDialog>
+)
+
+// Main component
 function ResourceContent({ params }: Readonly<{ params: Promise<{ slug: string }> }>) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const resolvedParams = use(params)
-  const { post, isLoading, error, isCached } = usePosts(resolvedParams.slug)
+  const { post, isLoading, error } = usePosts({ slug: resolvedParams.slug })
 
   try {
     if (isLoading) {
       return (
         <Dashboard>
-          <LoadingSpinner />
-          <div className="p-8">
-            <div className="text-center">Loading content...</div>
-          </div>
+          <LoadingState />
         </Dashboard>
       )
     }
@@ -29,102 +213,54 @@ function ResourceContent({ params }: Readonly<{ params: Promise<{ slug: string }
     if (error) {
       return (
         <Dashboard>
-          <div className="p-8">
-            <div className="text-red-500">Error loading content: {error.message}</div>
-          </div>
+          <ErrorState message={error.message} />
         </Dashboard>
       )
     }
 
+    const cacheStatusComponent = (
+      <CacheStatus
+        queryKey={['posts', undefined, resolvedParams.slug]}
+        onClick={() => setIsDialogOpen(true)}
+      />
+    )
+
     return (
       <Dashboard>
-        <div className="p-8 relative">
-          <div
-            className="absolute top-0 right-0 border-double border-4 rounded-md border-black m-2"
-            onClick={() => {
-              setIsDialogOpen(true)
-            }}
+        <div className="fixed top-0 left-0 w-full h-screen z-0">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, ease: 'easeInOut', delay: 0.5 }}
           >
-            <p className="p-1 hover:cursor-pointer bg-amber-100 hover:bg-amber-200 rounded-md">{`${
-              isCached ? 'cached' : 'fresh'
-            }`}</p>
-          </div>
-          <div className={`${styles.pixelArtBorder} mt-8 mb-8`}>
-            <div className="flex flex-row gap-4 m-2 justify-between">
-              <div>
-                <h1 className="text-2xl font-bold mb-4 w-full">{post?.title}</h1>
+            <PixelArtAnimation
+              opacity={0.3}
+              sizeRange={[50, 100]}
+              numSquares={20}
+              interactionDistance={200}
+              colors={['#ffe580']}
+              className="w-full h-screen"
+            />
+          </motion.div>
+        </div>
 
-                <p className="text-gray-600 mb-2">{post?.description}</p>
-                <div className="flex items-center gap-4 text-sm">
-                  <span>
-                    📅{' '}
-                    {new Date(post?.publishedDate ?? '').toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: 'numeric',
-                      minute: 'numeric',
-                      second: 'numeric',
-                    })}
-                  </span>
-                  <span>⏱️ {post?.readtime} min read</span>
-                  <span>👁️ {post?.views} views</span>
-                  <span>❤️ {post?.likes} likes</span>
-                </div>
-              </div>
-              <div className="flex flex-col justify-center items-end">
-                <div className="flex gap-2 flex-wrap justify-end">
-                  <span className={`${categoryStyles.pkmNoteChip} ${categoryStyles.normal}`}>
-                    {post?.categories}
-                  </span>
-                </div>
-              </div>
-            </div>
+        <div className="relative mt-32 z-10">
+          <div className="mx-auto max-w-7xl">
+            <PostHeader post={post} cacheComponent={cacheStatusComponent} />
+            <PostContent post={post} />
           </div>
-          <ContentDisplay attributes={[post].filter(Boolean) as Post[]} type="post" />
-          <PlainDialog
-            open={isDialogOpen}
-            onClose={() => {
-              setIsDialogOpen(false)
-            }}
-            title='Meaning of the "cached" and "fresh"'
-          >
-            <div className="flex flex-col gap-2">
-              <p>
-                The content is first check if it present in the cache, if not then fetched from the
-                server and stored in the cache.
-              </p>
-              <div className="flex items-center gap-2">
-                <span>If the content is present in the cache then it is </span>
-                <span className="inline-block border-4 border-double border-black rounded-md">
-                  <span className="bg-amber-100 px-1 rounded-md">cache</span>
-                </span>
-                <span>else</span>
-                <span className="inline-block border-4 border-double border-black rounded-md">
-                  <span className="bg-amber-100 px-1 rounded-md">fresh</span>
-                </span>
-                <span>.</span>
-              </div>
-              <p>
-                The cache also have it own expiration time for 30 minutes, after which the content
-                is fetched from the server.
-              </p>
-              <a
-                href="https://mclibrary.duke.edu/about/blog/clear-cache"
-                target="_blank"
-                rel="noreferrer"
-                className="text-sky-600 my-2"
-              >
-                How to clear cache?
-              </a>
-            </div>
-          </PlainDialog>
+
+          <CacheInfoDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
         </div>
       </Dashboard>
     )
   } catch (error) {
     console.error('Error fetching data:', error)
-    return <div>Error loading resource details.</div>
+    return (
+      <Dashboard>
+        <ErrorState message="Error loading resource details." />
+      </Dashboard>
+    )
   }
 }
 

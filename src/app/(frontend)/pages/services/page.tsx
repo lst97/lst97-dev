@@ -18,7 +18,7 @@ import { SiNextdotjs, SiTypescript, SiTailwindcss } from 'react-icons/si'
 
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import PixelArtAnimation from '@/app/(frontend)/components/animation/PixelArtAnimation'
+import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
 import {
   ProjectShowcaseDialog,
   BannerSection,
@@ -32,13 +32,12 @@ import {
   PresentationSection,
   ProjectDetailsSection,
   VisitWebsiteButton,
-} from '@/app/(frontend)/components/services/project-dialog'
-import { projectsData } from '@/app/(frontend)/constants/data/services'
-import { ContactForm } from '@/app/(frontend)/components/services/forms/ContactForm'
-import { httpClient } from '@/frontend/api/Api'
-import { ContactSubmissionForm } from '@/app/(frontend)/components/services/forms/ContactForm'
+} from '@/frontend/components/services/project-dialog'
+import { projectsData } from '@/frontend/constants/data/services'
+import { ContactForm } from '@/frontend/components/services/forms/ContactForm'
 import Message from '@/frontend/components/common/Message'
 import { Footer } from '@/frontend/components/footer/Footer'
+import { useContactForm } from '@/frontend/hooks/useContactForm'
 
 // Import our extracted components
 import {
@@ -54,7 +53,7 @@ import {
   Service,
   FreelancerAdvantage,
   Technology,
-} from '@/app/(frontend)/components/services'
+} from '@/frontend/components/services'
 
 const services: Service[] = [
   {
@@ -204,134 +203,18 @@ const freelancerAdvantages: FreelancerAdvantage[] = [
 
 const Services = () => {
   const [selectedProject, setSelectedProject] = useState<(typeof projectsData)[0] | null>(null)
-  const [formData, setFormData] = useState<ContactSubmissionForm>({
-    name: '',
-    email: '',
-    budget: '',
-    content: '',
-    source: '',
-  })
-  const [formErrors, setFormErrors] = useState<{
-    [key in keyof ContactSubmissionForm]?: string
-  }>({})
   const [isLoading, setIsLoading] = useState(true)
   const [isProjectShowcaseOpen, setIsProjectShowcaseOpen] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [isSending, setIsSending] = useState(false)
-  const [message, setMessage] = useState<{ type: string; text: string } | null>(null)
-  const [recaptchaToken, setRecaptchaToken] = useState<string>('')
+
+  // Use the contact form hook
+  const { form, isSending, isSuccess, message, setMessage, handleReCaptchaVerify } =
+    useContactForm(referralSources)
 
   useEffect(() => {
     setIsLoading(false)
   }, [])
 
   const titleText = 'Building modern web solutions with passion and precision'
-
-  const handleReCaptchaVerify = useCallback((token: string) => {
-    setRecaptchaToken(token)
-  }, [])
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!recaptchaToken) {
-      setMessage({
-        type: 'error',
-        text: 'Please complete the reCAPTCHA verification',
-      })
-      return
-    }
-
-    const errors: { [key in keyof ContactSubmissionForm]?: string } = {}
-    if (!formData.name.trim()) {
-      errors.name = 'Name is required'
-    }
-    if (!formData.email.trim()) {
-      errors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Email is invalid'
-    }
-    if (!formData.content.trim()) {
-      errors.content = 'Message is required'
-    }
-    if (!formData.budget.trim()) {
-      errors.budget = 'Budget is required'
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors)
-      return
-    }
-
-    setFormErrors({}) // Clear previous errors
-    setIsSending(true) // Start loading animation
-    setIsSuccess(false) // Reset success state
-
-    try {
-      const response = await httpClient.cms_authenticated.post('/contact-submissions', {
-        data: {
-          ...formData,
-          recaptchaToken,
-        },
-      })
-
-      setIsSuccess(true) // Show success message
-      setFormData({
-        name: '',
-        email: '',
-        budget: '',
-        content: '',
-        source: '',
-      })
-      setRecaptchaToken('')
-      setMessage({ type: 'success', text: 'Message sent successfully!' })
-    } catch (error: any) {
-      console.error('Error:', error)
-
-      // Check for Strapi validation error structure
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.error &&
-        error.response.data.error.details &&
-        error.response.data.error.details.errors
-      ) {
-        const strapiErrors = error.response.data.error.details.errors
-        const updatedFormErrors = { ...formErrors }
-
-        strapiErrors.forEach((err: any) => {
-          // Assuming Strapi error path matches form field names
-          if (err.path && err.path.length > 0 && err.message) {
-            const fieldName = err.path[0]
-            if (fieldName in updatedFormErrors) {
-              // Append to existing error message for the field
-              updatedFormErrors[fieldName as keyof ContactSubmissionForm] += `, ${err.message}`
-            } else {
-              updatedFormErrors[fieldName as keyof ContactSubmissionForm] = err.message
-            }
-          }
-        })
-
-        setFormErrors(updatedFormErrors)
-        setMessage({ type: 'error', text: 'Failed to send message' })
-      } else {
-        // Handle other types of errors
-        setMessage({ type: 'error', text: 'Failed to send message' })
-      }
-    } finally {
-      setIsSending(false) // Stop loading animation
-    }
-  }
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
 
   return (
     <ScrollProvider>
@@ -432,14 +315,11 @@ const Services = () => {
               </AnimatePresence>
               <div className="max-w-6xl mx-auto px-8">
                 <ContactForm
-                  formData={formData}
-                  handleInputChange={handleInputChange}
-                  handleFormSubmit={handleFormSubmit}
-                  referralSources={referralSources}
-                  formErrors={formErrors}
+                  form={form}
                   isSuccess={isSuccess}
                   isSending={isSending}
                   onVerifyReCaptcha={handleReCaptchaVerify}
+                  referralSources={referralSources}
                 />
               </div>
             </ContactSection>

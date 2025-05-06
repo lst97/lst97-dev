@@ -220,7 +220,7 @@ export const CV = React.memo<React.FC<CVProps>>(
             <button
               onClick={() => handlePageFlip('right')}
               disabled={currentPage === 0 && animationStatus !== 'idle'}
-              className={`absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 bg-[#2c2c2c] border-2 border-[#4a4a4a] text-[#fff3c4] py-2 px-2 sm:py-3 sm:px-3 font-mono text-xs transition-all duration-200 hover:bg-[#4a4a4a] hover:border-[#fff3c4] ${
+              className={`absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 bg-[#2c2c2c] border-2 border-[#4a4a4a] text-[#fff3c4] py-2 px-2 sm:py-3 sm:px-3 font-['Press_Start_2P'] text-xs transition-all duration-200 hover:bg-[#4a4a4a] hover:border-[#fff3c4] ${
                 currentPage === 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
               }`}
               aria-label="Previous page"
@@ -232,7 +232,7 @@ export const CV = React.memo<React.FC<CVProps>>(
             <button
               onClick={() => handlePageFlip('left')}
               disabled={currentPage === totalPages - 1 && animationStatus !== 'idle'}
-              className={`absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 bg-[#2c2c2c] border-2 border-[#4a4a4a] text-[#fff3c4] py-2 px-2 sm:py-3 sm:px-3 font-mono text-xs transition-all duration-200 hover:bg-[#4a4a4a] hover:border-[#fff3c4] ${
+              className={`absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 bg-[#2c2c2c] border-2 border-[#4a4a4a] text-[#fff3c4] py-2 px-2 sm:py-3 sm:px-3 font-['Press_Start_2P'] text-xs transition-all duration-200 hover:bg-[#4a4a4a] hover:border-[#fff3c4] ${
                 currentPage === totalPages - 1 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
               }`}
               aria-label="Next page"

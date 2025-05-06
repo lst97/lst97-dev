@@ -4,8 +4,8 @@ import Image from 'next/image'
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { routes } from '@/frontend/constants/routes'
-import CloudBackground from '@/app/(frontend)/components/landing/CloudBackground'
-import BackgroundFloatingElements from '@/app/(frontend)/components/landing/BackgroundFloatingElements'
+import CloudBackground from '@/frontend/components/landing/CloudBackground'
+import BackgroundFloatingElements from '@/frontend/components/landing/BackgroundFloatingElements'
 import ArrowRightIcon from '@heroicons/react/16/solid/ArrowRightIcon'
 
 export default function LandingPage() {

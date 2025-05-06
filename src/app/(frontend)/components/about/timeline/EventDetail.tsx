@@ -11,7 +11,7 @@ interface EventDetailProps {
 export const EventDetail: React.FC<EventDetailProps> = ({ selectedEvent, selectedEventRef }) => {
   if (!selectedEvent) {
     return (
-      <div className="mt-4 md:mt-0 p-4 text-center text-[color:var(--color-border)] font-mono opacity-70 bg-[color:var(--background-color)] border border-[color:var(--color-border)] rounded-[2px]">
+      <div className="mt-4 md:mt-0 p-4 text-center text-[color:var(--color-border)] font-['Press_Start_2P'] opacity-70 bg-[color:var(--background-color)] border border-[color:var(--color-border)] rounded-[2px]">
         Select an event on the timeline to view details
       </div>
     )

@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import Image from 'next/image'
 import { motion, useInView } from 'framer-motion'
 import { PkmLink } from '@/frontend/components/ui/Links'
-import { connects } from '@/app/(frontend)/constants/data/connect'
+import { connects } from '@/frontend/constants/data/connect'
 
 const containerVariants = {
   hidden: { opacity: 0 },

@@ -65,7 +65,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
             className="relative w-full h-[var(--line-spacing)] flex items-center gap-4"
           >
             <div
-              className={`w-[var(--year-width)] font-mono text-[1.2rem] text-right flex-shrink-0 absolute font-semibold whitespace-nowrap ${
+              className={`w-[var(--year-width)] font-['Press_Start_2P'] text-[1.2rem] text-right flex-shrink-0 absolute font-semibold whitespace-nowrap ${
                 isReversed
                   ? 'left-auto right-[-1rem] text-left transform translate-x-[100%] pr-0 pl-4'
                   : 'left-[-1rem] transform translate-x-[-100%] pr-4'

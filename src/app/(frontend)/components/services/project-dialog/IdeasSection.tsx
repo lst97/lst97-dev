@@ -40,7 +40,7 @@ export const IdeasSection: React.FC<IdeasSectionProps> = ({ ideas }) => (
               {idea.title}
             </span>
           </span>
-          <span className="text-base text-black/70 leading-snug pl-8 font-mono">
+          <span className="text-base text-black/70 leading-snug pl-8 font-['Press_Start_2P']">
             {idea.content}
           </span>
         </li>

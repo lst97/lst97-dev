@@ -1,0 +1,58 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# State Management
+
+The project uses a combination of React hooks, context API, and Zustand for state management.
+
+## Context API
+
+React Context API is used for global state management in the [src/app/(frontend)/contexts](mdc:src/app/(frontend)/contexts) directory:
+
+- Theme context for light/dark mode
+- User preferences context
+- Animation state context
+
+## Zustand Stores
+
+Zustand is used for complex state management with these principles:
+
+1. Create small, focused stores for specific features
+2. Use selectors to access only needed state
+3. Implement middleware for persistence and debugging
+4. Separate UI state from business logic
+
+Example Zustand store pattern:
+
+```tsx
+import { create } from 'zustand'
+
+type Store = {
+  // State interface
+  count: number
+  // Actions
+  increment: () => void
+}
+
+export const useStore = create<Store>((set) => ({
+  count: 0,
+  increment: () => set((state) => ({ count: state.count + 1 })),
+}))
+```
+
+## Local Component State
+
+For component-specific state:
+
+1. Use `useState` for simple state
+2. Use `useReducer` for complex state logic within a component
+3. Use custom hooks to encapsulate and reuse state logic
+
+## Server State Management
+
+For server state and data fetching, the project uses:
+
+1. React Query for data fetching, caching, and synchronization with server
+2. Custom hooks that encapsulate data fetching logic

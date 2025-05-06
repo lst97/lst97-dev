@@ -97,7 +97,7 @@
   --text-shadow-dark: rgba(181, 137, 0, 0.3);
 
   /* Fonts */
-  --font-mono: 'Roboto Mono', monospace;
+  --font-['Press_Start_2P']: 'Roboto Mono', monospace;
   --font-pixel: 'Press Start 2P', monospace;
 
   /* Gradients */
@@ -258,52 +258,6 @@
   .pixel-border {
     @apply border-[4px] border-gray-400 border-b-border border-r-border;
     border-style: outset;
-  }
-
-  /* New pixel art utilities */
-  .pixel-corners {
-    position: relative;
-  }
-
-  .pixel-corners::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 4px;
-    background-color: var(--color-accent);
-  }
-
-  .pixel-corners::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 4px;
-    height: 4px;
-    background-color: var(--color-accent);
-  }
-
-  /* Additional corner pixels using pseudo-elements from the children */
-  .pixel-corners > span:first-child {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 4px;
-    height: 4px;
-    background-color: var(--color-accent);
-  }
-
-  .pixel-corners > span:last-child {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 4px;
-    height: 4px;
-    background-color: var(--color-accent);
   }
 
   /* Scanline effect for CRT look */
@@ -754,8 +708,16 @@
   /* Grid pattern */
   .bg-grid-lines {
     background-image:
-      repeating-linear-gradient(0deg, var(--color-border) 0 2px, transparent 2px 24px),
-      repeating-linear-gradient(90deg, var(--color-border) 0 2px, transparent 2px 24px);
+      repeating-linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--color-border) 70%, transparent 70%) 0 2px,
+        transparent 2px 24px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--color-border) 70%, transparent 70%) 0 2px,
+        transparent 2px 24px
+      );
     background-size: 24px 24px;
   }
   /* Dots pattern */
@@ -1065,8 +1027,7 @@
   color: var(--color-text);
 }
 
-/* Add pixel-borders class if it doesn't exist */
-
+/* Pixel-borders (preserve this) */
 .pixel-borders {
   position: relative;
   border-style: solid;

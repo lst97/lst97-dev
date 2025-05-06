@@ -46,7 +46,7 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ testimonials 
   if (testimonials.length === 0) return null
   return (
     <section
-      className="mb-8 sm:mb-12 md:mb-20 px-2 sm:px-4 md:px-8 py-4 sm:py-8 md:py-12 bg-[var(--color-card)] dark:bg-[var(--color-card-dark)] border-4 border-[var(--color-border)] dark:border-[var(--color-border-dark)] shadow-[8px_8px_0_var(--shadow)] relative overflow-hidden pixel-border pixel-corners pixel-scanlines"
+      className="mb-8 sm:mb-12 md:mb-20 px-2 sm:px-4 md:px-8 py-4 sm:py-8 md:py-12 bg-[var(--color-card)] dark:bg-[var(--color-card-dark)] border-4 border-[var(--color-border)] dark:border-[var(--color-border-dark)] shadow-[8px_8px_0_var(--shadow)] relative overflow-hidden pixel-border  pixel-scanlines"
       style={{ zIndex: 1 }}
     >
       {/* Pixel noise overlay */}
@@ -65,7 +65,7 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ testimonials 
         {testimonials.map((testimonial, index) => (
           <div
             key={index}
-            className="bg-[var(--color-hover)] dark:bg-[var(--color-hover-dark)] border-4 border-[var(--color-border)] dark:border-[var(--color-border-dark)] p-3 sm:p-4 md:p-8 shadow-[8px_8px_0_var(--shadow)] relative transition-all duration-300 transform-gpu hover:translate-y-[-4px] hover:translate-x-[-4px] hover:scale-[1.02] hover:shadow-[12px_12px_0_var(--shadow)] pixel-border pixel-corners pixel-scanlines"
+            className="bg-[var(--color-hover)] dark:bg-[var(--color-hover-dark)] border-4 border-[var(--color-border)] dark:border-[var(--color-border-dark)] p-3 sm:p-4 md:p-8 shadow-[8px_8px_0_var(--shadow)] relative transition-all duration-300 transform-gpu hover:translate-y-[-4px] hover:translate-x-[-4px] hover:scale-[1.02] hover:shadow-[12px_12px_0_var(--shadow)] pixel-border  pixel-scanlines"
           >
             <p className="font-['Press_Start_2P'] text-xs sm:text-sm md:text-base text-[var(--color-text)] dark:text-[var(--color-text-light)] mb-4 sm:mb-6 leading-relaxed relative pl-1 sm:pl-4">
               {testimonial.quote}
@@ -100,7 +100,7 @@ const ContactSection: React.FC = () => (
     <h2 className="font-['Press_Start_2P'] text-xl sm:text-2xl text-[var(--color-text)] dark:text-[var(--color-text-light)] mb-2 sm:mb-4 relative ">
       Let&apos;s Build Something Together
     </h2>
-    <p className="font-mono text-base sm:text-xl text-[var(--color-text)] dark:text-[var(--color-text-light)] mb-4 sm:mb-8 relative ">
+    <p className="font-['Press_Start_2P'] text-base sm:text-xl text-[var(--color-text)] dark:text-[var(--color-text-light)] mb-4 sm:mb-8 relative ">
       Have a project in mind? I&apos;d love to help bring your ideas to life.
     </p>
     <Button asChild variant="pixel" className="z-1">
@@ -180,7 +180,7 @@ const ProjectsPage = () => {
           </motion.div>
         </div>
 
-        <div className="relative w-full min-h-screen flex flex-col bg-[var(--color-card)] dark:bg-[var(--color-card-dark)] px-2 sm:px-8 md:px-16 lg:px-32 py-4 sm:py-8 shadow-[12px_12px_0_var(--shadow)] bg-[radial-gradient(rgba(0,0,0,0.1)_1px,transparent_1px),radial-gradient(rgba(0,0,0,0.1)_1px,transparent_1px)] bg-[length:20px_20px] bg-[position:0_0,_10px_10px]">
+        <div className="border-4 border-border relative w-full min-h-screen flex flex-col bg-[var(--color-card)] dark:bg-[var(--color-card-dark)] px-2 sm:px-8 md:px-16 lg:px-32 py-4 sm:py-8 shadow-[12px_12px_0_var(--shadow)] bg-[radial-gradient(rgba(0,0,0,0.1)_1px,transparent_1px),radial-gradient(rgba(0,0,0,0.1)_1px,transparent_1px)] bg-[length:20px_20px] bg-[position:0_0,_10px_10px]">
           <section className="relative text-center mb-8 sm:mb-16 md:mb-20 pt-8 sm:pt-16 md:pt-20 pb-8 sm:pb-16 md:pb-20 px-2 sm:px-8 bg-[var(--color-card)] dark:bg-[var(--color-card-dark)] border-4 border-[var(--color-border)] dark:border-[var(--color-border-dark)] shadow-[12px_12px_0_var(--shadow)] transform-gpu perspective-[1000px] overflow-hidden">
             <div
               className="pointer-events-none absolute inset-0 z-0 opacity-20 bg-diagonal-lines"
@@ -216,7 +216,7 @@ const ProjectsPage = () => {
               <h2 className="font-['Press_Start_2P'] text-lg sm:text-2xl text-[var(--color-text)] dark:text-[var(--color-text-light)] mb-4 sm:mb-8 shadow-[2px_2px_0_var(--text-shadow)]">
                 {selectedProject.title}
               </h2>
-              <div className="font-mono text-base sm:text-xl text-[var(--color-text)] dark:text-[var(--color-text-light)] leading-relaxed">
+              <div className="font-['Press_Start_2P'] text-base sm:text-xl text-[var(--color-text)] dark:text-[var(--color-text-light)] leading-relaxed">
                 {selectedProject.casestudy?.content}
               </div>
             </div>

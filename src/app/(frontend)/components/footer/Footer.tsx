@@ -117,7 +117,7 @@ export const Footer = () => (
         </div>
       </div>
     </div>
-    <div className="mt-16 pt-8 border-t-2 border-dashed border-[var(--color-border)] text-center font-mono text-base text-[var(--text-color)] relative z-10">
+    <div className="mt-16 pt-8 border-t-2 border-dashed border-[var(--color-border)] text-center font-['Press_Start_2P'] text-base text-[var(--text-color)] relative z-10">
       <p>© {new Date().getFullYear()} lst97.dev | All rights reserved</p>
     </div>
   </footer>

@@ -106,7 +106,7 @@ const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
         <Select.ItemIndicator className="absolute left-2 inline-flex items-center justify-center">
           <CheckIcon />
         </Select.ItemIndicator>
-        <Select.ItemText>{children}</Select.ItemText>
+        {children}
       </Select.Item>
     )
   },
@@ -141,11 +141,17 @@ export const PixelSelect = React.forwardRef<HTMLButtonElement, PixelSelectProps>
     ref,
   ) => {
     const selectId = id || `select-${Math.random().toString(36).substring(2, 9)}`
+    const selectedLabel = value
+      ? options.find((option) => option.value === value)?.label
+      : placeholder
 
     return (
       <div className={`flex flex-col gap-2 ${fullWidth ? 'w-full' : ''}`}>
         {label && (
-          <label htmlFor={selectId} className="font-pixel text-[1.2rem] text-[var(--color-text)]">
+          <label
+            htmlFor={selectId}
+            className="font-pixel text-[1.2rem] text-[var(--color-text)] text-xs"
+          >
             {label}
           </label>
         )}
@@ -179,7 +185,7 @@ export const PixelSelect = React.forwardRef<HTMLButtonElement, PixelSelectProps>
             ].join(' ')}
             aria-label={placeholder}
           >
-            <Select.Value placeholder={placeholder} />
+            <div className="truncate">{selectedLabel}</div>
             <Select.Icon className="ml-2">
               <ChevronDownIcon />
             </Select.Icon>

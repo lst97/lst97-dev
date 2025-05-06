@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
+import { ApiResponse } from '@/frontend/api'
 
 export interface WeatherData {
   maxTemperature: number | null
   currentTemperature: number | null
   medianTemperature?: number | null
-  error: string | null
 }
 
 export function useWeather() {
@@ -13,7 +13,14 @@ export function useWeather() {
     queryFn: async () => {
       const response = await fetch('/api/weather')
       if (!response.ok) throw new Error('Weather API error')
-      return (await response.json()) as WeatherData
+
+      const data = (await response.json()) as ApiResponse<WeatherData>
+
+      if (!data.success || !data.data) {
+        throw new Error(data.error?.message || 'Failed to fetch weather data')
+      }
+
+      return data.data
     },
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 10, // 10 minutes

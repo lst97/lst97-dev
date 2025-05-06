@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import RecognitionSidebar from './RecognitionSidebar'
 import RecognitionTestimonials from './RecognitionTestimonials'
-import testimonials from '@/app/(frontend)/constants/data/recognition'
+import testimonials from '@/frontend/constants/data/recognition'
 
 interface RecognitionProps {
   inView?: boolean

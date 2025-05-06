@@ -921,7 +921,6 @@ const PixelArtAnimation: React.FC<PixelArtAnimationProps> = ({
               padding: '1px 3px',
               borderRadius: '2px',
               pointerEvents: 'none',
-              zIndex: 1000,
             }}
           >
             DEBUG MODE - ON

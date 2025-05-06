@@ -151,7 +151,7 @@ const ProjectFilters: React.FC<ProjectFiltersProps> = ({ selectedCategory, onCat
               aria-controls={`${category.id}-panel`}
               id={`${category.id}-tab`}
               tabIndex={focusedIndex === idx ? 0 : -1}
-              className={`relative px-5 py-3 bg-transparent border-none cursor-pointer font-mono text-sm text-yellow-900 transition-all duration-200 opacity-70 border-4 border-transparent flex-shrink-0 md:px-4 md:py-2 md:text-xs sm:px-3 sm:py-2 sm:text-xs ${
+              className={`relative px-5 py-3 bg-transparent border-none cursor-pointer font-['Press_Start_2P'] text-sm text-yellow-900 transition-all duration-200 opacity-70 border-4 border-transparent flex-shrink-0 md:px-4 md:py-2 md:text-xs sm:px-3 sm:py-2 sm:text-xs ${
                 selectedCategory === category.id
                   ? 'opacity-100 bg-yellow-100 border-yellow-900 shadow-[4px_4px_0_rgba(0,0,0,0.2)]'
                   : ''

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { ProjectData } from '../types'
-import { ProjectShowcaseCard } from '@/app/(frontend)/components/services/ProjectShowcaseCard'
+import { ProjectShowcaseCard } from '@/frontend/components/services/ProjectShowcaseCard'
 
 /**
  * Props for the ShowcaseSection component.

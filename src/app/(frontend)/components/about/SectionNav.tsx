@@ -19,7 +19,7 @@ const SectionNav: React.FC<NewSectionNavProps> = ({ sections, activeSection, onS
 
   return (
     <motion.div
-      className="hidden lg:block pixel-corners bg-[#fff7e0] border-4 border-[#2c2c2c] p-4 rounded-lg shadow-[4px_4px_0_#2c2c2c76] relative overflow-hidden"
+      className="hidden lg:block  bg-[#fff7e0] border-4 border-[#2c2c2c] p-4 rounded-lg shadow-[4px_4px_0_#2c2c2c76] relative overflow-hidden"
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
@@ -70,7 +70,7 @@ const SectionNav: React.FC<NewSectionNavProps> = ({ sections, activeSection, onS
             onClick={() => onSectionClick(index)}
             className={`
               relative p-2 border-2 rounded text-center w-full
-              font-mono text-xs uppercase font-bold
+              font-['Press_Start_2P'] text-xs uppercase font-bold
               [writing-mode:vertical-rl] rotate-180 
               h-[120px] flex items-center justify-center
               transition-colors duration-200 pixel-scanlines

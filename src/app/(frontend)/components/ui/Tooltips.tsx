@@ -1,10 +1,6 @@
-import * as RadixTooltip from '@radix-ui/react-tooltip'
 import React from 'react'
+import * as RadixTooltip from '@radix-ui/react-tooltip'
 
-// Provider for wrapping the app or a subtree
-export const TooltipProvider = RadixTooltip.Provider
-
-// Tooltip component props
 export interface TooltipProps {
   content: React.ReactNode
   children: React.ReactNode

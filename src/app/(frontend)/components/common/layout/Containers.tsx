@@ -35,10 +35,10 @@ export function PkmStatusContainer({
   return (
     <div className="lg:m-4 m-2">
       <div
-        className="relative bg-[#fffbeb] border-4 border-[#2c2c2c] px-4 py-2 inline-block min-w-52 shadow-inner"
+        className="relative bg-card border-4 border-[#2c2c2c] px-4 py-2 inline-block min-w-52 shadow-inner"
         style={{ boxShadow: '4px 4px 0 0 #a8a8a8' }}
       >
-        <span className="font-mono text-text uppercase tracking-wide">{title}</span>
+        <span className="font-['Press_Start_2P'] text-text uppercase tracking-wide">{title}</span>
         {currentHP !== undefined && maxHP !== undefined && (
           <div
             className="h-2 mt-2 border-2 border-[#2c2c2c] relative"

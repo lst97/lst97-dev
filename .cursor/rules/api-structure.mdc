@@ -1,0 +1,39 @@
+---
+description: When createing api endpoint or using fetch function
+globs: 
+alwaysApply: false
+---
+# API Structure
+
+The project uses several API integration points for retrieving data from external sources and providing data to the frontend.
+
+## API Routes Organization
+
+API routes are organized in the `src/app/(frontend)/api` directory with the following structure:
+
+- [GitHub API](mdc:src/app/(frontend)/api/github) - GitHub integration for retrieving project and repository data
+- [WakaTime API](mdc:src/app/(frontend)/api/wakatime) - WakaTime integration for code statistics
+  - `/code-activity` - Code activity statistics
+  - `/editors` - Editor usage statistics
+  - `/languages` - Programming language usage data
+  - `/operating-systems` - OS usage statistics
+- [Weather API](mdc:src/app/(frontend)/api/weather) - Weather data integration
+
+## API Utilities
+
+The project uses a central [Api.ts](mdc:src/app/(frontend)/api/Api.ts) utility for handling API requests and responses with standardized error handling and data formatting.
+
+## PayloadCMS API
+
+PayloadCMS provides:
+
+1. REST API routes at `src/app/(payload)/api/[...slug]`
+2. GraphQL API routes at `src/app/(payload)/api/graphql`
+
+## Authentication and Data Access
+
+API routes handle authentication and data access with:
+
+1. Environment variables for API keys and secrets
+2. Data caching strategies
+3. Error handling and fallback mechanisms

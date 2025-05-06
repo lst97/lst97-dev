@@ -1,4 +1,4 @@
-import { PkmCardLite } from '@/app/(frontend)/components/cards/Cards'
+import { PkmCardLite } from '@/frontend/components/cards/Cards'
 import { PkmTitle } from '@/frontend/components/common/Titles'
 import Image from 'next/image'
 export const FromTheLab = () => {

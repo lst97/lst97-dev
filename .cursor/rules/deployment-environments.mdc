@@ -1,0 +1,54 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Deployment and Environments
+
+This project is configured for deployment with multiple environments and Docker containerization.
+
+## Environment Variables
+
+Environment variables are managed through:
+
+1. `.env` - Local development environment variables
+2. `.env.example` - Template for required environment variables
+3. Environment variables configured in deployment platforms
+
+Required environment variables include:
+
+- `PAYLOAD_SECRET` - Secret for PayloadCMS
+- `POSTGRES_URL` - PostgreSQL connection string
+- `WAKATIME_API_KEY` - WakaTime API key
+- `GITHUB_TOKEN` - GitHub API token
+
+## Docker Configuration
+
+The project is containerized with Docker for consistent deployment:
+
+- [Dockerfile](mdc:Dockerfile) - Main container configuration
+- [docker-compose.yml](mdc:docker-compose.yml) - Development environment setup
+
+## Deployment Workflows
+
+The deployment process follows these principles:
+
+1. Development in local environment
+2. Testing in preview environment
+3. Production deployment to main domain
+
+## Build and Runtime Configuration
+
+Build configuration is managed through:
+
+1. [next.config.mjs](mdc:next.config.mjs) - Next.js configuration
+2. [postcss.config.mjs](mdc:postcss.config.mjs) - PostCSS and Tailwind configuration
+
+## Performance Optimization
+
+Deployment optimizations include:
+
+1. Image optimization via Next.js Image component
+2. Static site generation for eligible pages
+3. API route edge caching
+4. Content delivery network (CDN) integration

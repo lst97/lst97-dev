@@ -137,15 +137,15 @@ export const VerticalTimeline: React.FC<VerticalTimelineProps> = ({
                         {/* Event content */}
                         <div className="flex-1 pr-2 w-full overflow-hidden">
                           <div className="flex flex-col w-full">
-                            <div className="text-[1rem] font-mono font-bold text-[color:var(--color-primary)] w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                            <div className="text-[1rem] font-['Press_Start_2P'] font-bold text-[color:var(--color-primary)] w-full overflow-hidden text-ellipsis whitespace-nowrap">
                               {event.title}
                             </div>
-                            <div className="text-[0.8rem] font-mono opacity-80 text-[color:var(--color-text)]">
+                            <div className="text-[0.8rem] font-['Press_Start_2P'] opacity-80 text-[color:var(--color-text)]">
                               {formatDate(event.date)}
                             </div>
                           </div>
                           {event.description && (
-                            <div className="text-[0.85rem] mt-1 font-mono opacity-80 max-w-prose line-clamp-1 text-ellipsis overflow-hidden text-[color:var(--color-text)]">
+                            <div className="text-[0.85rem] mt-1 font-['Press_Start_2P'] opacity-80 max-w-prose line-clamp-1 text-ellipsis overflow-hidden text-[color:var(--color-text)]">
                               {truncateText(event.description)}
                             </div>
                           )}

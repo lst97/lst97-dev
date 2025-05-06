@@ -1,17 +1,15 @@
 'use client'
 
 import { ThemeProvider } from 'next-themes'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useState, ReactNode } from 'react'
-import { TooltipProvider } from '@/frontend/components/ui/Tooltips'
+import { ReactNode } from 'react'
+import { ReactQueryProvider, TooltipProvider } from '@/frontend/providers'
 
 export default function ClientProviders({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem>
+      <ReactQueryProvider>
         <TooltipProvider>{children}</TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+      </ReactQueryProvider>
+    </ThemeProvider>
   )
 }

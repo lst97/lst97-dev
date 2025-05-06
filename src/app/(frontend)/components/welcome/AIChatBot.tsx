@@ -75,7 +75,7 @@ export const AIChatBot = () => {
         </div>
 
         {/* Terminal-like chat window */}
-        <div className="rounded-b-md shadow-md w-[70vw] lg:w-full bg-black text-green-400 p-4 font-mono">
+        <div className="rounded-b-md shadow-md w-[70vw] lg:w-full bg-black text-green-400 p-4 font-['Press_Start_2P']">
           <DynamicTerminal
             messages={messages}
             setUserInput={setUserInput}

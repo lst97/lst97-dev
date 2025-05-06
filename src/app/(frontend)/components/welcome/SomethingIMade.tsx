@@ -1,4 +1,4 @@
-import { PkmCard } from '@/app/(frontend)/components/cards/Cards'
+import { PkmCard } from '@/frontend/components/cards/Cards'
 import { PkmTitle } from '@/frontend/components/common/Titles'
 
 export const SomethingIMade = () => {

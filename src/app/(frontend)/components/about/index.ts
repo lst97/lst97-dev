@@ -1,6 +1,6 @@
 import SectionNav from './SectionNav'
 import AnimatedScrollSections from './AnimatedScrollSections'
-import CodingActivity from './skill/CodingActivity'
+import CodingActivity from './skill/code-activity/CodingActivity'
 import PersonalAttributes from './skill/PersonalAttributes'
 import TechnicalSkills from './skill/TechnicalSkills'
 import OtherExperience from './skill/OtherExperience'

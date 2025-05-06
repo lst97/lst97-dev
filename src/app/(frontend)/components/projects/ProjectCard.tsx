@@ -1,10 +1,10 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { Button } from '@/app/(frontend)/components/ui/Buttons'
+import { Button } from '@/frontend/components/ui/Buttons'
 import Link from 'next/link'
 import { FaGithub, FaExternalLinkAlt, FaBookOpen } from 'react-icons/fa'
-import { Tags } from '@/app/(frontend)/components/ui/Tags'
+import { Tags } from '@/frontend/components/ui/Tags'
 
 export interface Project {
   id: number

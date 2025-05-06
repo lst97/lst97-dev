@@ -1,6 +1,6 @@
-import { PlainDialog } from '@/app/(frontend)/components/ui/Dialogs'
+import { PlainDialog } from '@/frontend/components/ui/Dialogs'
 import React, { useEffect } from 'react'
-import { releaseNoteData } from '@/app/(frontend)/constants/data/release-note'
+import { releaseNoteData } from '@/frontend/constants/data/release-note'
 
 interface ReleaseNoteProps {
   open: boolean

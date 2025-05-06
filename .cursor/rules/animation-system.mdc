@@ -1,0 +1,51 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Animation System
+
+The project uses a sophisticated animation system based on Framer Motion and custom components.
+
+## Animation Components
+
+Animation components are organized in the [src/app/(frontend)/components/animation](mdc:src/app/(frontend)/components/animation) directory:
+
+- `pixel-collisions-bg` - Physics-based pixel collision animations using Matter.js
+- Other animation components for various UI elements
+
+## Framer Motion Integration
+
+The project extensively uses Framer Motion for animations with these common patterns:
+
+1. Page transitions with `initial`, `animate`, and `transition` props
+2. Interactive animations with `whileHover` and `whileTap` variants
+3. Scroll-based animations using `useScroll` and `useTransform`
+4. Staggered animations for lists and grids
+
+## Animation Standards
+
+When implementing animations:
+
+1. Use the `motion` component from Framer Motion for basic animations
+2. Implement easing functions that match the pixel art aesthetic (use `easeInOut` or custom cubic-bezier curves)
+3. Keep animations performant by using `will-change` and hardware acceleration where appropriate
+4. Implement reduced motion preferences for accessibility
+
+## Physics-Based Animations
+
+The project uses Matter.js for physics-based animations, particularly in the pixel collision background component:
+
+```tsx
+import Matter from 'matter-js'
+
+// Physics configuration and implementation
+```
+
+## Animation Custom Hooks
+
+Custom hooks in the [src/app/(frontend)/hooks](mdc:src/app/(frontend)/hooks) directory provide reusable animation logic:
+
+- Parallax effects
+- Scroll-triggered animations
+- Physics-based animation utilities

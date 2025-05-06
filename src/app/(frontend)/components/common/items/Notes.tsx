@@ -3,6 +3,7 @@ import { format, parseISO } from 'date-fns'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import React from 'react'
+import { Tag } from '@/frontend/components/ui/Tags'
 
 export type NoteCategory = {
   name: string
@@ -31,27 +32,6 @@ export type NoteStats = {
   readingTime?: number
   views?: number
   likes?: number
-}
-
-const typeColorMap: Record<string, string> = {
-  normal: 'bg-[#a8a878] text-white',
-  fire: 'bg-[#f08030] text-white',
-  water: 'bg-[#6890f0] text-white',
-  electric: 'bg-[#f8d030] text-black',
-  grass: 'bg-[#78c850] text-white',
-  ice: 'bg-[#98d8d8] text-black',
-  fighting: 'bg-[#c03028] text-white',
-  poison: 'bg-[#a040a0] text-white',
-  ground: 'bg-[#e0c068] text-black',
-  flying: 'bg-[#a890f0] text-white',
-  psychic: 'bg-[#f85888] text-white',
-  bug: 'bg-[#a8b820] text-white',
-  rock: 'bg-[#b8a038] text-white',
-  ghost: 'bg-[#705898] text-white',
-  dragon: 'bg-[#7038f8] text-white',
-  dark: 'bg-[#705848] text-white',
-  steel: 'bg-[#b8b8d0] text-black',
-  fairy: 'bg-[#ee99ac] text-black',
 }
 
 export function NoteItem({
@@ -105,23 +85,23 @@ export function NoteItem({
           <div className="text-text [text-shadow:1px_1px_0px_#888888] text-base leading-[1.2] pr-2">
             {title}
           </div>
+
+          {categories && categories.length > 0 && (
+            <div className="flex gap-1 flex-wrap">
+              {categories.map((category) => (
+                <Tag
+                  key={category.name}
+                  label={category.name}
+                  type={category.type}
+                  className="text-[0.6rem] md:text-[0.7rem]"
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {description && (
           <div className="hidden lg:block leading-[1.4] text-text line-clamp-3">{description}</div>
-        )}
-
-        {categories && categories.length > 0 && (
-          <div className="flex gap-1 flex-wrap mt-1">
-            {categories.map((category) => (
-              <span
-                key={category.name}
-                className={`text-[0.6rem] md:text-[0.8rem] px-1 py-0.5 border-2 border-[#080808] relative [box-shadow:inset_-2px_-2px_0_0_rgba(0,0,0,0.2)] ${typeColorMap[category.type]}`}
-              >
-                {category.name}
-              </span>
-            ))}
-          </div>
         )}
       </div>
 

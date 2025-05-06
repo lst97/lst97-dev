@@ -1,60 +1,28 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import { NoteItem, NoteList } from '@/frontend/components/common/items/Notes'
-import type { NoteCategory } from '@/frontend/components/common/items/Notes'
 import { PkmTitle } from '@/frontend/components/common/Titles'
 import Image from 'next/image'
+import { Post } from '@/frontend/models/Post'
+import { usePosts } from '@/frontend/hooks/usePosts'
+import { LoadingSpinner } from '@/frontend/components/common/LoadingSpinner'
 
 export const MyNotes = () => {
-  // Demo notes array for mapping
-  const demoNotes: Array<{
-    title: string
-    date: string
-    href: string
-    description: string
-    icon: string
-    stats: { readingTime: number; views: number; likes: number }
-    categories: NoteCategory[]
-  }> = [
-    {
-      title: 'Implementing Pokemon-style UI',
-      date: '2024-03-15',
-      href: '/notes/pokemon-ui',
-      description:
-        'A deep dive into creating retro game-inspired user interfaces using React and CSS. Learn how to implement pixel-perfect designs with modern web technologies.',
-      icon: '/code-pixel-art.png',
-      stats: { readingTime: 8, views: 128, likes: 32 },
-      categories: [
-        { name: 'UI/UX', type: 'psychic' as const },
-        { name: 'React', type: 'electric' as const },
-        { name: 'CSS', type: 'water' as const },
-      ],
-    },
-    {
-      title: 'Building a Personal Website',
-      date: '2024-03-10',
-      href: '/notes/website',
-      description:
-        'Step-by-step guide on building a modern personal website using Next.js and TypeScript. Includes tips on performance optimization and SEO.',
-      icon: '/web-pixel-art.png',
-      stats: { readingTime: 12, views: 256, likes: 64 },
-      categories: [
-        { name: 'Next.js', type: 'dark' as const },
-        { name: 'TypeScript', type: 'steel' as const },
-      ],
-    },
-    {
-      title: 'Learning Next.js and React',
-      date: '2024-03-05',
-      href: '/notes/nextjs',
-      description:
-        'Getting started with Next.js and React development. Essential concepts, best practices, and common pitfalls to avoid.',
-      icon: '/book-pixel-art.png',
-      stats: { readingTime: 15, views: 512, likes: 128 },
-      categories: [
-        { name: 'Tutorial', type: 'normal' as const },
-        { name: 'React', type: 'electric' as const },
-      ],
-    },
-  ]
+  const { posts, isLoading, error } = usePosts()
+  const [featuredPosts, setFeaturedPosts] = useState<Post[]>([])
+
+  useEffect(() => {
+    if (posts && posts.length > 0) {
+      // Filter for featured posts and limit to 3
+      const featured = posts
+        .filter((post) => post.featuredPost === true)
+        .sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime())
+        .slice(0, 3)
+
+      setFeaturedPosts(featured)
+    }
+  }, [posts])
 
   return (
     <div>
@@ -68,18 +36,45 @@ export const MyNotes = () => {
             height={28}
             style={{ width: '28px', height: '28px' }}
           />{' '}
-          Latest Notes
+          Featured Notes
         </PkmTitle>
       </div>
       <div className="px-16">
-        <NoteList>
-          {demoNotes.map((note) => (
-            <NoteItem
-              key={note.title} // Use note.id if available in real data
-              {...note}
-            />
-          ))}
-        </NoteList>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <LoadingSpinner />
+          </div>
+        ) : error ? (
+          <div className="text-center py-4 text-[var(--color-error)] font-['Press_Start_2P'] text-sm">
+            Error loading notes
+          </div>
+        ) : featuredPosts.length > 0 ? (
+          <NoteList>
+            {featuredPosts.map((post) => (
+              <NoteItem
+                key={post.documentId}
+                title={post.title}
+                date={new Date(post.publishedDate).toISOString()}
+                href={`/pages/resources/${post.slug}`}
+                description={post.description}
+                icon={post.featuredImage || '/document-pixel-art.png'}
+                stats={{
+                  readingTime: post.readtime,
+                  views: post.views,
+                  likes: post.likes,
+                }}
+                categories={post.categories.map((category) => ({
+                  name: category,
+                  type: 'normal',
+                }))}
+              />
+            ))}
+          </NoteList>
+        ) : (
+          <div className="text-center py-4 text-[var(--color-text)] dark:text-[var(--color-text-light)] font-['Press_Start_2P'] text-sm">
+            No featured notes available
+          </div>
+        )}
       </div>
     </div>
   )

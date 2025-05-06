@@ -1,12 +1,13 @@
 'use client'
 
 import Image from 'next/image'
-import { PkmLink } from '@/app/(frontend)/components/ui/Links'
+import { PkmLink } from '@/frontend/components/ui/Links'
 import { useEffect, useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { introText, welcomeParagraphs, WelcomeParagraph } from '@/frontend/constants/data/welcome'
 import { PixelContainer } from '@/frontend/components/common/layout/Containers'
 import { contact } from '@/frontend/constants/data/contact'
+import { ApiResponse } from '@/frontend/api'
 
 // --- Constants ---
 const TYPING_SPEED_BASE = 10
@@ -37,7 +38,6 @@ interface WeatherData {
   maxTemperature: number | null
   currentTemperature: number | null
   medianTemperature?: number | null
-  error: string | null
 }
 
 // welcomeParagraphs is an array of objects: { title: string, content: (string | { text: string, href: string })[][] }
@@ -53,10 +53,10 @@ interface TypingIntroProps {
   isTypingComplete: boolean
 }
 const TypingIntro: React.FC<TypingIntroProps> = ({ displayedText, isTypingComplete }) => (
-  <PixelContainer className="max-w-xl min-w-[90vw] sm:min-w-[400px] sm:max-w-xl p-2 sm:p-4 mx-2 sm:mx-0 font-mono text-base sm:text-md leading-7 text-text bg-secondary-light">
+  <PixelContainer className="max-w-xl min-w-[90vw] sm:min-w-[400px] sm:max-w-xl p-2 sm:p-4 mx-2 sm:mx-0 font-['Press_Start_2P'] text-base sm:text-md leading-7 text-text bg-secondary-light">
     <div className="relative flex-grow p-2 min-h-40 sm:min-h-52">
       <div
-        className="m-0 p-0 w-full whitespace-pre-wrap break-words overflow-x-auto"
+        className="m-0 p-0 w-full whitespace-pre-wrap break-words text-xs leading-8"
         aria-live="polite"
       >
         {displayedText}
@@ -66,7 +66,7 @@ const TypingIntro: React.FC<TypingIntroProps> = ({ displayedText, isTypingComple
       </div>
     </div>
     <p
-      className={`mt-4 sm:mt-8 ${isTypingComplete ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
+      className={`mt-4 sm:mt-8 ${isTypingComplete ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500 text-sm`}
     >
       Nice to meet you and welcome to my page!
     </p>
@@ -77,11 +77,17 @@ const TypingIntro: React.FC<TypingIntroProps> = ({ displayedText, isTypingComple
  * ProfileCard: Shows profile image, weather, and HP bar
  */
 interface ProfileCardProps {
-  weatherData: WeatherData
+  weatherData: WeatherData | null
+  weatherError: boolean
   hpPercentage: number
   age: number
 }
-const ProfileCard: React.FC<ProfileCardProps> = ({ weatherData, hpPercentage, age }) => (
+const ProfileCard: React.FC<ProfileCardProps> = ({
+  weatherData,
+  weatherError,
+  hpPercentage,
+  age,
+}) => (
   <div className="flex flex-col items-center w-full max-w-xs sm:max-w-sm md:max-w-xs ">
     <div className="animate-bounce-slow">
       <Image
@@ -92,11 +98,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ weatherData, hpPercentage, ag
         className="rounded-full shadow-lg hover:scale-110 transition duration-0 cursor-pointer object-cover lg:w-72 lg:h-72 md:w-64 md:h-64 sm:h-48 sm:w-48 w-32 h-32"
       />
     </div>
-    <div className="bg-background-light border-4 border-gray-700 p-2 mt-2 w-full font-mono text-xs rounded-lg shadow-sm">
+    <div className="bg-background-light border-4 border-gray-700 p-2 mt-2 w-full font-['Press_Start_2P'] text-xs rounded-lg shadow-sm">
       <div className="flex justify-between items-center mb-1 text-gray-700">
         Lv: {age} - Nelson{' '}
         <span className="text-[10px]">
-          {weatherData.error ? (
+          {weatherError || !weatherData ? (
             <span className="text-red-500">--/--</span>
           ) : (
             <>
@@ -112,18 +118,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ weatherData, hpPercentage, ag
         <div
           className="h-full transition-all duration-500 rounded"
           style={{
-            width: weatherData.error ? '100%' : `${hpPercentage}%`,
-            backgroundColor: weatherData.error
-              ? '#ccc'
-              : hpPercentage > 50
-                ? '#48b850'
-                : hpPercentage > 25
-                  ? '#f7d51d'
-                  : '#ff5959',
+            width: weatherError || !weatherData ? '100%' : `${hpPercentage}%`,
+            backgroundColor:
+              weatherError || !weatherData
+                ? '#ccc'
+                : hpPercentage > 50
+                  ? '#48b850'
+                  : hpPercentage > 25
+                    ? '#f7d51d'
+                    : '#ff5959',
           }}
         />
       </div>
-      {weatherData.error && <div className="text-xs text-red-500 mt-1">Weather unavailable</div>}
+      {weatherError && <div className="text-xs text-red-500 mt-1">Weather unavailable</div>}
     </div>
   </div>
 )
@@ -175,7 +182,7 @@ interface RenderParagraphProps {
 }
 const RenderParagraph: React.FC<RenderParagraphProps> = ({ paragraph }) => (
   <PixelContainer className="relative bg-secondary-light mx-2 sm:mx-2">
-    <div className="absolute -top-8 -left-1 bg-black text-gray-100 px-2 py-1 text-xs border-4 border-black rounded-t w-fit font-mono font-bold">
+    <div className="absolute -top-8 -left-1 bg-black text-gray-100 px-2 py-1 text-xs border-4 border-black rounded-t w-fit font-['Press_Start_2P'] font-bold ">
       {paragraph.title}
     </div>
     <div className="max-w-3xl p-2 sm:p-4">
@@ -259,34 +266,35 @@ export const Introduction = () => {
     queryFn: async () => {
       const response = await fetch('/api/weather')
       if (!response.ok) throw new Error('Weather API error')
-      return (await response.json()) as WeatherData
+
+      const data = (await response.json()) as ApiResponse<WeatherData>
+
+      if (!data.success || !data.data) {
+        throw new Error(data.error?.message || 'Failed to fetch weather data')
+      }
+
+      return data.data
     },
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 10, // 10 minutes
   })
 
-  // Helper to get a safe WeatherData object
-  const safeWeatherData: WeatherData =
-    weatherData && typeof weatherData.maxTemperature !== 'undefined'
-      ? weatherData
-      : { maxTemperature: null, currentTemperature: null, medianTemperature: null, error: null }
-
   // Memoized derived values
   const age = useMemo(() => calculateAge(contact.birthday), [])
   const hpPercentage = useMemo(() => {
     if (
-      !safeWeatherData ||
-      typeof safeWeatherData.currentTemperature !== 'number' ||
-      typeof safeWeatherData.medianTemperature !== 'number'
+      !weatherData ||
+      typeof weatherData.currentTemperature !== 'number' ||
+      typeof weatherData.medianTemperature !== 'number'
     ) {
       return 100
     }
-    const median = safeWeatherData.medianTemperature
-    const current = safeWeatherData.currentTemperature
+    const median = weatherData.medianTemperature
+    const current = weatherData.currentTemperature
     const diff = Math.abs(current - median)
     const maxDiff = 10
     return Math.round(Math.max(0, 100 - (diff / maxDiff) * 100))
-  }, [safeWeatherData])
+  }, [weatherData])
 
   const handleNextParagraph = () => {
     setCurrentParagraphIndex((prevIndex) => (prevIndex + 1) % welcomeParagraphs.length)
@@ -296,7 +304,12 @@ export const Introduction = () => {
     <div className="mt-4 sm:mt-8 w-full flex flex-col items-center px-2 sm:px-0">
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6 sm:gap-8 w-full max-w-4xl mx-auto">
         <TypingIntro displayedText={displayedText} isTypingComplete={isTypingComplete} />
-        <ProfileCard weatherData={safeWeatherData} hpPercentage={hpPercentage} age={age} />
+        <ProfileCard
+          weatherData={weatherData || null}
+          weatherError={weatherError}
+          hpPercentage={hpPercentage}
+          age={age}
+        />
         {/* Optionally, show loading/error state for weather */}
         {weatherError && (
           <div className="text-xs text-red-500 mt-2">

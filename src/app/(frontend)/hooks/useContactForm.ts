@@ -1,8 +1,8 @@
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { useState, useCallback } from 'react'
-import { ContactSubmissionForm } from '@/frontend/models/ContactSubmissionForm'
-import { httpClient } from '@/frontend/api/Api'
+import { ContactSubmissionForm } from '@/frontend/models/forms/ContactSubmissionForm'
+import { ApiResponse } from '@/frontend/api'
 
 export function useContactForm(referralSources: string[]) {
   const [recaptchaToken, setRecaptchaToken] = useState('')
@@ -12,41 +12,37 @@ export function useContactForm(referralSources: string[]) {
   // TanStack Query mutation for form submission
   const mutation = useMutation({
     mutationFn: async (data: ContactSubmissionForm & { recaptchaToken: string }) => {
-      return httpClient.cms_authenticated.post('/contact-submissions', {
-        data,
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data }),
       })
+
+      const responseData = (await response.json()) as ApiResponse<{ message: string }>
+
+      if (!response.ok || !responseData.success) {
+        throw new Error(responseData.error?.message || 'Failed to send message')
+      }
+
+      return responseData.data
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setIsSuccess(true)
-      setMessage({ type: 'success', text: 'Message sent successfully!' })
+      setMessage({ type: 'success', text: data?.message || 'Message sent successfully!' })
     },
     onError: (error: any) => {
-      // Strapi-style error parsing
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.error &&
-        error.response.data.error.details &&
-        error.response.data.error.details.errors
-      ) {
-        const strapiErrors = error.response.data.error.details.errors
-        const fieldErrors: Record<string, string> = {}
-        strapiErrors.forEach((err: any) => {
-          if (err.path && err.path.length > 0 && err.message) {
-            const fieldName = err.path[0]
-            if (fieldErrors[fieldName]) {
-              fieldErrors[fieldName] += `, ${err.message}`
-            } else {
-              fieldErrors[fieldName] = err.message
-            }
-          }
+      // Error handling for form validation errors
+      if (error.response && error.response.data && error.response.data.error) {
+        setMessage({
+          type: 'error',
+          text: error.response.data.error.message || error.response.data.error,
         })
-        setMessage({ type: 'error', text: 'Failed to send message' })
-        return fieldErrors
       } else {
-        setMessage({ type: 'error', text: 'Failed to send message' })
-        return {}
+        setMessage({ type: 'error', text: error.message || 'Failed to send message' })
       }
+      return {}
     },
   })
 

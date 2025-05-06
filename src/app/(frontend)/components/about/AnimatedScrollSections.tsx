@@ -166,6 +166,10 @@ const AnimatedScrollSections: React.FC<AnimatedSectionsProps> = ({
           languages: wakaTimeStats?.languages,
           editors: wakaTimeStats?.editors,
           operatingSystems: wakaTimeStats?.operatingSystems,
+          isLoading:
+            !wakaTimeStats?.languages ||
+            !wakaTimeStats?.editors ||
+            !wakaTimeStats?.operatingSystems,
         },
       },
       {
@@ -177,6 +181,7 @@ const AnimatedScrollSections: React.FC<AnimatedSectionsProps> = ({
           width: '100%',
           height: '850px', // Slightly taller to accommodate the flip animation
           isLoading: !wakaTimeStats?.activity,
+          error: wakaTimeStats?.activity ? undefined : 'Failed to load activity data',
         },
       },
       {
