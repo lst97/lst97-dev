@@ -49,6 +49,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ year, days, inView }) => {
   const chartInstance = useRef<echarts.ECharts | null>(null)
 
   // Format tooltip content for calendar view
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   const formatTooltip = (params: any) => {
     const hours = params.value[1]
     const date = new Date(params.value[0]).toLocaleDateString('en-US', {

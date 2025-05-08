@@ -1,3 +1,4 @@
+import { LexicalNode } from '@/app/(frontend)/components/common/display/lexical/types'
 import type { CollectionConfig } from 'payload'
 import slugify from 'slugify'
 
@@ -192,25 +193,25 @@ export const Posts: CollectionConfig = {
           // Handle Lexical content
           if (data.content.root && data.content.root.children) {
             // Extract text from lexical nodes for word counting
-            const extractText = (node: any): string => {
+            const extractText = (node: LexicalNode): string => {
               if (node.text) return node.text
               if (!node.children) return ''
 
-              return node.children.map((child: any) => extractText(child)).join(' ')
+              return node.children.map((child: LexicalNode) => extractText(child)).join(' ')
             }
 
             const allText = data.content.root.children
-              .map((node: any) => extractText(node))
+              .map((node: LexicalNode) => extractText(node))
               .join(' ')
             wordCount = allText.split(/\s+/).filter(Boolean).length || 0
           }
           // Handle legacy rich text content
           else if (Array.isArray(data.content)) {
-            wordCount = data.content.reduce((count: number, node: any) => {
+            wordCount = data.content.reduce((count: number, node: LexicalNode) => {
               if (node.children) {
                 return (
                   count +
-                  node.children.reduce((sum: number, child: any) => {
+                  node.children.reduce((sum: number, child: LexicalNode) => {
                     if (typeof child.text === 'string') {
                       return sum + (child.text.split(/\s+/).filter(Boolean).length || 0)
                     }

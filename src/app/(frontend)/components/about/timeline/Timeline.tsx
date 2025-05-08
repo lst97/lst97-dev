@@ -21,8 +21,6 @@ export const Timeline: FC<TimelineProps> = ({
   startYear,
   endYear,
   onEventClick,
-  className = '',
-  style = {},
   backgroundImagePath = '/pixel-art-calender.png',
   useVerticalLayoutOnMobile = true,
   disableAutoScroll = false,

@@ -1,67 +1,135 @@
-# Payload Blank Template
+# lst97-dev - Personal Website and Portfolio
 
-This template comes configured with the bare minimum to get started on anything you need.
+This project is a personal website and portfolio built with **Next.js 15**, **React 19**, **Tailwind CSS v4**, **Framer Motion** for animations, and **PayloadCMS** as a headless CMS with PostgreSQL database (via Vercel Postgres).
 
-## Quick start
+## Features
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+- Modern, responsive UI with pixel art design elements
+- Light/dark mode theming using CSS variables and next-themes
+- Terminal-style interactions
+- Animated page transitions and UI elements using Framer Motion
+- Interactive code activity visualizations powered by WakaTime API
+- Headless CMS for content management with PayloadCMS
+- TypeScript for type safety
+- Optimized image handling with Next.js Image component
+- API routes for contact forms, GitHub integration, and more
 
-## Quick Start - local setup
+## Project Structure
 
-To spin up this template locally, follow these steps:
+### Main Directories
 
-### Clone
+- `src/app/(frontend)`: Frontend components, pages, API routes, styles, and utilities
+  - `components/`: UI components organized by feature
+  - `pages/`: Page components for different routes
+  - `api/`: API routes for the frontend
+  - `styles/`: CSS modules and styling utilities
+  - `hooks/`, `contexts/`, `providers/`: React patterns for state management
+- `src/app/(payload)`: PayloadCMS admin panel and API routes
+- `src/collections`: PayloadCMS collection definitions (data models)
+- `public`: Static assets (fonts, images, etc.)
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+### Key Configuration Files
 
-### Development
+- `next.config.mjs`: Next.js configuration
+- `postcss.config.mjs`: PostCSS configuration for Tailwind CSS v4
+- `tsconfig.json`: TypeScript configuration
+- `package.json`: Project dependencies and scripts
+- `payload.config.ts`: PayloadCMS configuration
+- `docker-compose.yml`: Docker configuration for local development
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URI` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+## Data Collections
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+The project uses PayloadCMS with these main collections:
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+- **Users**: Authentication and admin access with role-based permissions
+- **Media**: Manages uploaded media files with metadata
+- **Posts**: Blog posts with rich text content, categories, tags, and automatic read time calculation
 
-#### Docker (Optional)
+## Quick Start
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+### Prerequisites
 
-To do so, follow these steps:
+- Node.js 20.2+ or 22.14+
+- pnpm 9 or 10
+- PostgreSQL database (or Docker for local setup)
 
-- Modify the `MONGODB_URI` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URI` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+### Local Development
 
-## How it works
+1. Clone the repository
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+   ```bash
+   git clone https://github.com/your-username/lst97-dev.git
+   cd lst97-dev
+   ```
 
-### Collections
+2. Install dependencies
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+   ```bash
+   pnpm install
+   ```
 
-- #### Users (Authentication)
+3. Set up environment variables
 
-  Users are auth-enabled collections that have access to the admin panel.
+   ```bash
+   cp .env.example .env
+   ```
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+   Update `.env` with your database connection details and other required variables.
 
-- #### Media
+4. Start the development server
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+   ```bash
+   pnpm dev
+   ```
 
-### Docker
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+### Using Docker (Optional)
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+For local development with Docker:
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+1. Make sure Docker and Docker Compose are installed
+2. Update the `POSTGRES_URL` in your `.env` file
+3. Run the containers
 
-## Questions
+   ```bash
+   docker-compose up -d
+   ```
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+## Available Scripts
+
+- `pnpm dev`: Starts the development server with Turbopack
+- `pnpm devsafe`: Cleans the Next.js cache and starts the development server
+- `pnpm build`: Builds the application for production
+- `pnpm start`: Starts the production server
+- `pnpm lint`: Runs the linter
+- `pnpm generate:types`: Generates TypeScript types for PayloadCMS collections
+
+## Styling System
+
+The project uses a custom styling system with:
+
+- Tailwind CSS v4 for utility classes
+- CSS modules for component-specific styles
+- Theme variables for light/dark mode in globals.css
+- Custom utility classes for special effects
+
+## State Management
+
+State is managed through a combination of:
+
+- React hooks for local component state
+- Context API for global state
+- Zustand for more complex state management
+
+## Technologies
+
+- **Frontend**: Next.js 15, React 19, Tailwind CSS v4, Framer Motion
+- **Backend**: Next.js API Routes, PayloadCMS
+- **Database**: PostgreSQL (via Vercel Postgres)
+- **Deployment**: Vercel (recommended)
+- **Package Manager**: pnpm
+
+## License
+
+MIT

@@ -45,7 +45,6 @@ const ActivityChart: React.FC<ActivityChartProps> = ({ days, inView }) => {
     const maxDate = dates.length ? Math.max(...dates) : new Date().getTime()
     const defaultStartDate = new Date(maxDate)
     defaultStartDate.setMonth(defaultStartDate.getMonth() - 3) // Last 3 months
-    const minDate = defaultStartDate.getTime()
 
     return {
       chart: {

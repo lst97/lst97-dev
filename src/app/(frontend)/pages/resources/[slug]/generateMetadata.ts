@@ -35,7 +35,7 @@ export async function generatePostMetadata({
 
       // Get first 160 characters as fallback description
       description = textContent.substring(0, 160) + (textContent.length > 160 ? '...' : '')
-    } catch (e) {
+    } catch {
       description = `Read more about ${post.title} on LST97's blog.`
     }
   }
@@ -53,7 +53,9 @@ export async function generatePostMetadata({
   return {
     title: post.title,
     description,
-    keywords: [...(post.categories || []), ...(post.tags || [])],
+    keywords: [...(post.categories || []), ...(post.tags || [])].filter(
+      (item): item is string => item !== undefined,
+    ),
     authors: [
       {
         name: post.author?.name || 'Nelson Lai',
@@ -77,7 +79,7 @@ export async function generatePostMetadata({
       modifiedTime: post.lastUpdatedDate || post.publishedDate,
       authors: ['https://github.com/lst97'],
       section: post.categories?.[0] || 'Blog',
-      tags: post.tags,
+      tags: post.tags?.filter((item): item is string => item !== undefined) || [],
     },
     twitter: {
       card: 'summary_large_image',

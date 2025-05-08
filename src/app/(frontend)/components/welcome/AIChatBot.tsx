@@ -27,8 +27,8 @@ const DynamicTerminal = dynamic(
 
 export const AIChatBot = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [userInput, setUserInput] = useState<string>('')
-  const [isAITyping, setIsAITyping] = useState(false)
+  const [, setUserInput] = useState<string>('')
+  const [, setIsAITyping] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
   // Scroll to bottom when messages change
@@ -56,7 +56,7 @@ export const AIChatBot = () => {
         ...prev,
         { sender: 'ai', message: data.reply || 'Sorry, I could not understand.' },
       ])
-    } catch (err) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         { sender: 'ai', message: 'Error: Failed to get response from AI.' },

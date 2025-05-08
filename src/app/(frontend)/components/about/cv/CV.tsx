@@ -55,9 +55,8 @@ export const CV = React.memo<React.FC<CVProps>>(
   }: CVProps) => {
     const [currentPage, setCurrentPage] = useState(0)
     const [isCVFocused, setIsCVFocused] = useState(false)
-    const [isHovering, setIsHovering] = useState(false)
+    const [, setIsHovering] = useState(false)
     const cvContainerRef = useRef<HTMLDivElement>(null)
-    const touchStartY = useRef(0)
     const totalPages = data.pages.length
     const fadeControls = useAnimationControls()
 

@@ -76,7 +76,7 @@ interface LexicalCodeNode extends LexicalNode {
   language?: string
   fields?: {
     language?: string
-    [key: string]: any
+    [key: string]: unknown
   }
   text?: string
   format?: number | string
@@ -217,10 +217,15 @@ export const Code: React.FC<CodeProps> = ({ node, index }) => {
 
   const handleCopy = () => {
     if (codeContent) {
-      navigator.clipboard.writeText(codeContent).then(() => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      })
+      navigator.clipboard
+        .writeText(codeContent)
+        .then(() => {
+          setCopied(true)
+          setTimeout(() => setCopied(false), 2000)
+        })
+        .catch((error) => {
+          console.error('Failed to copy text:', error)
+        })
     }
   }
 
@@ -229,7 +234,7 @@ export const Code: React.FC<CodeProps> = ({ node, index }) => {
     return (
       <div className="mb-6 relative">
         <pre className="p-4 border-4 border-[#2c2c2c] shadow-[inset_-4px_-4px_0_0_#a8a8a8]">
-          <code className="font-['Press_Start_2P'] text-gray-400">// Empty code block</code>
+          <code className="font-['Press_Start_2P'] text-gray-400">{'// Empty code block'}</code>
         </pre>
       </div>
     )

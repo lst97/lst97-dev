@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useState, useTransition, Suspense } from 'react'
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 
 interface NextNavigationProgressBarProps {
@@ -8,7 +8,8 @@ interface NextNavigationProgressBarProps {
   className?: string
 }
 
-export default function NextNavigationProgressBar({
+// Inner component that uses useSearchParams
+function ProgressBarContent({
   height = 6,
   className = '',
 }: NextNavigationProgressBarProps) {
@@ -116,5 +117,21 @@ export default function NextNavigationProgressBar({
         </div>
       </div>
     </div>
+  )
+}
+
+// Main component that wraps the content in a Suspense boundary
+export default function NextNavigationProgressBar(props: NextNavigationProgressBarProps) {
+  return (
+    <Suspense fallback={
+      <div 
+        className={`fixed top-0 left-0 right-0 z-[9999] ${props.className}`}
+        style={{ height: `${props.height || 6}px` }}
+      >
+        <div className="relative h-full bg-black/10 w-full"></div>
+      </div>
+    }>
+      <ProgressBarContent {...props} />
+    </Suspense>
   )
 }

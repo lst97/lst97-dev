@@ -7,7 +7,7 @@ interface CVLeftSectionProps {
   inView?: boolean
 }
 
-export const CVLeftSection = React.memo<CVLeftSectionProps>(({ section, inView = false }) => {
+export const CVLeftSection = React.memo<CVLeftSectionProps>(({ section }) => {
   const itemVariants = {
     hidden: { opacity: 0, x: -20 },
     visible: {

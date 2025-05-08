@@ -1,3 +1,5 @@
+'use client'
+
 import '@/frontend/styles/blinking-triangle.css'
 
 import { startTransition } from 'react'
@@ -29,9 +31,26 @@ interface NavigationLinkProps {
   className?: string
   children: ReactNode
   onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
-  [key: string]: any // For any other props
+  [key: string]: unknown
 }
 
+/**
+ * A wrapper around `next/link` that uses `startTransition` for navigation.
+ * This helps integrate with React's concurrent features and can be used
+ * to signal pending state for UI elements like a progress bar.
+ *
+ * It prevents default navigation for standard clicks and uses `router.push`
+ * within `startTransition`. Modified clicks (e.g., Cmd+Click, Shift+Click,
+ * middle mouse button, or target="_blank") are handled by the browser's
+ * default behavior.
+ *
+ * @param {NavigationLinkProps} props - The component props.
+ * @param {string} props.href - The URL to navigate to.
+ * @param {string} [props.className] - Optional CSS class name.
+ * @param {ReactNode} props.children - The content of the link.
+ * @param {(e: React.MouseEvent<HTMLAnchorElement>) => void} [props.onClick] - Optional click handler to be called after internal logic.
+ * @param {any} [props...] - Any other standard anchor element props.
+ */
 export function NavigationLink({
   href,
   className,

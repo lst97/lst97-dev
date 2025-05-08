@@ -3,10 +3,18 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+interface TurnstileOptions {
+  sitekey: string
+  callback: (token: string) => void
+  'expired-callback'?: () => void
+  action?: string
+  [key: string]: unknown
+}
+
 declare global {
   interface Window {
     turnstile: {
-      render: (container: string | HTMLElement, options: any) => string
+      render: (container: string | HTMLElement, options: TurnstileOptions) => string
       reset: (widgetId: string) => void
       remove: (widgetId: string) => void
     }

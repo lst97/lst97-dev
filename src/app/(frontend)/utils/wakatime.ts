@@ -20,14 +20,17 @@ interface WakaTimeOSResponse {
   data: WakaTimeDataItem[]
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface WakaTimeActivityResponse extends ActivityData {}
 
-export async function fetchWakaTimeStats(): Promise<{
+export interface WakaTimeStats {
   activity: ActivityData
   languages: LanguageData
   editors: EditorData
   operatingSystems: OperatingSystemData
-}> {
+}
+
+export async function fetchWakaTimeStats(): Promise<WakaTimeStats> {
   try {
     const [languagesRes, editorsRes, osRes, activityRes] = await Promise.all([
       fetch('/api/wakatime/languages'),

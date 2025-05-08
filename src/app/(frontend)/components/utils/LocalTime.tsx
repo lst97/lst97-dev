@@ -1,17 +1,9 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 
 // FlipDigit: animates a single digit flip when value changes
-const FlipDigit = ({
-  value,
-  prevValue,
-  className,
-}: {
-  value: string
-  prevValue: string
-  className?: string
-}) => {
+const FlipDigit = ({ value, className }: { value: string; className?: string }) => {
   const [displayValue, setDisplayValue] = useState(value)
   const [flipping, setFlipping] = useState(false)
   const [flipDirection, setFlipDirection] = useState<'out' | 'in' | null>(null)
@@ -47,13 +39,6 @@ const FlipDigit = ({
       setFlipDirection(null)
       prev.current = value
     }
-  }
-
-  // Determine rotation based on state
-  let rotateX = 0
-  if (flipping) {
-    if (flipDirection === 'out') rotateX = -90
-    else if (flipDirection === 'in') rotateX = 0
   }
 
   return (
@@ -113,17 +98,20 @@ export const MelbourneTime = ({
   timeZone = 'Australia/Melbourne',
   hour12 = false,
 }: MelbourneTimeProps) => {
-  const getTimeString = () =>
-    new Date().toLocaleTimeString('en-AU', {
-      timeZone,
-      hour12,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
+  const getTimeString = useCallback(
+    () =>
+      new Date().toLocaleTimeString('en-AU', {
+        timeZone,
+        hour12,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }),
+    [timeZone, hour12],
+  )
 
   const [time, setTime] = useState(getTimeString())
-  const [prevTime, setPrevTime] = useState(time)
+  const [, setPrevTime] = useState(time)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -134,11 +122,10 @@ export const MelbourneTime = ({
       })
     }, 1000)
     return () => clearInterval(interval)
-  }, [timeZone, hour12])
+  }, [timeZone, hour12, getTimeString])
 
   // Split time into array of chars (digits and colons)
   const timeChars = time.split('')
-  const prevTimeChars = prevTime.split('')
 
   return (
     <div
@@ -148,12 +135,7 @@ export const MelbourneTime = ({
       <div className="text-5xl text-center font-bold flex justify-center">
         {timeChars.map((char, i) =>
           /\d/.test(char) ? (
-            <FlipDigit
-              key={i}
-              value={char}
-              prevValue={prevTimeChars[i] || char}
-              className="relative"
-            />
+            <FlipDigit key={i} value={char} className="relative" />
           ) : (
             <span key={i} className="mx-1">
               {char}

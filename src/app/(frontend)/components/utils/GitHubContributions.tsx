@@ -5,6 +5,17 @@ import GitHubCalendar from 'react-github-calendar'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import Image from 'next/image'
 
+interface GitHubContribution {
+  date: string
+  count: number
+  level: 0 | 1 | 2 | 3 | 4
+}
+
+interface CalendarTheme {
+  light: string[]
+  dark: string[]
+}
+
 export const GitHubContributionsCalendar = ({
   username = 'lst97',
   className,
@@ -12,7 +23,7 @@ export const GitHubContributionsCalendar = ({
   username?: string
   className?: string
 }) => {
-  const selectLastNDays = (contributions: any[], numDays: number) => {
+  const selectLastNDays = (contributions: GitHubContribution[], numDays: number) => {
     const today = new Date()
     const cutoffDate = new Date(today)
     cutoffDate.setDate(today.getDate() - numDays)
@@ -24,7 +35,7 @@ export const GitHubContributionsCalendar = ({
     })
   }
 
-  const explicitTheme: any = {
+  const explicitTheme: CalendarTheme = {
     light: ['#fdf6e3', '#ecdbaf', '#dabf7c', '#c8a449', '#b58900'],
     dark: ['#fdf6e3', '#ecdbaf', '#dabf7c', '#c8a449', '#b58900'],
   }
@@ -42,7 +53,7 @@ export const GitHubContributionsCalendar = ({
       <div className="pt-8 pb-4 flex flex-col items-center justify-center w-full h-full press-start-2p-regular">
         <GitHubCalendar
           username={username}
-          transformData={(data: any[]) => selectLastNDays(data, 72)}
+          transformData={(data: GitHubContribution[]) => selectLastNDays(data, 72)}
           labels={{ totalCount: '{{count}} contributions ∈ 72 days' }}
           hideMonthLabels={true}
           hideColorLegend={true}

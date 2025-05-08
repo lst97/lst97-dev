@@ -257,10 +257,8 @@ export const Introduction = () => {
   // React Query: fetch weather data
   const {
     data: weatherData,
-    isLoading: weatherLoading,
     isError: weatherError,
     error: weatherQueryError,
-    refetch: refetchWeather,
   } = useQuery<WeatherData>({
     queryKey: ['weather'],
     queryFn: async () => {

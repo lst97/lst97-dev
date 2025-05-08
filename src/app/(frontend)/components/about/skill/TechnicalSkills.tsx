@@ -1,12 +1,7 @@
 import React, { useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { ApexOptions } from 'apexcharts'
-import {
-  LanguageData,
-  EditorData,
-  OperatingSystemData,
-  BaseBarData,
-} from '@/frontend/models/Wakatime'
+import { LanguageData, EditorData, OperatingSystemData } from '@/frontend/models/Wakatime'
 import { motion } from 'framer-motion'
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
@@ -18,6 +13,7 @@ interface WakaTimeDataItem {
   name: string
   percent: number
   hours: number
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   [key: string]: any // For other fields like color, text, etc.
 }
 
@@ -434,7 +430,7 @@ const LanguageBarChart: React.FC<LanguageBarChartProps> = ({ languages, inView }
         fontSize: THEME.fonts.size.small,
         fontFamily: THEME.fonts.family,
       },
-      custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+      custom: function ({ series, seriesIndex, dataPointIndex }) {
         const value = series[seriesIndex][dataPointIndex]
         const name = processedLanguages[dataPointIndex].name
         const hours = processedLanguages[dataPointIndex].hours

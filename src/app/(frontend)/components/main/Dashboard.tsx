@@ -1,7 +1,6 @@
 'use client'
 import React, { createContext, useMemo, useState, Dispatch, SetStateAction } from 'react'
 import Navbar from './Navbar'
-import { PixelContainer } from '../common/layout/Containers'
 import { ScrollProvider } from '@/frontend/contexts/ScrollContext'
 import { Footer } from '@/frontend/components/footer/Footer'
 

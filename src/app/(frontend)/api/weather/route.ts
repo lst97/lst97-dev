@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createSuccessResponse, createErrorResponse, HttpStatus, CACHE_CONTROL } from '../index'
 
 const WEATHER_API_URL =
@@ -17,7 +17,7 @@ interface OpenMeteoApiResponse {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const response = await fetch(WEATHER_API_URL)
 

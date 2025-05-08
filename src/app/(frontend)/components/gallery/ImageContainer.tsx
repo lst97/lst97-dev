@@ -2,7 +2,6 @@
 
 import React, { memo, ReactNode } from 'react'
 import Image from 'next/image'
-import { CloseIconButton } from '../ui/Buttons'
 import { PixelContainer } from '../common/layout/Containers'
 import { ImageEmbeddedInfo, ImageInfoAction } from './ImageInfo'
 
@@ -13,18 +12,13 @@ interface ImageContainerProps {
 
 export const ImageContainer = memo(({ children, className = '' }: ImageContainerProps) => {
   // Memoize child finding operations
-  const [imageChild, infoChild, infoActionChild, closeButtonChild] = React.useMemo(() => {
-    const findChild = (type: any) =>
+  const [imageChild, infoChild, infoActionChild] = React.useMemo(() => {
+    const findChild = (type: React.ElementType) =>
       React.Children.toArray(children).find(
         (child) => React.isValidElement(child) && child.type === type,
       )
 
-    return [
-      findChild(Image),
-      findChild(ImageEmbeddedInfo),
-      findChild(ImageInfoAction),
-      findChild(CloseIconButton),
-    ]
+    return [findChild(Image), findChild(ImageEmbeddedInfo), findChild(ImageInfoAction)]
   }, [children])
 
   return (

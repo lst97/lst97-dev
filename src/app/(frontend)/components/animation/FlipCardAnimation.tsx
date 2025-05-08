@@ -68,7 +68,7 @@ export function FlipCardAnimation<P extends FlipCardProps>(
         dx.set(degreeX)
         dy.set(degreeY)
       },
-      [isPointInContainer],
+      [isPointInContainer, dx, dy],
     )
 
     const handleMouseEnter = useCallback(() => {

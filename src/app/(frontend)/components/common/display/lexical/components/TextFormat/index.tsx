@@ -19,9 +19,8 @@ export const TextFormat: React.FC<TextFormatProps> = ({ node, index }) => {
     return null
   }
 
-  const anyNode = node as any
-  let content = node.text
-  let classNames: string[] = ['font-["Press_Start_2P"]']
+  const content = node.text
+  const classNames: string[] = ['font-["Press_Start_2P"]']
 
   // Apply text formatting based on Lexical format flags
   if (typeof node.format === 'number') {
@@ -45,24 +44,24 @@ export const TextFormat: React.FC<TextFormatProps> = ({ node, index }) => {
   }
 
   // Also check for textFormat property
-  if (anyNode.textFormat && typeof anyNode.textFormat === 'number') {
-    if (anyNode.textFormat & 1) classNames.push('font-bold text-xs') // Bold
-    if (anyNode.textFormat & 2) classNames.push('italic text-xs') // Italic
-    if (anyNode.textFormat & 4) classNames.push('underline') // Underline
-    if (anyNode.textFormat & 8) classNames.push('line-through') // Strikethrough
-    if (anyNode.textFormat & 16) classNames.push('align-top relative top-[-0.5em]') // Superscript
-    if (anyNode.textFormat & 32) classNames.push('align-bottom relative top-[0.3em]') // Subscript
-  } else if (anyNode.textFormat && typeof anyNode.textFormat === 'string') {
+  if (node.textFormat && typeof node.textFormat === 'number') {
+    if (node.textFormat & 1) classNames.push('font-bold text-xs') // Bold
+    if (node.textFormat & 2) classNames.push('italic text-xs') // Italic
+    if (node.textFormat & 4) classNames.push('underline') // Underline
+    if (node.textFormat & 8) classNames.push('line-through') // Strikethrough
+    if (node.textFormat & 16) classNames.push('align-top relative top-[-0.5em]') // Superscript
+    if (node.textFormat & 32) classNames.push('align-bottom relative top-[0.3em]') // Subscript
+  } else if (node.textFormat && typeof node.textFormat === 'string') {
     // Handle string-based alignment
-    const alignClass = getTextAlignClass(anyNode.textFormat)
+    const alignClass = getTextAlignClass(node.textFormat)
     if (alignClass) classNames.push(alignClass)
   }
 
   const style =
     typeof node.format === 'string'
       ? getTextAlignStyle(node.format)
-      : anyNode.textFormat && typeof anyNode.textFormat === 'string'
-        ? getTextAlignStyle(anyNode.textFormat)
+      : node.textFormat && typeof node.textFormat === 'string'
+        ? getTextAlignStyle(node.textFormat)
         : undefined
 
   return classNames.length > 0 ? (

@@ -17,17 +17,11 @@ export function PixelContainer({
 
 interface PkmStatusContainerProps {
   title: string
-  direction: 'left' | 'right'
   currentHP?: number
   maxHP?: number
 }
 
-export function PkmStatusContainer({
-  title,
-  direction,
-  currentHP,
-  maxHP,
-}: PkmStatusContainerProps) {
+export function PkmStatusContainer({ title, currentHP, maxHP }: PkmStatusContainerProps) {
   const healthPercentage = maxHP ? (currentHP! / maxHP) * 100 : 100
   const healthColor =
     healthPercentage > 50 ? '#30da0c' : healthPercentage > 20 ? '#f7d02c' : '#ff0000'
@@ -72,12 +66,7 @@ export function PkmBattleLayout({
       {direction === 'left' && <div className="m-8">{children}</div>}
 
       <div className="lg:basis-1/2">
-        <PkmStatusContainer
-          direction={direction}
-          title={title}
-          currentHP={currentHP}
-          maxHP={maxHP}
-        />
+        <PkmStatusContainer title={title} currentHP={currentHP} maxHP={maxHP} />
       </div>
 
       {direction === 'right' && <div className="m-8">{children}</div>}

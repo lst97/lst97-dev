@@ -31,13 +31,13 @@ export const Quote: React.FC<QuoteProps> = ({ node, index }) => {
       >
         {/* Pixelated quote marks */}
         <div className="absolute -left-2 -top-2 text-[var(--color-accent)] text-3xl font-['Press_Start_2P'] animate-bounce z-10">
-          "
+          &quot;
         </div>
         <div
           className="absolute -right-2 -bottom-2 text-[var(--color-accent)] text-3xl font-['Press_Start_2P'] animate-bounce z-10"
           style={{ animationDelay: '0.4s' }}
         >
-          "
+          &quot;
         </div>
 
         {/* Quote content with pixelated font */}

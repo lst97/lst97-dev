@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useEffect, useState, useRef } from 'react'
-import { useMotionValue } from 'framer-motion'
-import { PixelArtAnimationProps, SquareState, Point } from './types'
+import { MotionValue, useMotionValue } from 'framer-motion'
+import { PixelArtAnimationProps, SquareState, Point, SquareProps } from './types'
 import {
   generateRandomValue,
   generateVelocity,
@@ -67,7 +67,6 @@ const PixelArtAnimation: React.FC<PixelArtAnimationProps> = ({
   numSquares = 20,
   sizeRange = [10, 25],
   colors = DEFAULT_COLORS,
-  interactionDistance = 150,
   className = '',
   opacity = 1,
   debug = false,
@@ -305,39 +304,23 @@ const PixelArtAnimation: React.FC<PixelArtAnimationProps> = ({
    * Uses memoization to avoid redundant calculations for grid size and cell size.
    */
   const calculateGridPosition = useCallback(
-    (() => {
-      // Cache for columns and cell size to avoid redundant calculations
-      let lastTotal = -1
-      let lastPadding = -1
-      let lastCols = 0
-      let lastCellSize = 0
-      let lastMaxSquareSize = 0
+    (index: number, total: number, padding: number = 25) => {
+      const maxSquareSize = sizeRange[1]
+      const cols = Math.ceil(Math.sqrt(total))
+      const minCellSize = maxSquareSize * 2
+      const cellSize = Math.max((100 - padding * 2) / cols, minCellSize)
 
-      return (index: number, total: number, padding: number = 25) => {
-        // Only recalculate if total, padding, or maxSquareSize changes
-        const maxSquareSize = sizeRange[1]
-        if (total !== lastTotal || padding !== lastPadding || maxSquareSize !== lastMaxSquareSize) {
-          lastCols = Math.ceil(Math.sqrt(total))
-          const minCellSize = maxSquareSize * 2
-          lastCellSize = Math.max((100 - padding * 2) / lastCols, minCellSize)
-          lastTotal = total
-          lastPadding = padding
-          lastMaxSquareSize = maxSquareSize
-        }
+      const row = Math.floor(index / cols)
+      const col = index % cols
 
-        const row = Math.floor(index / lastCols)
-        const col = index % lastCols
+      const offsetX = generateRandomValue(-3, 3)
+      const offsetY = generateRandomValue(-3, 3)
 
-        // Minimize calls to generateRandomValue by using a single offset value
-        const offsetX = generateRandomValue(-3, 3)
-        const offsetY = generateRandomValue(-3, 3)
-
-        return {
-          x: padding + col * lastCellSize + offsetX,
-          y: padding + row * lastCellSize + offsetY,
-        }
+      return {
+        x: padding + col * cellSize + offsetX,
+        y: padding + row * cellSize + offsetY,
       }
-    })(),
+    },
     [sizeRange],
   )
 
@@ -345,7 +328,7 @@ const PixelArtAnimation: React.FC<PixelArtAnimationProps> = ({
    * Initializes the array of square objects with randomized size, color, velocity, and rotation.
    * Each square is assigned a unique id and physical properties for simulation.
    */
-  const squares = useMemo(() => {
+  const squares: SquareProps[] = useMemo(() => {
     return Array.from({ length: Math.min(numSquares, MAX_SQUARES) }).map((_, index) => {
       const velocity = generateVelocity()
       const size = generateRandomValue(sizeRange[0], sizeRange[1])
@@ -442,7 +425,12 @@ const PixelArtAnimation: React.FC<PixelArtAnimationProps> = ({
    * Returns true if a collision occurred, false otherwise.
    */
   const handleCollision = useCallback(
-    (square1: SquareState, square2: SquareState, xValues: any[], yValues: any[]) => {
+    (
+      square1: SquareState,
+      square2: SquareState,
+      xValues: MotionValue<number>[],
+      yValues: MotionValue<number>[],
+    ) => {
       // Quick distance check before doing expensive collision detection
       const dx = square1.centerX - square2.centerX
       const dy = square1.centerY - square2.centerY
@@ -601,7 +589,7 @@ const PixelArtAnimation: React.FC<PixelArtAnimationProps> = ({
       const { width: viewportWidth, height: viewportHeight } = viewportDimensionsRef.current
 
       setSquareStates((prevStates) => {
-        const updatedStates = prevStates.map((state, i) => ({
+        const updatedStates = prevStates.map((state) => ({
           ...state,
         }))
 
@@ -812,17 +800,14 @@ const PixelArtAnimation: React.FC<PixelArtAnimationProps> = ({
       square,
       state,
       index,
-      xMotionVal,
-      yMotionVal,
-      rMotionVal,
       opacity,
     }: {
-      square: any
+      square: SquareProps
       state: SquareState
       index: number
-      xMotionVal: any
-      yMotionVal: any
-      rMotionVal: any
+      xMotionVal: MotionValue<number>
+      yMotionVal: MotionValue<number>
+      rMotionVal: MotionValue<number>
       opacity: number
     }) => {
       if (!state || !state.corners || state.corners.length !== 4) return null
@@ -872,6 +857,8 @@ const PixelArtAnimation: React.FC<PixelArtAnimationProps> = ({
     },
   )
 
+  Square.displayName = 'Square'
+
   return (
     squares.length <= MAX_SQUARES && (
       <div
@@ -920,4 +907,5 @@ const PixelArtAnimation: React.FC<PixelArtAnimationProps> = ({
   )
 }
 
+PixelArtAnimation.displayName = 'PixelArtAnimation'
 export default React.memo(PixelArtAnimation)

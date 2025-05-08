@@ -71,22 +71,3 @@ export function extractTextFromNode(node: LexicalNode): string {
 
   return ''
 }
-
-// Helper function to extract all text from Lexical content
-export function extractTextFromLexical(content: any): string {
-  if (!content) return ''
-
-  try {
-    const parsedContent = typeof content === 'string' ? JSON.parse(content) : content
-    if (!parsedContent.root || !parsedContent.root.children) return ''
-
-    return parsedContent.root.children
-      .map((node: LexicalNode) => extractTextFromNode(node))
-      .join(' ')
-      .trim()
-      .substring(0, 200)
-  } catch (error) {
-    console.error('Error extracting text from Lexical content:', error)
-    return ''
-  }
-}

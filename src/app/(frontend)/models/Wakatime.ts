@@ -48,8 +48,11 @@ export interface BaseBarData {
   data: WakaTimeDataItem[]
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface LanguageData extends BaseBarData {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface EditorData extends BaseBarData {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface OperatingSystemData extends BaseBarData {}

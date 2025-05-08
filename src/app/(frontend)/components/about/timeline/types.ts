@@ -33,9 +33,9 @@ export const getDaysInYear = (year: number): number => {
   return isLeapYear(year) ? 366 : 365
 }
 
-export const isValidDate = (date: any): boolean => {
+export const isValidDate = (date: string | Date): boolean => {
   const d = new Date(date)
-  return !isNaN(d.getTime())
+  return !Number.isNaN(d.getTime())
 }
 
 export const formatDate = (date: Date | string) => {
@@ -46,7 +46,7 @@ export const formatDate = (date: Date | string) => {
       month: 'short',
       day: 'numeric',
     })
-  } catch (error) {
+  } catch {
     return 'Invalid date'
   }
 }
@@ -65,10 +65,7 @@ export const getPositionInYear = (date: Date | string, isReversed: boolean) => {
 }
 
 // Calculate tooltip position to avoid edge overflow
-export const getTooltipPosition = (
-  position: number,
-  isReversed: boolean,
-): 'left' | 'center' | 'right' => {
+export const getTooltipPosition = (position: number): 'left' | 'center' | 'right' => {
   // Determine if the tooltip should be left/center/right aligned based on position
   if (position < 20) return 'left'
   if (position > 80) return 'right'

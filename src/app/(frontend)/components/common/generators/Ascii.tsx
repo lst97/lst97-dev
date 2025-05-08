@@ -7,7 +7,6 @@ interface AsciiTextGeneratorProps {
 }
 
 const TYPING_BATCH_SIZE = 8
-const TYPING_INTERVAL_MS = 25
 const LINE_BREAK_INTERVAL = 35
 const FONT_NAME = 'Doom'
 
@@ -18,6 +17,7 @@ export function AsciiTextGenerator({ text }: AsciiTextGeneratorProps) {
 
   const loadFont = useCallback(async () => {
     try {
+      // @ts-expect-error - figlet/importable-fonts/Doom.js is not typed (javascript)
       const doomFont = await import('figlet/importable-fonts/Doom.js')
       figlet.parseFont(FONT_NAME, doomFont.default)
     } catch (err) {
@@ -29,7 +29,11 @@ export function AsciiTextGenerator({ text }: AsciiTextGeneratorProps) {
   const generateAsciiArt = useCallback(() => {
     return new Promise<string>((resolve, reject) => {
       figlet(text, { font: FONT_NAME }, (err, data) => {
-        err || !data ? reject(err) : resolve(data)
+        if (err || !data) {
+          reject(err)
+        } else {
+          resolve(data)
+        }
       })
     })
   }, [text])
@@ -37,7 +41,7 @@ export function AsciiTextGenerator({ text }: AsciiTextGeneratorProps) {
   const startTypingEffect = useCallback((data: string) => {
     const textArray = data.split('')
     const displayBuffer = Array(textArray.length).fill(' ')
-    let remainingIndices = Array.from(textArray.keys())
+    const remainingIndices = Array.from(textArray.keys())
 
     // Pre-process line breaks
     for (let i = 0; i < textArray.length; i += LINE_BREAK_INTERVAL) {
@@ -72,11 +76,17 @@ export function AsciiTextGenerator({ text }: AsciiTextGeneratorProps) {
       try {
         await loadFont()
         const data = await generateAsciiArt()
-        if (isMounted) startTypingEffect(data)
-      } catch (err) {
-        isMounted && setError('Failed to generate art')
+        if (isMounted) {
+          startTypingEffect(data)
+        }
+      } catch {
+        if (isMounted) {
+          setError('Failed to generate art')
+        }
       } finally {
-        isMounted && setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
     }
 

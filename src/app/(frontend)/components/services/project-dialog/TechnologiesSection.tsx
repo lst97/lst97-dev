@@ -27,7 +27,6 @@ const DENSITY = 0.002
 const SLEEP_THRESHOLD = 60
 const WALL_RESTITUTION = 0.1
 const WALL_FRICTION = 0.8
-const WALL_THICKNESS = 50
 const WALL_BUFFER = 25
 const CHAMFER_RADIUS = 16
 const INITIAL_VELOCITY_RANGE = 10
@@ -293,7 +292,7 @@ export const TechnologiesSection: React.FC<TechnologiesSectionProps> = ({ techno
     }
 
     // Create technology boxes, explicitly setting isStatic: false
-    const techBodies = technologies.map((tech, i) =>
+    const techBodies = technologies.map((tech) =>
       Bodies.rectangle(
         // Random x between boxSize/2+10 and canvasWidth-boxSize/2-10
         Math.random() * (canvasWidth - boxSize - 20) + boxSize / 2 + 10,
@@ -381,7 +380,8 @@ export const TechnologiesSection: React.FC<TechnologiesSectionProps> = ({ techno
         topWall: null,
       }
     }
-  }, [technologies]) // No dependency on canvasWidth here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [technologies])
 
   // Drag handler for technology boxes
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
@@ -443,7 +443,7 @@ export const TechnologiesSection: React.FC<TechnologiesSectionProps> = ({ techno
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [draggedIndex, technologyBodies])
+  }, [draggedIndex, technologyBodies, canvasWidth])
 
   // Handle ref callbacks properly to avoid TS errors
   const setElementRef = useCallback(

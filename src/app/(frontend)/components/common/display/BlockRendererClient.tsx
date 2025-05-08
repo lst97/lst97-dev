@@ -3,6 +3,7 @@
 import { LexicalRenderer } from '@/frontend/components/common/display/lexical'
 
 interface BlockRendererClientProps {
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   readonly content: any
 }
 

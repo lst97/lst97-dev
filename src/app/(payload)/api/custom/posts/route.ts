@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { Post } from '@/payload-types'
+import { PostResponse, PostListItem } from './types'
 
 // GET /api/custom/posts
 export async function GET() {
@@ -22,7 +23,7 @@ export async function GET() {
     })
 
     // Map the response to match our frontend model
-    const mappedPosts = posts.docs.map((post: Post) => ({
+    const mappedPosts: PostListItem[] = posts.docs.map((post: Post) => ({
       id: post.id,
       documentId: post.id,
       title: post.title,
@@ -50,7 +51,8 @@ export async function GET() {
       },
     }))
 
-    return NextResponse.json({ data: mappedPosts })
+    const response: PostResponse = { data: mappedPosts }
+    return NextResponse.json(response)
   } catch (error) {
     console.error('Error fetching posts:', error)
     return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 })

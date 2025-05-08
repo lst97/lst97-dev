@@ -77,7 +77,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
               <div className="relative w-full h-[var(--line-thickness)] bg-[color:var(--color-border)]">
                 {yearEvents.map((event) => {
                   const position = getPositionInYear(event.date, isReversed)
-                  const tooltipPosition = getTooltipPosition(position, isReversed)
+                  const tooltipPosition = getTooltipPosition(position)
 
                   return (
                     <div

@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 // ===== Constants for magic numbers =====
 const SCROLL_AMOUNT = 200
 const ANIMATION_X_OFFSET = 64
-const ANIMATION_BLOCK_DURATION_MS = 300
 const GRADIENT_SEGMENT_WIDTH = 4
 const GRADIENT_SEGMENT_WIDTH_2X = GRADIENT_SEGMENT_WIDTH * 2
 const SCROLL_THROTTLE_MS = 100
@@ -68,11 +67,18 @@ const TAB_PANEL_BASE = [
 const TAB_INDICATOR_STYLE = `repeating-linear-gradient(to right, var(--color-accent) 0, var(--color-accent) ${GRADIENT_SEGMENT_WIDTH}px, transparent ${GRADIENT_SEGMENT_WIDTH}px, transparent ${GRADIENT_SEGMENT_WIDTH_2X}px)`
 
 // ===== Simple throttle implementation =====
-function throttle<T extends (...args: any[]) => void>(fn: T, wait: number) {
+function throttle<T extends (...args: Parameters<T>) => ReturnType<T>>(
+  fn: T,
+  wait: number,
+): {
+  (...args: Parameters<T>): void
+  cancel: () => void
+} {
   let lastCall = 0
   let timeout: ReturnType<typeof setTimeout> | null = null
-  let lastArgs: any[]
-  const throttled = (...args: any[]) => {
+  let lastArgs: Parameters<T>
+
+  const throttled = (...args: Parameters<T>) => {
     const now = Date.now()
     lastArgs = args
     if (now - lastCall >= wait) {
@@ -89,10 +95,12 @@ function throttle<T extends (...args: any[]) => void>(fn: T, wait: number) {
       )
     }
   }
+
   throttled.cancel = () => {
     if (timeout) clearTimeout(timeout)
     timeout = null
   }
+
   return throttled
 }
 
@@ -185,7 +193,7 @@ const PixelTabPanel: React.FC<PixelTabPanelProps> = ({ tabs, defaultTab, onTabCh
         tabList.removeEventListener('scroll', throttledCheckScrollPosition)
       }
       window.removeEventListener('resize', throttledCheckScrollPosition)
-      throttledCheckScrollPosition.cancel && throttledCheckScrollPosition.cancel()
+      throttledCheckScrollPosition.cancel()
     }
   }, [throttledCheckScrollPosition])
 
@@ -209,7 +217,7 @@ const PixelTabPanel: React.FC<PixelTabPanelProps> = ({ tabs, defaultTab, onTabCh
     window.addEventListener('resize', throttledResizeHandler)
     return () => {
       window.removeEventListener('resize', throttledResizeHandler)
-      throttledResizeHandler.cancel && throttledResizeHandler.cancel()
+      throttledResizeHandler.cancel()
     }
   }, [throttledResizeHandler])
 
@@ -221,9 +229,12 @@ const PixelTabPanel: React.FC<PixelTabPanelProps> = ({ tabs, defaultTab, onTabCh
     }
   }
 
-  const getTabIndex = (tabId: string) => {
-    return tabs.findIndex((tab) => tab.id === tabId)
-  }
+  const getTabIndex = useCallback(
+    (tabId: string) => {
+      return tabs.findIndex((tab) => tab.id === tabId)
+    },
+    [tabs],
+  )
 
   const handleTabChange = (tabId: string) => {
     if (tabId !== selectedTab && !isAnimating) {
@@ -300,7 +311,7 @@ const PixelTabPanel: React.FC<PixelTabPanelProps> = ({ tabs, defaultTab, onTabCh
       const offset = tabBtn.offsetLeft + tabBtn.offsetWidth / 2 - tabList.clientWidth / 2
       animateScrollTo(tabList, offset)
     }
-  }, [selectedTab])
+  }, [selectedTab, getTabIndex])
 
   return (
     <div className="relative w-full">

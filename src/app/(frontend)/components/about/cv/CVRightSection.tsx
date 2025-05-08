@@ -1,7 +1,6 @@
 import React from 'react'
 import { CVRightSideSection } from '@/frontend/models/CV'
 import { Marker } from './Marker'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { NavigationLink } from '@/frontend/components/ui/Links'
 

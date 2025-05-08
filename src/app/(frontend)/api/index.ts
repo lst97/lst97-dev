@@ -11,6 +11,9 @@ export interface ApiResponse<T> {
   error?: {
     code: string
     message: string
+    // The type of `details` can be dynamic or unknown depending on the specific error,
+    // so `any` is used for flexibility.
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     details?: any
   }
 }
@@ -37,6 +40,7 @@ export function createSuccessResponse<T>(data: T): ApiResponse<T> {
 export function createErrorResponse(
   code: string,
   message: string,
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   details?: any,
 ): ApiResponse<never> {
   return {
@@ -50,9 +54,10 @@ export function createErrorResponse(
 }
 
 // Helper for handling API errors
+// the type of `error` can be dynamic or unknown depending on the specific error,
+// so `any` is used for flexibility.
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export async function handleApiError(error: any): Promise<ApiResponse<never>> {
-  console.error('API Error:', error)
-
   if (error instanceof Response) {
     try {
       const errorData = await error.json()
@@ -61,7 +66,7 @@ export async function handleApiError(error: any): Promise<ApiResponse<never>> {
         errorData.message || 'Unknown error',
         errorData,
       )
-    } catch (e) {
+    } catch {
       return createErrorResponse(
         String(error.status || 'UNKNOWN'),
         error.statusText || 'Unknown error',

@@ -64,7 +64,7 @@ export class EmailService {
       html: template.html,
     }
 
-    await this.sendEmail(emailOptions)
+    await EmailService.sendEmail(emailOptions)
   }
 
   public static async sendAutoReply(
@@ -82,6 +82,6 @@ export class EmailService {
       html: template.html,
     }
 
-    await this.sendEmail(emailOptions)
+    await EmailService.sendEmail(emailOptions)
   }
 }

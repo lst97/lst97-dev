@@ -9,7 +9,7 @@ import { usePosts } from '@/frontend/hooks/usePosts'
 import { LoadingSpinner } from '@/frontend/components/common/LoadingSpinner'
 
 export const MyNotes = () => {
-  const { posts, isLoading, error } = usePosts()
+  const { posts, isLoading, error } = usePosts({})
   const [featuredPosts, setFeaturedPosts] = useState<Post[]>([])
 
   useEffect(() => {
@@ -63,10 +63,14 @@ export const MyNotes = () => {
                   views: post.views,
                   likes: post.likes,
                 }}
-                categories={post.categories.map((category) => ({
-                  name: category,
-                  type: 'normal',
-                }))}
+                categories={post.categories
+                  .filter(
+                    (category): category is string => category !== null && category !== undefined,
+                  )
+                  .map((category) => ({
+                    name: category,
+                    type: 'normal' as const,
+                  }))}
               />
             ))}
           </NoteList>

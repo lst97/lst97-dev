@@ -17,14 +17,39 @@ export interface LexicalNode {
     url?: string
     newTab?: boolean
     linkType?: string
-    [key: string]: any
+    [key: string]: unknown
   }
   // For multi-line code blocks
   combinedCodeBlock?: boolean
   codeContent?: string
-  [key: string]: any // Allow any additional properties
+  // Properties for code blocks
+  code?: string
+  codeHighlight?: string
+  textFormat?: number | string
+  // Index signature for additional properties
+  [key: string]: unknown
+}
+
+// Specific node type for code nodes
+export interface LexicalCodeNode extends LexicalNode {
+  type: 'code'
+  language?: string
+  codeContent?: string
+  code?: string
+  codeHighlight?: string
+}
+
+export interface LexicalContent {
+  root: {
+    children: LexicalNode[]
+    direction?: string
+    format?: string | number
+    indent?: number
+    type?: string
+    version?: number
+  }
 }
 
 export interface LexicalRendererProps {
-  content: any // The Lexical JSON content from the API
+  content: string | LexicalContent | null | undefined
 }

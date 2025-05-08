@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Dashboard } from '@/frontend/components/main/Dashboard'
 import { Post } from '@/frontend/models/Post'
-import { ErrorState, LoadingState, PostHeader, PostContent } from './Components'
+import { ErrorState, PostHeader, PostContent } from './Components'
 import { CacheStatus } from '@/frontend/components/utils/CacheStatus'
 import { motion } from 'framer-motion'
 import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
@@ -20,7 +20,7 @@ const CacheInfoDialog = ({ open, onClose }: { open: boolean; onClose: () => void
       </p>
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
-          If the content is already in React Query's cache then it is marked as{' '}
+          If the content is already in React Query&apos;s cache then it is marked as{' '}
         </span>
         <span className="inline-block pixel-borders">
           <span className="bg-[var(--color-secondary)] px-2 py-1 font-['Press_Start_2P'] text-xs text-[var(--color-text)]">
@@ -28,7 +28,7 @@ const CacheInfoDialog = ({ open, onClose }: { open: boolean; onClose: () => void
           </span>
         </span>
         <span className="text-[var(--color-text)] dark:text-[var(--color-text-light)]">
-          else it's marked as
+          else it&apos;s marked as
         </span>
         <span className="inline-block pixel-borders">
           <span className="bg-[var(--color-primary)] px-2 py-1 font-['Press_Start_2P'] text-xs text-[var(--color-text)]">

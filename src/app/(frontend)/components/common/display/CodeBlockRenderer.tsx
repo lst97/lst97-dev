@@ -55,10 +55,15 @@ export const CodeBlockRenderer = ({ children, language }: CodeBlockRendererProps
   const [copied, setCopied] = useState(false)
 
   const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      })
+      .catch((error) => {
+        console.error('Failed to copy text:', error)
+      })
   }
 
   if (!language) return null

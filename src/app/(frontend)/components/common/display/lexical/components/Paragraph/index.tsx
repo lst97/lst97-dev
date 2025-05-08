@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { LexicalNode } from '@/frontend/components/common/display/lexical/types'
+import { LexicalNode, LexicalCodeNode } from '@/frontend/components/common/display/lexical/types'
 import {
   getTextAlignClass,
   getTextAlignStyle,
@@ -15,9 +15,6 @@ interface ParagraphProps {
 }
 
 export const Paragraph: React.FC<ParagraphProps> = ({ node, index }) => {
-  // Check if this paragraph is actually a code block
-  const anyNode = node as any
-
   // Check for markdown-style code blocks
   const isMarkdownCodeBlock =
     node.children &&
@@ -29,26 +26,27 @@ export const Paragraph: React.FC<ParagraphProps> = ({ node, index }) => {
   // In Lexical format 16 indicates code formatting
   // Check for various ways code blocks might be identified
   const isCodeBlock =
-    anyNode.codeHighlight ||
-    anyNode.code ||
+    node.codeHighlight !== undefined ||
+    node.code !== undefined ||
     node.tag === 'code' ||
     node.format === 16 ||
-    anyNode.textFormat === 16 ||
+    node.textFormat === 16 ||
     isMarkdownCodeBlock ||
-    (node.children && node.children.some((child) => (child as any).format === 16))
+    (node.children && node.children.some((child) => child.format === 16))
 
   if (isCodeBlock) {
-    return <Code node={{ ...node, type: 'code' }} index={index} />
+    // Cast to LexicalCodeNode with proper typing
+    const codeNode: LexicalCodeNode = {
+      ...node,
+      type: 'code',
+    }
+    return <Code node={codeNode} index={index} />
   }
 
   // Handle text alignment
   // format can be a number, string, or undefined
   const format =
-    node.format !== undefined
-      ? node.format
-      : anyNode.textFormat !== undefined
-        ? anyNode.textFormat
-        : null
+    node.format !== undefined ? node.format : node.textFormat !== undefined ? node.textFormat : null
 
   // Get alignment class and style (if any)
   const alignClass = format !== null ? getTextAlignClass(format) : ''

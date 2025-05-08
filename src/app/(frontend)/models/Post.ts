@@ -1,29 +1,35 @@
-// Post interface for frontend use
-
+// Post interface for frontend usage
 export interface Post {
-  documentId: string
+  id: string | number
+  documentId: string | number
   title: string
+  slug: string | null | undefined
   description: string
-  slug: string
   publishedDate: string
-  lastUpdatedDate?: string
-  featuredImage?: string
-  content: any
-  categories: string[]
-  tags?: string[]
-  postStatus: 'draft' | 'published' | 'archived'
-  author: {
-    id: string
-    name: string
-    bio?: string
-    profilePictureUrl?: string
-  }
-  featuredPost: boolean
-  commentsEnabled: boolean
+  lastUpdatedDate?: string | null
+  content: LexicalContent
+  featuredImage: string | null | undefined
+  categories: (string | null | undefined)[]
+  tags: (string | null | undefined)[]
   views: number
   likes: number
   readtime: number
-  tableOfContents?: TableOfContentItem[]
+  featuredPost: boolean
+  postStatus: string
+  commentsEnabled: boolean
+  author: {
+    id: string | number
+    name: string
+  }
+}
+
+// Response types for different API endpoints
+export interface PostListResponse {
+  data: Post[]
+}
+
+export interface PostDetailResponse {
+  data: Post
 }
 
 export type PostSortField = 'publishedDate' | 'views' | 'likes' | 'title' | 'readtime'
@@ -43,13 +49,13 @@ export interface LexicalContent {
     indent?: number
     version?: number
     children: LexicalNode[]
-    direction?: string
+    direction?: string | null
   }
 }
 
 export interface LexicalNode {
   type: string
-  format?: string
+  format?: number | string
   indent?: number
   version?: number
   children?: LexicalNode[]
@@ -58,7 +64,7 @@ export interface LexicalNode {
   mode?: string
   style?: string
   detail?: number
-  direction?: string
+  direction?: string | null
   fields?: {
     url?: string
     newTab?: boolean
@@ -68,14 +74,14 @@ export interface LexicalNode {
   checked?: boolean
   language?: string
   code?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
-// Rich Text Content definitions
+// Rich Text Content definitions (legacy format)
 export interface RichTextContent {
   type: string
   children?: RichTextContent[]
-  [key: string]: any
+  [key: string]: unknown
 }
 
 // Legacy content types (for backward compatibility or reference)

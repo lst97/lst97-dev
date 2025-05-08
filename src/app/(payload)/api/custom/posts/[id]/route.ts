@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { Post } from '@/payload-types'
+import { Post as PayloadPost } from '@/payload-types'
+import { PostByIdResponse } from './types'
+import { Post } from '@/app/(frontend)/models/Post'
 
 // GET /api/custom/posts/[id]
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -12,21 +14,23 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const post = (await payload.findByID({
       collection: 'posts',
       id,
-    })) as Post
+    })) as PayloadPost
 
     if (!post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 })
     }
 
     // Map the response to match our frontend model
-    const mappedPost = {
+    const mappedPost: Post = {
       id: post.id,
       documentId: post.id,
       title: post.title,
+      slug: post.slug,
       description: post.description,
       publishedDate: post.publishedDate,
       lastUpdatedDate: post.lastUpdatedDate,
-      content: post.content,
+      // Ensure content is properly formatted as LexicalContent
+      content: post.content || { root: { type: 'root', children: [], direction: null } },
       featuredImage:
         typeof post.featuredImage === 'object' && post.featuredImage
           ? post.featuredImage.url
@@ -44,6 +48,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         name: typeof post.author === 'object' ? post.author.email : 'Unknown Author',
       },
     }
+
+    const response: PostByIdResponse = { data: mappedPost }
 
     // Update view count in a separate try-catch block to prevent it from breaking the entire request
     // TODO: Require a separate endpoint for updating view count for security reasons. (only admins can update documents)
@@ -69,7 +75,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     //   // Continue with the request even if view count update fails
     // }
 
-    return NextResponse.json({ data: mappedPost })
+    return NextResponse.json(response)
   } catch (error) {
     console.error('Error fetching post:', error)
     return NextResponse.json({ error: 'Failed to fetch post' }, { status: 500 })

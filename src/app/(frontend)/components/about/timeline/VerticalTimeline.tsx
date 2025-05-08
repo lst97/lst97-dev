@@ -7,14 +7,11 @@ import { EventDetail } from './EventDetail'
 interface VerticalTimelineProps {
   yearRange: number[]
   eventsByYear: Map<number, TimelineEvent[]>
-  currentYearProgress: number
   selectedEvent: TimelineEvent | null
   selectedEventRef: React.RefObject<HTMLDivElement>
-  eventRefs: React.MutableRefObject<Map<string | number, HTMLDivElement>>
-  isAutoScrolling: boolean
+  eventRefs: React.RefObject<Map<string | number, HTMLDivElement>>
   prefersReducedMotion: boolean
   backgroundImagePath: string
-  toggleAutoScroll: () => void
   handleEventSelect: (event: TimelineEvent) => void
   timelineContainerRef: React.RefObject<HTMLDivElement>
 }
@@ -22,14 +19,11 @@ interface VerticalTimelineProps {
 export const VerticalTimeline: React.FC<VerticalTimelineProps> = ({
   yearRange,
   eventsByYear,
-  currentYearProgress,
   selectedEvent,
   selectedEventRef,
   eventRefs,
-  isAutoScrolling,
   prefersReducedMotion,
   backgroundImagePath,
-  toggleAutoScroll,
   handleEventSelect,
   timelineContainerRef,
 }) => {

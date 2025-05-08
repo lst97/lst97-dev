@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React from 'react'
 import {
   FaCheckCircle,
   FaSpinner,
@@ -15,6 +15,36 @@ import { contactFormSchema } from '@/frontend/components/services/forms/schemas'
 import { ZodError } from 'zod'
 import { ContactSubmissionForm } from '@/frontend/models/forms/ContactSubmissionForm'
 
+interface FieldState {
+  value: string
+  meta: {
+    errors?: string[]
+    isTouched?: boolean
+    isPristine?: boolean
+    isDirty?: boolean
+    isValidating?: boolean
+    isValid?: boolean
+  }
+}
+
+interface FieldApi {
+  name: string
+  state: FieldState
+  handleChange: (value: string) => void
+  handleBlur: () => void
+  setFieldValue?: (name: string, value: string) => void
+}
+
+export interface TanStackFormProps {
+  Field: React.FC<{
+    name: string
+    children: (field: FieldApi) => React.ReactElement
+  }>
+  setFieldValue: (name: string, value: string) => void
+  handleSubmit: () => void
+  reset: () => void
+}
+
 // Original props interface
 interface ContactFormWithPixelUIProps {
   formData?: ContactSubmissionForm
@@ -28,7 +58,15 @@ interface ContactFormWithPixelUIProps {
   isSending: boolean
   onVerifyTurnstile: (token: string) => void
   setFormErrors?: (errors: { [key in keyof ContactSubmissionForm]?: string }) => void
-  form?: any // Simplify to avoid complex TypeScript errors
+  form?: {
+    Field: React.FC<{
+      name: string
+      children: (field: FieldApi) => React.ReactElement
+    }>
+    setFieldValue: (name: string, value: string) => void
+    handleSubmit: () => void
+    reset: () => void
+  }
 }
 
 // Helper function to validate form data with Zod
@@ -138,11 +176,8 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
       ) : (
         <form onSubmit={onSubmit} className="max-w-2xl mx-auto flex flex-col gap-8">
           {usingTanStackForm ? (
-            // Use a dynamic accessor pattern to avoid TypeScript errors
-            // @ts-ignore
-            <form.Field
-              name="name"
-              children={(field: any) => (
+            <form.Field name="name">
+              {(field: FieldApi) => (
                 <PixelInput
                   label="Name"
                   id="name"
@@ -156,7 +191,7 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
                   fullWidth
                 />
               )}
-            />
+            </form.Field>
           ) : (
             <PixelInput
               label="Name"
@@ -173,10 +208,8 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
           )}
 
           {usingTanStackForm ? (
-            // @ts-ignore
-            <form.Field
-              name="email"
-              children={(field: any) => (
+            <form.Field name="email">
+              {(field: FieldApi) => (
                 <PixelInput
                   label="Email"
                   id="email"
@@ -191,7 +224,7 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
                   fullWidth
                 />
               )}
-            />
+            </form.Field>
           ) : (
             <PixelInput
               label="Email"
@@ -209,10 +242,8 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
           )}
 
           {usingTanStackForm ? (
-            // @ts-ignore
-            <form.Field
-              name="budget"
-              children={(field: any) => (
+            <form.Field name="budget">
+              {(field: FieldApi) => (
                 <PixelInput
                   label="Budget (AUD)"
                   id="budget"
@@ -226,7 +257,7 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
                   fullWidth
                 />
               )}
-            />
+            </form.Field>
           ) : (
             <PixelInput
               label="Budget (AUD)"
@@ -252,10 +283,8 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
                 <FaCommentAlt />
               </div>
               {usingTanStackForm ? (
-                // @ts-ignore
-                <form.Field
-                  name="content"
-                  children={(field: any) => (
+                <form.Field name="content">
+                  {(field: FieldApi) => (
                     <>
                       <textarea
                         id="content"
@@ -274,7 +303,7 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
                       )}
                     </>
                   )}
-                />
+                </form.Field>
               ) : (
                 <>
                   <textarea
@@ -308,10 +337,8 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
 
           <div id="source-field">
             {usingTanStackForm ? (
-              // @ts-ignore
-              <form.Field
-                name="source"
-                children={(field: any) => (
+              <form.Field name="source">
+                {(field: FieldApi) => (
                   <PixelSelect
                     label="Where did you find me?"
                     id="source"
@@ -327,7 +354,7 @@ export const ContactForm: React.FC<ContactFormWithPixelUIProps> = ({
                     fullWidth
                   />
                 )}
-              />
+              </form.Field>
             ) : (
               <PixelSelect
                 label="Where did you find me?"

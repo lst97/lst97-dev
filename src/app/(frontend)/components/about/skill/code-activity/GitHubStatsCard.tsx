@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useGithubStats } from '@/frontend/hooks/useGithubStats'
+import Image from 'next/image'
 
 // GitHub Stats Card Component (Pixel Art Style)
 const GitHubStatsCard: React.FC = () => {
@@ -56,7 +57,17 @@ const GitHubStatsCard: React.FC = () => {
   return (
     <div className="relative flex justify-center [image-rendering:pixelated]">
       <div className="pixel-border w-fit overflow-hidden border-4 border-[var(--color-border)] shadow-[5px_5px_0px_rgba(44,44,44,0.3)]">
-        <img src={statsData?.url} alt="GitHub Stats" className="h-auto" width={320} height={140} />
+        {statsData?.url && (
+          <Image
+            src={statsData.url}
+            alt="GitHub Stats"
+            className="h-auto"
+            width={320}
+            height={140}
+            unoptimized={true}
+            priority
+          />
+        )}
       </div>
     </div>
   )

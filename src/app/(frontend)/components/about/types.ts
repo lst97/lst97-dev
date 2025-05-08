@@ -12,7 +12,9 @@ import { SoftSkill } from '@/frontend/models/SoftSkill'
 export interface SectionConfig {
   id: string
   label: string
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   Component: ComponentType<any>
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   props?: any
 }
 

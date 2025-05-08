@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { Post } from '@/payload-types'
-
+import { Post as PayloadPost } from '@/payload-types'
+import { PostBySlugResponse } from './types'
+import { Post } from '@/app/(frontend)/models/Post'
 // GET /api/custom/posts/by-slug?slug={slug}
 export async function GET(request: NextRequest) {
   try {
@@ -33,10 +34,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 })
     }
 
-    const post = posts.docs[0] as Post
+    const post = posts.docs[0] as unknown as PayloadPost
 
     // Map the response to match our frontend model
-    const mappedPost = {
+    const mappedPost: Post = {
       id: post.id,
       documentId: post.id,
       title: post.title,
@@ -44,7 +45,8 @@ export async function GET(request: NextRequest) {
       description: post.description,
       publishedDate: post.publishedDate,
       lastUpdatedDate: post.lastUpdatedDate,
-      content: post.content,
+      // Ensure content is properly formatted as LexicalContent
+      content: post.content || { root: { type: 'root', children: [], direction: null } },
       featuredImage:
         typeof post.featuredImage === 'object' && post.featuredImage
           ? post.featuredImage.url
@@ -62,6 +64,8 @@ export async function GET(request: NextRequest) {
         name: typeof post.author === 'object' ? post.author.email : 'Unknown Author',
       },
     }
+
+    const response: PostBySlugResponse = { data: mappedPost }
 
     // Update view count in a separate try-catch block
     try {
@@ -84,7 +88,7 @@ export async function GET(request: NextRequest) {
       // Continue with the request even if view count update fails
     }
 
-    return NextResponse.json({ data: mappedPost })
+    return NextResponse.json(response)
   } catch (error) {
     console.error('Error fetching post by slug:', error)
     return NextResponse.json({ error: 'Failed to fetch post' }, { status: 500 })

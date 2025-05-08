@@ -1,6 +1,14 @@
 export const CMS_BASE_URL = `/api`
 
-export const CMS_API_PATHS = {
+export interface CMS_API_PATHS {
+  POSTS: {
+    GET_ALL: string
+    GET_BY_ID: (id: string) => string
+    GET_BY_SLUG: (slug: string) => string
+  }
+}
+
+export const CMS_API_PATHS: CMS_API_PATHS = {
   POSTS: {
     GET_ALL: `${CMS_BASE_URL}/custom/posts`,
     GET_BY_ID: (id: string) => `${CMS_BASE_URL}/custom/posts/${id}`,

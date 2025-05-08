@@ -4,6 +4,15 @@ import { useState, useCallback } from 'react'
 import { ContactSubmissionForm } from '@/frontend/models/forms/ContactSubmissionForm'
 import { ApiResponse } from '@/frontend/api'
 
+interface ApiError {
+  response?: {
+    data?: {
+      error?: { message: string } | string
+    }
+  }
+  message: string // Include standard error message property
+}
+
 export function useContactForm(referralSources: string[]) {
   const [turnstileToken, setTurnstileToken] = useState('')
   const [message, setMessage] = useState<{ type: string; text: string } | null>(null)
@@ -32,12 +41,15 @@ export function useContactForm(referralSources: string[]) {
       setIsSuccess(true)
       setMessage({ type: 'success', text: data?.message || 'Message sent successfully!' })
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       // Error handling for form validation errors
-      if (error.response && error.response.data && error.response.data.error) {
+      if (error.response?.data?.error) {
         setMessage({
           type: 'error',
-          text: error.response.data.error.message || error.response.data.error,
+          text:
+            typeof error.response.data.error === 'string'
+              ? error.response.data.error
+              : error.response.data.error.message || 'Unknown API error',
         })
       } else {
         setMessage({ type: 'error', text: error.message || 'Failed to send message' })

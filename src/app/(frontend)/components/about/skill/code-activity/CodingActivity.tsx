@@ -23,6 +23,7 @@ const CodingActivity: React.FC<CodingActivityProps> = ({
     if (!activity) return null
     // If activity has a data property, use it, otherwise use activity directly
     // This handles the new API response structure where data is nested
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     return ((activity as any).data as ActivityData) || (activity as ActivityData)
   }, [activity])
 

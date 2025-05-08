@@ -14,9 +14,12 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') || 'website'
 
     // Font loading
-    const pixelFont = await fetch(
-      new URL('public/fonts/PressStart2P-Regular.ttf', import.meta.url),
-    ).then((res) => res.arrayBuffer())
+    const pixelFont = await fetch(new URL('public/fonts/PressStart2P-Regular.ttf', import.meta.url))
+      .then((res) => res.arrayBuffer())
+      .catch((error) => {
+        console.error('Failed to fetch pixel font:', error)
+        return null
+      })
 
     return new ImageResponse(
       (
@@ -135,13 +138,15 @@ export async function GET(request: NextRequest) {
       {
         width: 1200,
         height: 630,
-        fonts: [
-          {
-            name: 'Press Start 2P',
-            data: pixelFont,
-            style: 'normal',
-          },
-        ],
+        fonts: pixelFont
+          ? [
+              {
+                name: 'Press Start 2P',
+                data: pixelFont,
+                style: 'normal',
+              },
+            ]
+          : [],
       },
     )
   } catch (error) {

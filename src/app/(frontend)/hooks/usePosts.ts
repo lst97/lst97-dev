@@ -1,12 +1,13 @@
 import { useCallback } from 'react'
-import { Post } from '@/frontend/models/Post'
 import { CMS_API_PATHS } from '@/frontend/constants/api-paths'
 import { useQuery } from '@tanstack/react-query'
+import { Post, LexicalNode } from '@/frontend/models/Post'
 
 // Cache expiration time (30 minutes)
 const CACHE_EXPIRATION = 30 * 60 * 1000
 
-interface UsePostsReturn {
+// Return type for usePosts hook
+export interface UsePostsReturn {
   posts: Post[]
   post: Post | null
   isLoading: boolean
@@ -14,7 +15,8 @@ interface UsePostsReturn {
   refetch: () => void
 }
 
-interface UsePostsOptions {
+// Options type for usePosts hook
+export interface UsePostsOptions {
   id?: string
   slug?: string
 }
@@ -55,7 +57,7 @@ export const usePosts = (options?: UsePostsOptions | string): UsePostsReturn => 
 
       // Process the posts
       if (Array.isArray(data) && data.length > 0) {
-        return data.map((post: Post) => ({
+        return data.map((post) => ({
           ...post,
           // For list view, content is empty and readtime is already calculated
           // If readtime doesn't exist, use a default value
@@ -94,14 +96,14 @@ export const usePosts = (options?: UsePostsOptions | string): UsePostsReturn => 
     posts: isSinglePostRequest ? [] : Array.isArray(data) ? data : [],
     post: isSinglePostRequest ? (Array.isArray(data) ? null : data) || null : null,
     isLoading,
-    error: error as Error | null,
+    error: error,
     refetch,
   }
 }
 
 // Helper function to calculate read time from rich text content
 // Assumes 200 words per minute reading speed
-function calculateReadTime(content: any[]): number {
+function calculateReadTime(content: LexicalNode[]): number {
   if (!content || !Array.isArray(content)) return 1
 
   let wordCount = 0
@@ -109,7 +111,7 @@ function calculateReadTime(content: any[]): number {
   // Process rich text to count words
   content.forEach((node) => {
     if (node.children) {
-      node.children.forEach((child: any) => {
+      node.children.forEach((child: LexicalNode) => {
         if (typeof child.text === 'string') {
           wordCount += child.text.split(/\s+/).filter(Boolean).length || 0
         }

@@ -3,7 +3,7 @@ import { ProjectsGrid } from './ProjectsGrid'
 import { Project } from './ProjectCard'
 import { FaStar, FaCode, FaPause, FaArchive, FaGithub, FaFlask, FaBookOpen } from 'react-icons/fa'
 import PixelTabPanel from '@/frontend/components/ui/Tabs'
-
+import Image from 'next/image'
 export interface ProjectExplorerProps {
   projects: Project[]
   onOpenCaseStudy: (project: Project) => void
@@ -36,10 +36,12 @@ const EmptyState = () => (
       404 - Nothing to show here yet.
     </p>
     <div className="w-24 h-24 mx-auto mb-8">
-      <img
+      <Image
         src="/pixel-error.svg"
         alt="Pixel art character"
         className="w-full h-full image-pixelated"
+        width={96}
+        height={96}
         onError={(e) => {
           e.currentTarget.src =
             "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E"

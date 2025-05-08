@@ -66,7 +66,7 @@ export const PostHeader = ({
               {post.categories.map((category, index) => (
                 <Tag
                   key={`category-${index}`}
-                  label={category}
+                  label={category || ''}
                   type={
                     [
                       'normal',

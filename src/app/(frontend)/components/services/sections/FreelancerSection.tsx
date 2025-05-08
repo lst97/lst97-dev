@@ -29,7 +29,7 @@ const FreelancerSection: React.FC<FreelancerSectionProps> = ({
     <p className="font-pixel text-[1.2rem] md:text-[1.8rem] text-text-color leading-[2] text-center max-w-[1400px] mx-auto mb-24 px-24">
       Choosing a freelance web developer like myself means partnering with a{' '}
       <span className="pixel-underline">dedicated professional</span> who is as invested in your
-      project's success as you are. Here's what sets the freelance experience apart:
+      project&apos;s success as you are. Here&apos;s what sets the freelance experience apart:
     </p>
     <div className="flex flex-col gap-24 max-w-6xl mx-auto px-8 md:px-32">
       {freelancerAdvantages.map((adv: FreelancerAdvantage, i: number) => (

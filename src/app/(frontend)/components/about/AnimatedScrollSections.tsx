@@ -9,7 +9,6 @@ const PROGRESS_BAR_REST_DELTA = 0.001
 
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { motion, useScroll, useSpring, useInView, useReducedMotion } from 'framer-motion'
-import { useScroll as useScrollContext } from '@/frontend/contexts/ScrollContext'
 import { SectionConfig, AnimatedSectionsProps } from './types'
 import {
   Timeline,
@@ -26,6 +25,17 @@ import {
 import PersonalAttributes from '@/frontend/components/about/skill/PersonalAttributes'
 
 import { FlipCardAnimation } from '@/frontend/components/animation/FlipCardAnimation'
+
+// Create a simple scroll context for this component
+interface ScrollContextType {
+  isNavbarVisible: boolean
+  setIsNavbarVisible: (visible: boolean) => void
+}
+
+const LocalScrollContext = React.createContext<ScrollContextType>({
+  isNavbarVisible: true,
+  setIsNavbarVisible: () => {},
+})
 
 /**
  * Wrapper component for each scrollable section
@@ -46,7 +56,7 @@ const AnimatedScrollSectionWrapper: React.FC<{
   isMainScrolling,
   handleTimelineAutoScroll,
 }) => {
-  const sectionRef = useRef(null)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const [hasAnimated, setHasAnimated] = useState(false)
   const prefersReducedMotion = useReducedMotion()
   const isInView = useInView(sectionRef, {
@@ -113,7 +123,7 @@ const AnimatedScrollSections: React.FC<AnimatedSectionsProps> = ({
   cvData,
   softSkills,
 }) => {
-  const { setIsNavbarVisible } = useScrollContext()
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
   const lastScrollY = useRef(0)
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null)
@@ -259,7 +269,7 @@ const AnimatedScrollSections: React.FC<AnimatedSectionsProps> = ({
         isProgrammaticScrolling.current = false
       }, animationDuration)
     },
-    [prefersReducedMotion],
+    [prefersReducedMotion, activeSection],
   )
 
   // Then define handleSectionNavigation
@@ -324,7 +334,7 @@ const AnimatedScrollSections: React.FC<AnimatedSectionsProps> = ({
   }, [handleScroll])
 
   return (
-    <>
+    <LocalScrollContext.Provider value={{ isNavbarVisible, setIsNavbarVisible }}>
       <div
         className="fixed right-8 top-1/2 -translate-y-1/2 z-[10] xl:right-8 lg:right-4 md:right-2 hidden sm:block"
         style={{ width: '80px' }}
@@ -368,7 +378,7 @@ const AnimatedScrollSections: React.FC<AnimatedSectionsProps> = ({
           />
         ))}
       </div>
-    </>
+    </LocalScrollContext.Provider>
   )
 }
 

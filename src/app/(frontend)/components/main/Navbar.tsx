@@ -348,7 +348,6 @@ const DesktopNavLinks = ({ currentPath }: { currentPath: string }) => {
     { href: routes.projects, label: 'PROJECTS' },
     { href: '/pages/services', label: 'SERVICES' },
     { href: routes.about, label: 'ABOUT' },
-    { href: '/pages/test-navigation', label: 'TEST NAV' },
   ]
 
   return (

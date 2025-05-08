@@ -45,3 +45,22 @@ export interface CollisionResult {
   normal?: Point
   penetration?: number
 }
+
+export interface SquareProps {
+  id: number
+  size: number
+  color: string
+  velocityX: number
+  velocityY: number
+  rotation: number
+  angularVelocity: number
+  mass: number
+  inertia: number
+  corners: Point[]
+  isTransitioning: boolean
+  opacity: number
+  collisionCoolDown: Map<number, number>
+  lastCollision: undefined
+  centerX: number
+  centerY: number
+}

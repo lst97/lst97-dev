@@ -49,7 +49,7 @@ export const PostsList: React.FC<PostsListProps> = ({ posts, className, showFilt
   const categories = useMemo(() => {
     const categorySet = new Set<string>()
     posts.forEach((post) => {
-      post.categories?.forEach((category) => categorySet.add(category))
+      post.categories?.forEach((category) => categorySet.add(category || ''))
     })
     return Array.from(categorySet).map((category) => ({
       label: category,
@@ -65,7 +65,7 @@ export const PostsList: React.FC<PostsListProps> = ({ posts, className, showFilt
     // Filter by categories if any selected
     if (activeCategories.length > 0) {
       result = result.filter((post) =>
-        post.categories.some((category) => activeCategories.includes(category)),
+        post.categories.some((category) => activeCategories.includes(category || '')),
       )
     }
 
@@ -162,9 +162,9 @@ export const PostsList: React.FC<PostsListProps> = ({ posts, className, showFilt
               date={new Date(post.publishedDate).toISOString()}
               href={`${routes.resources}/${post.slug}`}
               description={post.description}
-              icon={post.featuredImage}
+              icon={post.featuredImage || undefined}
               categories={post.categories.map((category) => ({
-                name: category,
+                name: category || '',
                 type: 'normal',
               }))}
               stats={{

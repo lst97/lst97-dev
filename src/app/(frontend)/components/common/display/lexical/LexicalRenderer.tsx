@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { LexicalRendererProps, LexicalNode } from './types'
+import { LexicalRendererProps, LexicalNode, LexicalContent, LexicalCodeNode } from './types'
 import { Paragraph, Heading, List, Link, Quote, Code, Image, TextFormat } from './components'
 
 /**
@@ -34,7 +34,8 @@ export const LexicalRenderer = ({ content }: LexicalRendererProps) => {
 
     try {
       // Parse the Lexical JSON content
-      const parsedContent = typeof content === 'string' ? JSON.parse(content) : content
+      const parsedContent =
+        typeof content === 'string' ? (JSON.parse(content) as LexicalContent) : content
 
       if (!parsedContent.root || !parsedContent.root.children) {
         return (
@@ -78,7 +79,7 @@ const isSingleNodeCodeBlock = (node: LexicalNode): boolean => {
   if (node.type === 'code' || node.type === 'codeBlock' || node.tag === 'code') return true
 
   // Check for code field
-  if ('code' in node && typeof (node as any).code === 'string') return true
+  if ('code' in node && typeof node.code === 'string') return true
 
   // Check for codeHighlight property
   if ('codeHighlight' in node) return true
@@ -86,8 +87,8 @@ const isSingleNodeCodeBlock = (node: LexicalNode): boolean => {
   // Check if node has code format (more expensive, requires checking children)
   const hasCodeFormat =
     node.format === 16 ||
-    ('textFormat' in node && (node as any).textFormat === 16) ||
-    (node.children && node.children.some((child: any) => child.format === 16))
+    ('textFormat' in node && node.textFormat === 16) ||
+    (node.children && node.children.some((child) => child.format === 16))
 
   if (hasCodeFormat) return true
 
@@ -216,7 +217,7 @@ const renderLexicalNodes = (nodes: LexicalNode[]): React.ReactNode => {
 
     if (codeBlockRange) {
       // Create a combined code block node using pre-collected content
-      const combinedCodeNode: LexicalNode = {
+      const combinedCodeNode: LexicalCodeNode = {
         type: 'code',
         combinedCodeBlock: true,
         language: codeBlockRange.language,
@@ -231,14 +232,17 @@ const renderLexicalNodes = (nodes: LexicalNode[]): React.ReactNode => {
     }
     // Check for single-node code blocks
     else if (isSingleNodeCodeBlock(node)) {
-      result.push(<Code key={`code-${i}`} node={{ ...node, type: 'code' }} index={i} />)
+      // Create a proper code node with the correct type
+      const codeNode: LexicalCodeNode = {
+        ...node,
+        type: 'code',
+        // Ensure codeHighlight is a string if it exists
+        codeHighlight: typeof node.codeHighlight === 'boolean' ? undefined : node.codeHighlight,
+      }
+      result.push(<Code key={`code-${i}`} node={codeNode} index={i} />)
     }
     // Links - check for both direct link type and link fields
-    else if (
-      node.type === 'link' ||
-      ('fields' in node && (node as any).fields?.url) ||
-      'url' in node
-    ) {
+    else if (node.type === 'link' || ('fields' in node && node.fields?.url) || 'url' in node) {
       result.push(<Link key={`link-${i}`} node={{ ...node, type: 'link' }} index={i} />)
     }
     // Process regular node types
@@ -260,7 +264,7 @@ const renderLexicalNodes = (nodes: LexicalNode[]): React.ReactNode => {
           result.push(<Quote key={`quote-${i}`} node={node} index={i} />)
           break
         case 'image':
-          result.push(<Image key={`img-${i}`} node={node} index={i} />)
+          result.push(<Image key={`img-${i}`} node={node} index={i} alt={node.altText ?? ''} />)
           break
         default:
           // If it has text or children nodes, use TextFormat
@@ -271,6 +275,3 @@ const renderLexicalNodes = (nodes: LexicalNode[]): React.ReactNode => {
 
   return result
 }
-
-// Export helper function for metadata
-export { extractTextFromLexical } from './utils/formatHelpers'

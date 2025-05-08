@@ -5,7 +5,7 @@ import { useRef, useCallback } from 'react'
  * @param callback The function to throttle
  * @param delay The throttle delay in ms
  */
-export function useThrottle<T extends (...args: any[]) => void>(callback: T, delay: number): T {
+export function useThrottle<T extends (...args: unknown[]) => void>(callback: T, delay: number): T {
   const lastCall = useRef(0)
   const savedCallback = useRef(callback)
 
@@ -13,7 +13,7 @@ export function useThrottle<T extends (...args: any[]) => void>(callback: T, del
   savedCallback.current = callback
 
   return useCallback(
-    (...args: any[]) => {
+    (...args: Parameters<T>) => {
       const now = Date.now()
       if (now - lastCall.current >= delay) {
         lastCall.current = now

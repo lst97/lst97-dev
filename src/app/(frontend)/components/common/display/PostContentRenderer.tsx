@@ -4,7 +4,6 @@ import {
   RichTextContent,
   HeadingContent,
   ParagraphContent,
-  ListContent,
   CodeContent,
   ImageContent,
   ListItem,
@@ -13,6 +12,7 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import { useEffect, useRef } from 'react'
 import React from 'react'
+import Image from 'next/image'
 
 // Extend the types to support the additional properties needed
 interface ExtendedHeadingContent extends HeadingContent {
@@ -78,15 +78,15 @@ export const PostContentRenderer = ({ content }: PostContentRendererProps) => {
   const renderContent = (content: RichTextContent, index: number) => {
     switch (content.type) {
       case 'heading':
-        return renderHeading(content as ExtendedHeadingContent, index)
+        return renderHeading(content as unknown as ExtendedHeadingContent, index)
       case 'paragraph':
-        return renderParagraph(content as ExtendedParagraphContent, index)
+        return renderParagraph(content as unknown as ExtendedParagraphContent, index)
       case 'list':
-        return renderList(content as CheckListContent, index)
+        return renderList(content as unknown as CheckListContent, index)
       case 'code':
-        return renderCode(content as CodeContent, index)
+        return renderCode(content as unknown as CodeContent, index)
       case 'image':
-        return renderImage(content as ImageContent, index)
+        return renderImage(content as unknown as ImageContent, index)
       default:
         return null
     }
@@ -95,16 +95,26 @@ export const PostContentRenderer = ({ content }: PostContentRendererProps) => {
   const renderHeading = (content: ExtendedHeadingContent, index: number) => {
     const { level, text, align } = content
 
-    const headingStyles =
-      {
-        1: "font-['Press_Start_2P'] text-2xl font-bold mb-4 text-[var(--color-text)] dark:text-[var(--color-text-light)]",
-        2: "font-['Press_Start_2P'] text-xl font-semibold mb-3 text-[var(--color-text)] dark:text-[var(--color-text-light)]",
-        3: "font-['Press_Start_2P'] text-lg font-medium mb-2 text-[var(--color-text)] dark:text-[var(--color-text-light)]",
-        4: 'font-['Press_Start_2P'] text-lg font-medium mb-2 text-[var(--color-text)] dark:text-[var(--color-text-light)]',
-        5: 'font-['Press_Start_2P'] text-base font-medium mb-1 text-[var(--color-text)] dark:text-[var(--color-text-light)]',
-        6: 'font-['Press_Start_2P'] text-sm font-medium mb-1 text-[var(--color-text)] dark:text-[var(--color-text-light)]',
-      }[level] ||
-      "font-['Press_Start_2P'] text-xl font-bold mb-2 text-[var(--color-text)] dark:text-[var(--color-text-light)]"
+    // Create a function to get the heading style based on level
+    const getHeadingStyle = (level: number) => {
+      switch (level) {
+        case 1:
+          return "font-['Press_Start_2P'] text-2xl font-bold mb-4 text-[var(--color-text)] dark:text-[var(--color-text-light)]"
+        case 2:
+          return "font-['Press_Start_2P'] text-xl font-semibold mb-3 text-[var(--color-text)] dark:text-[var(--color-text-light)]"
+        case 3:
+        case 4: // Fall through to use the same style for level 3 and 4
+          return "font-['Press_Start_2P'] text-lg font-medium mb-2 text-[var(--color-text)] dark:text-[var(--color-text-light)]"
+        case 5:
+          return "font-['Press_Start_2P'] text-base font-medium mb-1 text-[var(--color-text)] dark:text-[var(--color-text-light)]"
+        case 6:
+          return "font-['Press_Start_2P'] text-sm font-medium mb-1 text-[var(--color-text)] dark:text-[var(--color-text-light)]"
+        default:
+          return "font-['Press_Start_2P'] text-xl font-bold mb-2 text-[var(--color-text)] dark:text-[var(--color-text-light)]"
+      }
+    }
+
+    const headingStyles = getHeadingStyle(level)
 
     const alignClass = align ? `text-${align}` : ''
     const formattedText = renderFormattedText(text)
@@ -119,77 +129,28 @@ export const PostContentRenderer = ({ content }: PostContentRendererProps) => {
       style.textAlign = align
     }
 
-    switch (level) {
-      case 1:
-        return (
-          <h1
-            key={`heading-${index}`}
-            className={`${headingStyles} ${alignClass}`}
-            id={headingId}
-            style={style}
-            dangerouslySetInnerHTML={{ __html: formattedText }}
-          />
-        )
-      case 2:
-        return (
-          <h2
-            key={`heading-${index}`}
-            className={`${headingStyles} ${alignClass}`}
-            id={headingId}
-            style={style}
-            dangerouslySetInnerHTML={{ __html: formattedText }}
-          />
-        )
-      case 3:
-        return (
-          <h3
-            key={`heading-${index}`}
-            className={`${headingStyles} ${alignClass}`}
-            id={headingId}
-            style={style}
-            dangerouslySetInnerHTML={{ __html: formattedText }}
-          />
-        )
-      case 4:
-        return (
-          <h4
-            key={`heading-${index}`}
-            className={`${headingStyles} ${alignClass}`}
-            id={headingId}
-            style={style}
-            dangerouslySetInnerHTML={{ __html: formattedText }}
-          />
-        )
-      case 5:
-        return (
-          <h5
-            key={`heading-${index}`}
-            className={`${headingStyles} ${alignClass}`}
-            id={headingId}
-            style={style}
-            dangerouslySetInnerHTML={{ __html: formattedText }}
-          />
-        )
-      case 6:
-        return (
-          <h6
-            key={`heading-${index}`}
-            className={`${headingStyles} ${alignClass}`}
-            id={headingId}
-            style={style}
-            dangerouslySetInnerHTML={{ __html: formattedText }}
-          />
-        )
-      default:
-        return (
-          <h2
-            key={`heading-${index}`}
-            className={`${headingStyles} ${alignClass}`}
-            id={headingId}
-            style={style}
-            dangerouslySetInnerHTML={{ __html: formattedText }}
-          />
-        )
+    const commonProps = {
+      className: `${headingStyles} ${alignClass}`,
+      id: headingId,
+      style,
+      dangerouslySetInnerHTML: { __html: formattedText },
+    }
+
+    // Use a conditional rendering approach instead of createElement
+    if (level === 1) {
+      return <h1 key={`heading-${index}`} {...commonProps} />
+    } else if (level === 2) {
+      return <h2 key={`heading-${index}`} {...commonProps} />
+    } else if (level === 3) {
+      return <h3 key={`heading-${index}`} {...commonProps} />
+    } else if (level === 4) {
+      return <h4 key={`heading-${index}`} {...commonProps} />
+    } else if (level === 5) {
+      return <h5 key={`heading-${index}`} {...commonProps} />
+    } else if (level === 6) {
+      return <h6 key={`heading-${index}`} {...commonProps} />
+    } else {
+      return <h2 key={`heading-${index}`} {...commonProps} />
     }
   }
 
@@ -312,7 +273,14 @@ export const PostContentRenderer = ({ content }: PostContentRendererProps) => {
     return (
       <div key={`image-${index}`} className="mb-6">
         <div className="relative w-full h-auto max-h-[500px] flex justify-center pixel-borders p-2 bg-[var(--color-card)] dark:bg-[var(--color-card-dark)]">
-          <img src={url} alt={altText} className="object-contain max-h-[500px] image-pixelated" />
+          <Image
+            src={url}
+            alt={altText}
+            className="object-contain max-h-[500px] image-pixelated"
+            width={0}
+            height={0}
+            sizes="100vw"
+          />
         </div>
         {altText && (
           <p className="text-center text-[var(--color-text)] dark:text-[var(--color-text-light)] opacity-70 text-sm mt-2 font-['Press_Start_2P']">

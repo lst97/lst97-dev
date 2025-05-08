@@ -3,7 +3,7 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
+        protocol: 'http',
         hostname: 'localhost',
         port: '3000',
       },
@@ -12,6 +12,7 @@ const nextConfig = {
   env: {
     BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
   },
+  turbopack: {},
 }
 
 export default nextConfig

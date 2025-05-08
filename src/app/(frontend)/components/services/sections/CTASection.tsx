@@ -3,15 +3,11 @@
 import React from 'react'
 import { routes } from '@/frontend/constants/routes'
 import { NavigationLink } from '@/frontend/components/ui/Links'
-/**
- * Props for the CTASection component.
- */
-interface CTASectionProps {}
 
 /**
  * Call to Action section component.
  */
-const CTASection: React.FC<CTASectionProps> = () => (
+const CTASection: React.FC = () => (
   <section className="text-center py-12 sm:py-16 md:py-20 mt-12 sm:mt-16 md:mt-24 relative">
     {/* Decorative pixel elements */}
     <div className="absolute top-[-12px] sm:top-[-16px] md:top-[-20px] left-0 w-full h-3 sm:h-4 bg-[repeating-linear-gradient(90deg,var(--color-border)_0,var(--color-border)_4px,transparent_2px,transparent_24px)]"></div>
@@ -44,7 +40,7 @@ const CTASection: React.FC<CTASectionProps> = () => (
 
             <div className="bg-amber-100 border-dashed border-1 sm:border-2 border-border p-3 sm:p-4 md:p-6 mb-6 sm:mb-8 md:mb-10 inline-block">
               <p className="font-['Press_Start_2P'] text-xs sm:text-sm md:text-base text-accent-color">
-                Let's work together to bring your ideas to life
+                Let&apos;s work together to bring your ideas to life
               </p>
             </div>
 
