@@ -3,6 +3,7 @@
 import { Suspense } from 'react'
 import ServicesClient from './ServicesClient'
 import { LoadingSpinner } from '@/frontend/components/common/LoadingSpinner'
+import { Footer } from '@/frontend/components/footer'
 
 // Loading component
 function Loading() {
@@ -21,6 +22,7 @@ export default function ServicesPage() {
   return (
     <Suspense fallback={<Loading />}>
       <ServicesClient />
+      <Footer />
     </Suspense>
   )
 }

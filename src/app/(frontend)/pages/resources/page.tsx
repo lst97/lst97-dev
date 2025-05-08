@@ -3,6 +3,7 @@
 import { Suspense } from 'react'
 import ResourcesClient from './ResourcesClient'
 import { LoadingSpinner } from '@/frontend/components/common/LoadingSpinner'
+import { Footer } from '@/frontend/components/footer'
 
 // Loading component
 function Loading() {
@@ -21,6 +22,7 @@ export default function ResourcesPage() {
   return (
     <Suspense fallback={<Loading />}>
       <ResourcesClient />
+      <Footer />
     </Suspense>
   )
 }

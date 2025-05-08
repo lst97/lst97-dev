@@ -341,8 +341,6 @@ const ServicesContent = () => {
           <CTASection />
         </main>
 
-        <Footer />
-
         <AnimatePresence>
           {isProjectShowcaseOpen && selectedProject && (
             <ProjectShowcaseDialog

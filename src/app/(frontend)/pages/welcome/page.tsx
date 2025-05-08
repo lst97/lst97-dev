@@ -3,6 +3,7 @@
 import { Suspense } from 'react'
 import WelcomeClient from './WelcomeClient'
 import { LoadingSpinner } from '@/frontend/components/common/LoadingSpinner'
+import { Footer } from '@/frontend/components/footer'
 
 // Loading component
 function Loading() {
@@ -19,6 +20,7 @@ export default function WelcomePage() {
   return (
     <Suspense fallback={<Loading />}>
       <WelcomeClient />
+      <Footer />
     </Suspense>
   )
 }

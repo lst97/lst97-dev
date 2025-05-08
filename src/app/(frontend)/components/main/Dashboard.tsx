@@ -29,7 +29,6 @@ export function Dashboard({ children }: Readonly<{ children?: React.ReactNode }>
         <main className="grow w-full max-w-screen-2xl mx-auto px-2 sm:px-4 lg:px-8 py-4 pt-12 lg:pt-24">
           <div className="min-h-[calc(100vh-140px)] lg:min-h-[calc(100vh-200px)]">{children}</div>
         </main>
-        <Footer />
       </NavbarRefreshContext.Provider>
     </ScrollProvider>
   )
