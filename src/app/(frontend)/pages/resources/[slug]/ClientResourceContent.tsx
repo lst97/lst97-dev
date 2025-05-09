@@ -9,6 +9,7 @@ import { motion } from 'framer-motion'
 import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
 import { PlainDialog } from '@/frontend/components/ui/Dialogs'
 import React from 'react'
+import { Footer } from '@/app/(frontend)/components/footer'
 
 // Cache information dialog
 const CacheInfoDialog = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
@@ -95,6 +96,8 @@ export default function ClientResourceContent({ post, slug }: ClientResourceCont
 
         <CacheInfoDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
       </div>
+
+      <Footer />
     </Dashboard>
   )
 }

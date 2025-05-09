@@ -19,19 +19,21 @@ const navLinkClass =
 const desktopNavLinkBaseClass = classNames(
   "font-['Press_Start_2P'] text-gray-800 uppercase transition-colors text-xl px-4",
   'relative text-center h-full flex items-center justify-center',
-  'border-r border-gray-800 bg-amber-50 w-full',
+  'border-gray-800 bg-amber-50 w-full',
   'hover:bg-amber-100',
   'transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md',
   'active:translate-y-0 active:shadow-none',
+  'border-r-2 border-4 first:border-l-2 last:border-r-4 border-gray-800',
 )
 
 const tabletNavLinkBaseClass = classNames(
   "font-['Press_Start_2P'] text-gray-800 uppercase transition-colors text-xs sm:text-sm px-1",
   'relative text-center h-full flex items-center justify-center',
-  'border-r border-gray-800 bg-amber-50 w-full',
+  'border-gray-800 bg-amber-50 w-full',
   'hover:bg-amber-100',
   'transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md',
   'active:translate-y-0 active:shadow-none',
+  'border-r-2 border-4 first:border-l-2 last:border-r-4 border-gray-800',
 )
 
 const socialIconLinkClass = classNames(
@@ -251,11 +253,10 @@ const ReleaseNoteButton = ({ onClick }: { onClick: () => void }) => {
     <button
       type="button"
       className={classNames(
-        'w-full bg-amber-100 py-3 px-6 text-center border-r border-gray-800',
+        'w-full bg-amber-100 py-3 px-6 text-center border-r border-gray-800 border-4 md:border-b-0 border-l-2',
         "font-['Press_Start_2P'] md:text-sm text-xs text-gray-800 cursor-pointer h-full",
         'transition-all duration-200 hover:bg-amber-200 ',
-        'hover:-translate-y-[1px] hover:shadow active:translate-y-0 active:shadow-none',
-        'hover:border-b-amber-600',
+        'hover:shadow active:translate-y-0 active:shadow-none',
         'focus:outline-none focus:ring-2 focus:ring-amber-500',
       )}
       onClick={onClick}
@@ -268,13 +269,13 @@ const ReleaseNoteButton = ({ onClick }: { onClick: () => void }) => {
 // NavbarLogo component
 const NavbarLogo = () => {
   return (
-    <div className="md:h-full p-10 flex items-center justify-center border-r border-gray-800 overflow-hidden cursor-pointer transition-colors hover:bg-amber-100">
+    <div className="md:h-full sm:p-4 flex items-center justify-center border-4 border-gray-800 overflow-hidden cursor-pointer transition-colors hover:bg-amber-100">
       <NavigationLink
         href={routes.welcome}
         className="w-full h-full flex items-center justify-center no-underline text-gray-800"
         aria-label="LST97 Home"
       >
-        <span className="font-press-start text-xl sm:hidden">LST97</span>
+        <span className="font-['Press_Start_2P'] text-md sm:hidden">LST97</span>
         <span className="hidden sm:block md:hidden scale-75 origin-center">
           <AsciiTextGenerator text="LST97" />
         </span>
@@ -300,7 +301,7 @@ const MobileNavToggle = ({
     <button
       ref={buttonRef}
       type="button"
-      className="hover:bg-amber-200 p-2 rounded-md border-2 border-gray-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] focus:outline-none focus:ring-2 focus:ring-amber-500"
+      className="hover:bg-amber-200 p-2 rounded-md border-4 border-gray-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] focus:outline-none focus:ring-2 focus:ring-amber-500 hover:cursor-pointer"
       onClick={onToggle}
       aria-label="Open menu"
       aria-expanded={isOpen}
@@ -323,14 +324,17 @@ const TabletNavLinks = ({ currentPath }: { currentPath: string }) => {
 
   return (
     <nav>
-      <div className="flex flex-row items-stretch h-full border-r border-gray-800">
+      <div className="flex flex-row items-stretch h-full border-gray-800">
         {navLinks.map((link) => {
           const isActive = currentPath === link.href
           return (
             <NavigationLink
               key={link.href}
               href={link.href}
-              className={classNames(tabletNavLinkBaseClass, isActive && 'bg-amber-100 shadow-md')}
+              className={classNames(
+                tabletNavLinkBaseClass,
+                isActive && 'bg-amber-100 shadow-md border-t-0',
+              )}
             >
               {link.label}
             </NavigationLink>
@@ -346,20 +350,23 @@ const DesktopNavLinks = ({ currentPath }: { currentPath: string }) => {
   const navLinks = [
     { href: routes.resources, label: 'RESOURCES' },
     { href: routes.projects, label: 'PROJECTS' },
-    { href: '/pages/services', label: 'SERVICES' },
+    { href: routes.services, label: 'SERVICES' },
     { href: routes.about, label: 'ABOUT' },
   ]
 
   return (
     <nav>
-      <div className="flex flex-row items-stretch h-full border-r border-gray-800">
+      <div className="flex flex-row items-stretch h-full border-gray-800">
         {navLinks.map((link) => {
           const isActive = currentPath === link.href
           return (
             <NavigationLink
               key={link.href}
               href={link.href}
-              className={classNames(desktopNavLinkBaseClass, isActive && 'bg-amber-100 shadow-md')}
+              className={classNames(
+                desktopNavLinkBaseClass,
+                isActive && 'bg-amber-100 shadow-md border-t-0',
+              )}
             >
               {link.label}
             </NavigationLink>
@@ -414,7 +421,7 @@ const GetStartedButton = () => {
     <NavigationLink
       href={routes.home}
       className={classNames(
-        'border border-gray-800 bg-amber-500 text-amber-50',
+        'border-4 border-y-2 border-gray-800 bg-amber-500 text-amber-50',
         'py-2 sm:py-3 px-2 sm:px-3 md:px-6 flex items-center justify-center font-bold text-sm',
         'sm:ml-2 md:ml-4',
         'hover:bg-amber-100 hover:text-gray-800',
@@ -455,20 +462,20 @@ function Navbar({ className }: Readonly<NavbarProps>) {
 
       <motion.nav
         className={classNames('w-screen bg-amber-50 flex flex-col h-24', 'z-50', className)}
-        style={{ position: 'relative', zIndex: 50 }}
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}
         initial={{ y: 0, opacity: 1 }}
         animate={{
           y: isNavbarVisible ? 0 : -100,
           opacity: isNavbarVisible ? 1 : 0,
         }}
       >
-        <div className="grid grid-cols-[1fr_4fr] sm:grid-cols-[2fr_8fr] items-stretch border-b border-gray-800 bg-amber-50 h-24">
+        <div className="grid grid-cols-[1fr_4fr] sm:grid-cols-[2fr_8fr] items-stretch bg-amber-50 h-26">
           <NavbarLogo />
 
           <div className="h-full flex flex-col">
             <div className="flex items-center justify-between h-full">
               <ReleaseNoteButton onClick={() => setIsReleaseNotesOpen(true)} />
-              <div className="sm:hidden px-4">
+              <div className="sm:hidden px-4 flex items-center border-4 border-gray-800 h-full">
                 <MobileNavToggle
                   isOpen={isHamburgerMenuOpen}
                   onToggle={() => setIsHamburgerMenuOpen(true)}
@@ -481,7 +488,7 @@ function Navbar({ className }: Readonly<NavbarProps>) {
             <div className="hidden sm:grid md:hidden sm:grid-cols-[7fr_3fr] flex-1 items-stretch">
               <TabletNavLinks currentPath={pathname} />
 
-              <div className="flex items-center justify-end gap-1 px-1 sm:px-2 h-full">
+              <div className="flex items-center justify-end gap-1 px-1 sm:px-2 h-full border-4 border-l-2 border-gray-800">
                 <SocialLinks />
                 <GetStartedButton />
               </div>
@@ -491,7 +498,7 @@ function Navbar({ className }: Readonly<NavbarProps>) {
             <div className="hidden md:grid md:grid-cols-[7fr_3fr] flex-1 items-stretch">
               <DesktopNavLinks currentPath={pathname} />
 
-              <div className="flex items-center justify-end gap-4 px-6 h-full">
+              <div className="flex items-center justify-end gap-4 pl-6 h-full border-4 border-l-2 border-border">
                 <SocialLinks />
                 <GetStartedButton />
               </div>

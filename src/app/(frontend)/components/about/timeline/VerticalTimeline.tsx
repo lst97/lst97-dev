@@ -60,7 +60,7 @@ export const VerticalTimeline: React.FC<VerticalTimelineProps> = ({
     <div className="flex flex-col md:flex-row gap-4 w-full relative mx-auto">
       {/* Main timeline scrollable area */}
       <div
-        className="bg-card w-full md:w-3/5 max-w-[1000px] pt-0 px-[clamp(1rem,3vw,2rem)] pb-[clamp(1rem,3vw,2rem)] relative mx-auto timeline-vertical timeline-container overflow-auto max-h-[80vh] overflow-x-hidden"
+        className="border-2 border-l-8 border-border bg-card w-full md:w-3/5 max-w-[1000px] pt-0 px-[clamp(1rem,3vw,2rem)] pb-[clamp(1rem,3vw,2rem)] relative mx-auto timeline-vertical timeline-container overflow-auto max-h-[80vh] overflow-x-hidden"
         ref={timelineContainerRef}
       >
         {/* Background image */}
@@ -75,8 +75,6 @@ export const VerticalTimeline: React.FC<VerticalTimelineProps> = ({
 
         {/* Vertical timeline line */}
         <div className="relative">
-          <div className="absolute -left-4 top-0 bottom-0 w-[var(--line-thickness)] bg-[color:var(--color-border)] "></div>
-
           {yearRange.map((year) => {
             const yearEvents = eventsByYear.get(year) || []
 

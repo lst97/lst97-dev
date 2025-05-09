@@ -5,7 +5,7 @@ import { GitHubContributionsCalendar } from '@/frontend/components/utils/GitHubC
 
 export const Accessories = () => {
   return (
-    <div className="grid lg:grid-cols-2 grid-cols-1 gap-4 m-16 grid-rows-2">
+    <div className="grid lg:grid-cols-2 grid-cols-1 gap-4 px-4 md:px-16 grid-rows-2">
       <PixelContainer className="flex relative h-full">
         <Image
           src="/melbourne-city-map.svg"

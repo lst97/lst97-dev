@@ -185,9 +185,14 @@ const RenderParagraph: React.FC<RenderParagraphProps> = ({ paragraph }) => (
     <div className="absolute -top-8 -left-1 bg-black text-gray-100 px-2 py-1 text-xs border-4 border-black rounded-t w-fit font-['Press_Start_2P'] font-bold ">
       {paragraph.title}
     </div>
-    <div className="max-w-3xl p-2 sm:p-4">
+    <div className="max-w-3xl p-2 sm:p-4 text-sm font-['Press_Start_2P']">
       {paragraph.content.map((line, idx) => (
-        <div key={idx} className={paragraph.title === 'About this site' ? '' : undefined}>
+        <div
+          key={idx}
+          className={
+            paragraph.title === 'About this site' ? 'font-["Press_Start_2P"] text-sm mb-4' : 'mb-4'
+          }
+        >
           {line.map((part, i) =>
             typeof part === 'string' ? (
               part

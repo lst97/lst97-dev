@@ -5,36 +5,36 @@ import Image from 'next/image'
 import {
   FaCode,
   FaReact,
-  FaNodeJs,
   FaTools,
   FaUserClock,
   FaPuzzlePiece,
   FaBriefcase,
   FaBuilding,
   FaComments,
-  FaDollarSign,
+  FaQuestion,
 } from 'react-icons/fa'
 import { routes } from '@/frontend/constants/routes'
 import { contact } from '@/frontend/constants/data/contact'
 import { NavigationLink } from '@/frontend/components/ui/Links'
 
 const navLinks = [
-  { href: routes.home, icon: FaCode, text: 'Home' },
+  { href: routes.welcome, icon: FaCode, text: 'Home' },
   { href: routes.resources, icon: FaPuzzlePiece, text: 'Resources' },
   { href: routes.projects, icon: FaBriefcase, text: 'Projects' },
   { href: routes.about, icon: FaBuilding, text: 'About' },
 ]
 
 const serviceLinks = [
-  { href: '#frontend', icon: FaReact, text: 'Frontend Development' },
-  { href: '#fullstack', icon: FaNodeJs, text: 'Full-Stack Solutions' },
-  { href: '#consulting', icon: FaTools, text: 'Technical Consulting' },
+  { href: '#frontend', icon: FaReact, text: 'Full-Stack Solutions' },
+  { href: '#consulting', icon: FaQuestion, text: 'Technical Consulting' },
   { href: '#career', icon: FaUserClock, text: 'Career Opportunities' },
+  { href: '#tools', icon: FaTools, text: 'Tools' },
+  { href: '#api', icon: FaCode, text: 'API' },
 ]
 
 const connectLinks = [
   { href: `mailto:${contact.email}`, icon: FaComments, text: 'Get in Touch' },
-  { href: '#pricing', icon: FaDollarSign, text: 'Pricing' },
+  // { href: '#pricing', icon: FaDollarSign, text: 'Pricing' },
 ]
 
 export const Footer = () => (

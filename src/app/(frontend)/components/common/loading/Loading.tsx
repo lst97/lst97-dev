@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import { motion } from 'framer-motion'
 
@@ -40,6 +42,18 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ message = 'Loadi
         </div>
       </motion.div>
       <p className="mt-4 font-['Press_Start_2P'] text-base text-gray-700 text-center">{message}</p>
+    </div>
+  )
+}
+
+interface PageLoadingProps {
+  message?: string
+}
+
+export const PageLoading: React.FC<PageLoadingProps> = ({ message = 'Loading page...' }) => {
+  return (
+    <div className="flex items-center justify-center w-full h-screen">
+      <LoadingSpinner message={message} />
     </div>
   )
 }

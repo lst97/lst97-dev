@@ -365,6 +365,7 @@ const LanguageBarChart: React.FC<LanguageBarChartProps> = ({ languages, inView }
       toolbar: {
         show: false,
       },
+      height: '100%',
     },
     plotOptions: {
       bar: {
@@ -479,14 +480,63 @@ const LanguageBarChart: React.FC<LanguageBarChartProps> = ({ languages, inView }
         offsetY: 0,
       },
     },
+    responsive: [
+      {
+        breakpoint: 768,
+        options: {
+          chart: {
+            height: 400,
+          },
+          plotOptions: {
+            bar: {
+              barHeight: '60%',
+            },
+          },
+          dataLabels: {
+            offsetX: 5,
+            style: {
+              fontSize: '10px',
+            },
+            formatter: function (val: number) {
+              return `${val.toFixed(1)}%`
+            },
+          },
+          yaxis: {
+            labels: {
+              style: {
+                fontSize: '10px',
+              },
+            },
+          },
+        },
+      },
+    ],
   })
 
   if (!inView || processedLanguages.length === 0) {
     return (
-      <div className="h-[600px] flex items-center justify-center">
+      <div className="h-[600px] md:h-[500px] sm:h-[400px] flex items-center justify-center">
         <p className="text-[#2c2c2c] font-['Press_Start_2P']">No language data available</p>
       </div>
     )
+  }
+
+  // Calculate dynamic height based on number of languages
+  const getChartHeight = () => {
+    const baseHeight = 600
+    const minHeight = 400
+
+    // Calculate height based on screen size
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth < 640) {
+        // sm breakpoint
+        return Math.max(minHeight, Math.min(baseHeight, processedLanguages.length * 40))
+      } else if (window.innerWidth < 768) {
+        // md breakpoint
+        return Math.max(minHeight, Math.min(baseHeight, processedLanguages.length * 50))
+      }
+    }
+    return baseHeight
   }
 
   return (
@@ -499,7 +549,7 @@ const LanguageBarChart: React.FC<LanguageBarChartProps> = ({ languages, inView }
         },
       ]}
       type="bar"
-      height={600}
+      height={getChartHeight()}
       aria-label="Chart showing usage percentage of different programming languages"
     />
   )
@@ -624,13 +674,13 @@ const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({
       ) : error ? (
         <ErrorState message={error} />
       ) : (
-        <div className="grid grid-cols-[0.6fr_1.4fr] gap-8 lg:grid-cols-1">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.6fr_1.4fr] gap-8">
           <motion.div
-            className="flex flex-col gap-8 lg:flex-row lg:flex-wrap"
+            className="flex flex-col gap-8 md:flex-row md:flex-wrap"
             variants={itemVariants}
           >
             <motion.div
-              className="bg-[rgba(44,44,44,0.05)] p-4 border-2 border-[#2c2c2c] lg:flex-1 lg:min-w-[300px]"
+              className="bg-[rgba(44,44,44,0.05)] p-4 border-2 border-[#2c2c2c] md:flex-1 md:min-w-[200px]"
               variants={itemVariants}
             >
               <h4 className="font-['Press_Start_2P'] text-base text-[#2c2c2c] mb-4 text-center uppercase tracking-wider">
@@ -639,7 +689,7 @@ const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({
               <DonutChart title="Code Editors" data={processedEditors} inView={inView} />
             </motion.div>
             <motion.div
-              className="bg-[rgba(44,44,44,0.05)] p-4 border-2 border-[#2c2c2c] lg:flex-1 lg:min-w-[300px]"
+              className="bg-[rgba(44,44,44,0.05)] p-4 border-2 border-[#2c2c2c] md:flex-1 md:min-w-[200px]"
               variants={itemVariants}
             >
               <h4 className="font-['Press_Start_2P'] text-base text-[#2c2c2c] mb-4 text-center uppercase tracking-wider">
@@ -649,7 +699,7 @@ const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({
             </motion.div>
           </motion.div>
           <motion.div
-            className="bg-[rgba(44,44,44,0.05)] p-4 border-2 border-[#2c2c2c] lg:h-auto"
+            className="bg-[rgba(44,44,44,0.05)] p-4 border-2 border-[#2c2c2c] overflow-x-auto"
             variants={itemVariants}
           >
             <h4 className="font-['Press_Start_2P'] text-base text-[#2c2c2c] mb-4 text-center uppercase tracking-wider">

@@ -34,9 +34,8 @@ import {
 import { projectsData } from '@/frontend/constants/data/services'
 import { ContactForm, TanStackFormProps } from '@/frontend/components/services/forms/ContactForm'
 import Message from '@/frontend/components/common/Message'
-import { Footer } from '@/frontend/components/footer/Footer'
 import { useContactForm } from '@/frontend/hooks/useContactForm'
-import { LoadingSpinner } from '@/frontend/components/common/LoadingSpinner'
+import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
 import dynamic from 'next/dynamic'
 
 // Dynamically import the Dashboard component with SSR disabled
@@ -383,16 +382,7 @@ const ServicesContent = () => {
 export default function ServicesClient() {
   return (
     <DynamicDashboard>
-      <Suspense
-        fallback={
-          <div className="flex flex-col items-center justify-center h-screen">
-            <LoadingSpinner />
-            <div className="mt-4 font-['Press_Start_2P'] text-sm text-[var(--color-text)] dark:text-[var(--color-text-light)]">
-              Loading services...
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={<PageLoading message="Loading services..." />}>
         <ServicesContent />
       </Suspense>
     </DynamicDashboard>

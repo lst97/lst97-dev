@@ -189,6 +189,14 @@ export const Timeline: FC<TimelineProps> = ({
     if (!isAutoScrolling || validEvents.length === 0 || disableAutoScroll) return
 
     const interval = setInterval(() => {
+      // Check if we should auto-scroll
+      if (disableAutoScroll) {
+        // If disabled during interval execution, clear it and return
+        clearInterval(interval)
+        setIsAutoScrolling(false)
+        return
+      }
+
       // Using a callback function inside setCurrentEventIndex to avoid state updates during render
       const nextIndex = (currentEventIndex + 1) % validEvents.length
       const nextEvent = validEvents[nextIndex]
@@ -201,13 +209,16 @@ export const Timeline: FC<TimelineProps> = ({
         onAutoScroll(true)
       }
 
-      // Use requestAnimationFrame for more reliable DOM updates
-      scrollEventIntoView(nextEvent.id)
+      // Only scroll if auto-scrolling is not disabled
+      if (!disableAutoScroll) {
+        // Use requestAnimationFrame for more reliable DOM updates
+        scrollEventIntoView(nextEvent.id)
 
-      // Animate the detail container during auto-scrolling
-      setTimeout(() => {
-        animateDetailContainer()
-      }, 300) // Small delay to let the scrolling start
+        // Animate the detail container during auto-scrolling
+        setTimeout(() => {
+          animateDetailContainer()
+        }, 300) // Small delay to let the scrolling start
+      }
     }, AUTO_SCROLL_INTERVAL)
 
     return () => clearInterval(interval)

@@ -2,17 +2,13 @@
 
 import React from 'react'
 import { Post } from '@/frontend/models/Post'
-import { ContentDisplay } from '@/frontend/components/common/display/ContentDisplay'
+import { ContentDisplay } from '@/frontend/components/common/renderers'
 import { Tag } from '@/frontend/components/ui/Tags'
 import Image from 'next/image'
+import { PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
 
-// Loading state component
-export const LoadingState = () => (
-  <div className="flex flex-col items-center justify-center min-h-[50vh]">
-    <div className="animate-spin h-10 w-10 border-4 border-[var(--color-accent)] border-t-transparent rounded-full"></div>
-    <div className="mt-4 font-['Press_Start_2P'] text-sm">Loading content...</div>
-  </div>
-)
+// Loading state component - re-export PageLoading with custom message
+export const LoadingState = () => <PageLoading message="Loading content..." />
 
 // Error state component
 export const ErrorState = ({ message }: { message: string }) => (

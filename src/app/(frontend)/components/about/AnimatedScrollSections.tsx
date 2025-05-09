@@ -164,7 +164,7 @@ const AnimatedScrollSections: React.FC<AnimatedSectionsProps> = ({
         Component: Timeline,
         props: {
           events: timelineEvents,
-          disableAutoScroll: activeSection !== 0 || isMainScrolling, // Also disable during main scrolling
+          disableAutoScroll: activeSection !== 0 || isMainScrolling, // Disable when not in timeline section or during scrolling
         },
       },
       { id: 'cv', label: 'CV', Component: CV, props: { data: cvData } },
@@ -306,6 +306,11 @@ const AnimatedScrollSections: React.FC<AnimatedSectionsProps> = ({
       }
     })
 
+    // If user naturally scrolled away from the timeline section, ensure auto-scrolling is stopped
+    if (activeSection === 0 && newSectionIndex !== 0 && !isProgrammaticScrolling.current) {
+      setIsTimelineAutoScrolling(false)
+    }
+
     // Only update the active section if we're not auto-scrolling within the timeline
     if (!isProgrammaticScrolling.current && !isTimelineAutoScrolling) {
       setActiveSection(Math.min(Math.max(0, newSectionIndex), sections.length - 1))
@@ -323,7 +328,7 @@ const AnimatedScrollSections: React.FC<AnimatedSectionsProps> = ({
         scrollTimeout.current = setTimeout(() => setIsNavbarVisible(false), NAVBAR_HIDE_DELAY)
       }
     }
-  }, [setIsNavbarVisible, sections.length, isMainScrolling, isTimelineAutoScrolling])
+  }, [setIsNavbarVisible, sections.length, isMainScrolling, isTimelineAutoScrolling, activeSection])
 
   useEffect(() => {
     const container = containerRef.current

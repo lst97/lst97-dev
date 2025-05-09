@@ -67,15 +67,15 @@ export const AIChatBot = () => {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center bg-background-light">
-      <PixelContainer className="flex flex-col justify-center items-center bg-background-light w-[70vw] lg:w-full">
+    <div className="flex flex-col justify-center items-center mb-32 md:mb-0">
+      <PixelContainer className="flex flex-col justify-center items-center bg-background-light w-full">
         {/* Chat title */}
         <div className="border-b-2 border-black w-full text-center font-pkmn bg-secondary-light font-bold">
           Nelson (Agent)
         </div>
 
         {/* Terminal-like chat window */}
-        <div className="rounded-b-md shadow-md w-[70vw] lg:w-full bg-black text-green-400 p-4 font-['Press_Start_2P']">
+        <div className="rounded-b-md shadow-md w-full bg-black text-green-400 p-4 font-['Press_Start_2P']">
           <DynamicTerminal
             messages={messages}
             setUserInput={setUserInput}

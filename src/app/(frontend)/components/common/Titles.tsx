@@ -14,7 +14,7 @@ const variantMap = {
 export function PkmTitle({ children, className, variant = 'primary' }: PkmTitleProps) {
   return (
     <div
-      className={`relative press-start-2p-regular uppercase tracking-wider py-3 px-6 text-center border-4 border-border bg-[#fffbeb] font-bold [box-shadow:inset_-4px_-4px_0_0_#a8a8a8] ${variantMap[variant]} ${className || ''}`}
+      className={`mx-4 md:mx-16 max-w-xl w-full relative press-start-2p-regular uppercase tracking-wider py-3 px-6 text-center border-4 border-border bg-[#fffbeb] font-bold [box-shadow:inset_-4px_-4px_0_0_#a8a8a8] ${variantMap[variant]} ${className || ''}`}
     >
       {/* Pseudo-element border */}
       <div

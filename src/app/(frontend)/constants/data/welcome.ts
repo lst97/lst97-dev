@@ -1,3 +1,5 @@
+import { routes } from '@/frontend/constants/routes'
+
 export const introText =
   "Hi everyone! Nelson here, hailing from the vibrant city of Hong Kong. Armed with a Computer Science degree from Deakin University (still figuring out how to wield it properly!), I'm on the hunt for thrilling software engineering escapades. In the meantime, I'm whipping up code concoctions and soaking up new knowledge like a sponge. 🥔"
 
@@ -11,25 +13,30 @@ export const welcomeParagraphs: WelcomeParagraph[] = [
     title: 'About this site',
     content: [
       [
-        'This site is built with Next.js, TypeScript, and Tailwind CSS. It is hosted on Vercel and the content is managed by a ',
-        { text: 'headless CMS', href: 'https://github.com/lst97/simple-cms-frontend/tree/dev' },
-        '. This site contains:',
+        'This site is built with Next.js 15, React 19, TypeScript, and Tailwind CSS v4. It is hosted on Vercel with PayloadCMS as a headless CMS. Features include:',
       ],
-      ['☆ A portfolio of some ', { text: 'Projects', href: '/pages/projects' }],
-      ['☆ Some ', { text: 'Resources', href: '/pages/resources' }, ' that I found useful'],
-      ['☆ More thing described ', { text: 'About Me', href: '/pages/resources' }],
+      ['☆ A ', { text: 'Projects', href: `${routes.projects}` }, ' portfolio showcasing my work'],
+      ['☆ ', { text: 'Services', href: `${routes.services}` }, ' that I offer'],
+      ['☆ Useful ', { text: 'Resources', href: `${routes.resources}` }, ' for developers'],
+      ['☆ Code statistics via API integration'],
+      ['☆ More details ', { text: 'About Me', href: `${routes.about}` }],
     ],
   },
   {
     title: 'About me',
     content: [
       [
-        'I\'m a junior programmer expanding my skillset through a private C# and MySQL project called "Conndy." Concurrently, I\'m building "Split Tab," an expense management web app using Deno, Next.js, and SQLite.',
+        "I'm a junior software developer with a strong foundation in multiple programming languages and technologies. My current focus is on web development with Next.js, React, and TypeScript, along with backend experience in C# and various database technologies.",
       ],
       [
-        "I'm also actively pursuing new job opportunities where I can further contribute and grow. GitHub: ",
+        'My GitHub profile (',
         { text: 'lst97', href: 'https://github.com/lst97' },
-        '. In the mean time, I am doing Uber Eats deliveries for keeping my body in shape.',
+        ") showcases my various projects including SplitTab, a web app for expense management, and several libraries for common services. When not coding, I'm working as a cabinet maker and previously had experiences as a kitchen hand and automotive mechanic.",
+      ],
+      [
+        'Check out my ',
+        { text: 'About page', href: `${routes.about}` },
+        ' for my detailed timeline, skill set, and live code statistics from WakaTime.',
       ],
     ],
   },

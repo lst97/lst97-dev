@@ -1,5 +1,5 @@
 import { Post } from '@/frontend/models/Post'
-import { BlockRendererClient } from '@/frontend/components/common/display/BlockRendererClient'
+import { BlockRendererClient } from '@/frontend/components/common/renderers'
 
 export type Attribute = Post
 export const AttributesViewer = ({

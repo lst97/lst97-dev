@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       : 'true'
 
     // Construct the URL for the GitHub README Stats service
-    const url = new URL('https://github-readme-stats-lst97.vercel.app/api')
+    const url = new URL('https://github-stats.lst97.dev/api')
     url.searchParams.append('username', username)
     url.searchParams.append('theme', theme)
 

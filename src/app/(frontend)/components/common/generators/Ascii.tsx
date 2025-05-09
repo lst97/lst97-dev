@@ -103,7 +103,7 @@ export function AsciiTextGenerator({ text }: AsciiTextGeneratorProps) {
     <div className="min-h-[100px]">
       {' '}
       {/* Reduced from h-48 */}
-      <pre className="text-sm leading-none font-mono max-w-full overflow-hidden text-center">
+      <pre className="text-xs leading-none font-mono max-w-full overflow-hidden text-center pt-2">
         {displayText}
       </pre>
     </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { LexicalRenderer } from '@/frontend/components/common/display/lexical'
+import { LexicalRenderer } from '@/frontend/components/common/renderers/lexical'
 
 interface BlockRendererClientProps {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any

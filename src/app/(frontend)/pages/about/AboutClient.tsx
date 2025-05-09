@@ -6,7 +6,7 @@ import { cvData } from '@/frontend/constants/data/cv'
 import { timelineEvents } from '@/frontend/constants/data/timeline'
 import { AnimatedScrollSections } from '@/frontend/components/about'
 import { WindowSizeProvider } from '@/frontend/contexts/WindowContexts'
-import { LoadingSpinner } from '@/frontend/components/common/LoadingSpinner'
+import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
 import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
 import { motion } from 'framer-motion'
 import { softSkills } from '@/frontend/constants/data/about'
@@ -59,11 +59,7 @@ const setCachedWakaTimeStats = (data: WakaTimeStats) => {
 
 // Loading component for inner content
 function ContentLoading() {
-  return (
-    <div className="flex flex-col items-center justify-center h-full">
-      <LoadingSpinner />
-    </div>
-  )
+  return <PageLoading message="Loading content..." />
 }
 
 // Main content component separated from navigation

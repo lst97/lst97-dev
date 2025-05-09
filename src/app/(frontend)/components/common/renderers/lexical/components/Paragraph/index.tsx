@@ -1,13 +1,12 @@
 'use client'
 
 import React from 'react'
-import { LexicalNode, LexicalCodeNode } from '@/frontend/components/common/display/lexical/types'
+import { LexicalNode, LexicalCodeNode } from '@/frontend/components/common/renderers/lexical/types'
 import {
   getTextAlignClass,
   getTextAlignStyle,
-} from '@/frontend/components/common/display/lexical/utils/formatHelpers'
-import { NodeRenderer } from '@/frontend/components/common/display/lexical/components/NodeRenderer'
-import { Code } from '@/frontend/components/common/display/lexical/components/Code'
+} from '@/frontend/components/common/renderers/lexical/utils/formatHelpers'
+import { NodeRenderer, Code } from '@/frontend/components/common/renderers/lexical/components'
 
 interface ParagraphProps {
   node: LexicalNode

@@ -256,7 +256,7 @@
 
   /* Retro pixel border utility for cards/items */
   .pixel-border {
-    @apply border-[4px] border-gray-400 border-b-border border-r-border;
+    @apply border-[4px] border-gray-600 border-b-border border-r-border;
     border-style: outset;
   }
 

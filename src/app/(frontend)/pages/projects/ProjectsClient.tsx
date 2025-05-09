@@ -10,7 +10,7 @@ import { Project } from '@/frontend/components/projects/ProjectCard'
 import { ProjectExplorer } from '@/frontend/components/projects'
 import { NavigationLink } from '@/frontend/components/ui/Links'
 import { routes } from '@/frontend/constants/routes'
-import { LoadingSpinner } from '@/frontend/components/common/LoadingSpinner'
+import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
 import dynamic from 'next/dynamic'
 
 // Dynamically import the Dashboard component to prevent useSearchParams issues
@@ -244,16 +244,7 @@ const ProjectsContent = () => {
 export default function ProjectsClient() {
   return (
     <DynamicDashboard>
-      <Suspense
-        fallback={
-          <div className="flex flex-col items-center justify-center py-12 mt-32">
-            <LoadingSpinner />
-            <div className="mt-4 font-['Press_Start_2P'] text-sm text-[var(--color-text)] dark:text-[var(--color-text-light)]">
-              Loading projects...
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={<PageLoading message="Loading projects..." />}>
         <ProjectsContent />
       </Suspense>
     </DynamicDashboard>

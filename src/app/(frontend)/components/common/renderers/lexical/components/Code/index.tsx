@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { LexicalNode } from '@/frontend/components/common/display/lexical/types'
+import { LexicalNode } from '@/frontend/components/common/renderers/lexical/types'
 import hljs from 'highlight.js/lib/core'
 import javascript from 'highlight.js/lib/languages/javascript'
 import python from 'highlight.js/lib/languages/python'

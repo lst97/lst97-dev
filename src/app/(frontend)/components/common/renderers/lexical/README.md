@@ -22,7 +22,7 @@ This directory contains a component for rendering Lexical JSON content with pixe
 ## Usage
 
 ```tsx
-import { LexicalRenderer } from '@/components/common/display/lexical/LexicalRenderer'
+import { LexicalRenderer } from '@/components/common/renderers/lexical'
 
 // With a Lexical JSON string
 const lexicalContent = '{"root": {"children": [...]}}'

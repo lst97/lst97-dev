@@ -129,10 +129,10 @@ export const MelbourneTime = ({
 
   return (
     <div
-      className={`${className} flex flex-col items-center w-full h-full justify-center relative press-start-2p-regular`}
+      className={`${className || ''} flex flex-col items-center w-full h-full justify-center relative press-start-2p-regular`}
       aria-live="polite"
     >
-      <div className="text-5xl text-center font-bold flex justify-center">
+      <div className="text-3xl md:text-5xl text-center font-bold flex justify-center">
         {timeChars.map((char, i) =>
           /\d/.test(char) ? (
             <FlipDigit key={i} value={char} className="relative" />

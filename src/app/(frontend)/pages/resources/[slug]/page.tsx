@@ -3,6 +3,7 @@ import { Post } from '@/frontend/models/Post'
 import { generatePostMetadata } from './generateMetadata'
 import dynamic from 'next/dynamic'
 import React from 'react'
+import { LoadingState } from './Components'
 
 // Server-side data fetching for the post
 async function getPost(slug: string): Promise<Post | null> {
@@ -68,14 +69,6 @@ function generateBlogPostStructuredData(post: Post, slug: string) {
     keywords: [...(post.categories || []), ...(post.tags || [])].join(', '),
   }
 }
-
-// Loading state component
-const LoadingState = () => (
-  <div className="flex flex-col items-center justify-center min-h-[50vh]">
-    <div className="animate-spin h-10 w-10 border-4 border-[var(--color-accent)] border-t-transparent rounded-full"></div>
-    <div className="mt-4 font-['Press_Start_2P'] text-sm">Loading content...</div>
-  </div>
-)
 
 // Main component for Server Component
 export default async function ResourcePage({ params }: { params: Promise<{ slug: string }> }) {

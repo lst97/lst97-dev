@@ -1,4 +1,4 @@
-import { LexicalNode } from '@/app/(frontend)/components/common/display/lexical/types'
+import { LexicalNode } from '@/app/(frontend)/components/common/renderers/lexical/types'
 import type { CollectionConfig } from 'payload'
 import slugify from 'slugify'
 

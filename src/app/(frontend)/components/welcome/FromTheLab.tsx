@@ -21,7 +21,7 @@ export const FromTheLab = () => {
         </PkmTitle>
       </div>
 
-      <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8 px-16">
+      <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8 px-4 md:px-16">
         <PkmCardLite title={'Test but a little bit long'} />
         <PkmCardLite title={'Test'} />
         <PkmCardLite title={'Test'} />

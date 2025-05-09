@@ -2,7 +2,7 @@
 
 import React, { Suspense } from 'react'
 import Image from 'next/image'
-import { LoadingSpinner } from '@/frontend/components/common/LoadingSpinner'
+import { PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
 import dynamic from 'next/dynamic'
 import {
   AIChatBot,
@@ -18,29 +18,19 @@ const DynamicDashboard = dynamic(
   () => import('@/frontend/components/main/Dashboard').then((mod) => mod.Dashboard),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <LoadingSpinner />
-        <div className="mt-4 font-['Press_Start_2P'] text-sm">Loading dashboard...</div>
-      </div>
-    ),
+    loading: () => <PageLoading message="Loading dashboard..." />,
   },
 )
 
 // Loading component for inner content
 function ContentLoading() {
-  return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <LoadingSpinner />
-      <div className="mt-4 font-['Press_Start_2P'] text-sm">Loading welcome page...</div>
-    </div>
-  )
+  return <PageLoading message="Loading welcome page..." />
 }
 
 // Content component
 function WelcomeContent() {
   return (
-    <div className="border-4 border-border bg-card lg:p-8 sm:p-2 mt-16 overflow-x-hidden no-scrollbar">
+    <div className="border-4 border-border bg-card overflow-x-hidden no-scrollbar pb-4 md:p-16">
       <AIChatBot />
       <div className="flex flex-col gap-32">
         <Introduction />
