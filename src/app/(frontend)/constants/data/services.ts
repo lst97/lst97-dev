@@ -29,6 +29,7 @@ export interface ProjectData {
   logoDescription: string
   process: ProjectProcessStep[]
   presentation: string
+  youtubeUrl: string
   background: string
   ideas: ProjectIdea[]
   client: string
@@ -89,7 +90,9 @@ export const projectsData: ProjectData[] = [
         icon: '🔄',
       },
     ],
-    presentation: 'The portfolio website presents a unique blend of...',
+    presentation:
+      "The portfolio website presents a unique blend of retro gaming aesthetics and modern web development techniques. It showcases a pixelated visual style inspired by classic games, complete with custom animations, interactive elements, and a nostalgic color palette. The site features a responsive design that adapts to different screen sizes while maintaining its distinctive pixel art charm. Built with Next.js and React, it combines cutting-edge performance with playful visuals, creating an engaging digital experience that stands out from typical portfolio sites. The integration of PayloadCMS enables efficient content management while preserving the site's pixel art theme across all content types.",
+    youtubeUrl: 'https://youtu.be/Du--gKWTiKc',
     background:
       'This project originated from a desire to build a modern website from scratch to experience firsthand the challenges and time commitment involved in web development.  I also wanted to explore integrating a headless CMS into a project.  Driven by a personal fondness for pixel art and the amber color palette, I envisioned a retro gaming theme, drawing particular inspiration from Pokémon, to give the site a unique and engaging aesthetic.',
     ideas: [

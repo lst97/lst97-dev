@@ -287,7 +287,9 @@ const ServicesContent = () => {
           <ShowcaseSection
             projectsData={projectsData}
             setIsProjectShowcaseOpen={setIsProjectShowcaseOpen}
-            setSelectedProject={setSelectedProject}
+            setSelectedProject={(project) =>
+              setSelectedProject(project as (typeof projectsData)[0] | null)
+            }
           />
           <div className="w-full flex justify-center items-center mb-16 min-h-[300px] relative">
             <motion.div initial="initial" animate="animate" variants={floatingAnimation}>
@@ -360,7 +362,10 @@ const ServicesContent = () => {
               <ProcessSection process={selectedProject.process} />
               <TechnologiesSection technologies={selectedProject.technologies} />
               {selectedProject.presentation && (
-                <PresentationSection presentation={selectedProject.presentation} />
+                <PresentationSection
+                  presentation={selectedProject.presentation}
+                  youtubeUrl={selectedProject.youtubeUrl}
+                />
               )}
               <ProjectDetailsSection
                 client={selectedProject.client}

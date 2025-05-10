@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { Dialog } from '@/frontend/components/common/Dialog'
+import { Dialog } from '@/app/(frontend)/components/dialog/Dialog'
 import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
 import { Button } from '@/frontend/components/ui/Buttons'
 import { Project } from '@/frontend/components/projects/ProjectCard'
