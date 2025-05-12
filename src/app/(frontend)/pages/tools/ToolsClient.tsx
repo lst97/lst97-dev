@@ -7,7 +7,7 @@ import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
-import { FaImages } from 'react-icons/fa'
+import { FaImages, FaFileAlt } from 'react-icons/fa'
 import { routes } from '../../constants/routes'
 
 // Dynamically import the Dashboard component with SSR disabled
@@ -97,6 +97,14 @@ const ToolsContent = () => {
       description:
         'A collection of image tools including converter, background remover, and more ...',
       link: `${routes.tools}/image`,
+      isComingSoon: false,
+    },
+    {
+      icon: <FaFileAlt />,
+      title: 'File',
+      description:
+        'A collection of file tools including AI-powered file type detection and more ...',
+      link: `${routes.tools}/file`,
       isComingSoon: false,
     },
     // {

@@ -51,6 +51,7 @@
     "exifreader": "^4.30.1",
     "figlet": "^1.8.1",
     "file-saver": "^2.0.5",
+    "file-type": "^20.5.0",
     "filesize": "^10.1.6",
     "framer-motion": "^12.11.0",
     "gif.js": "^0.2.0",
@@ -60,6 +61,7 @@
     "heic-convert": "^2.1.0",
     "highlight.js": "^11.11.1",
     "jszip": "^3.10.1",
+    "magika": "^0.3.2",
     "matter-js": "^0.20.0",
     "next": "^15.3.2",
     "next-themes": "^0.4.6",
@@ -113,12 +115,14 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",
+      "@tensorflow/tfjs-node",
       "@vercel/speed-insights",
       "bufferutil",
       "canvas",
       "core-js",
       "core-js-pure",
       "esbuild",
+      "exifreader",
       "sharp",
       "unrs-resolver",
       "utf-8-validate"

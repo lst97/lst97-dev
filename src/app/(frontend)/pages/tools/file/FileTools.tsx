@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { FaImages, FaFileImage, FaLock, FaRocket } from 'react-icons/fa'
+import { FaFileAlt, FaFileCode, FaLock, FaRocket } from 'react-icons/fa'
 import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
 import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
 import dynamic from 'next/dynamic'
@@ -97,27 +97,27 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; description:
 )
 
 // Content component
-const ImageToolsContent = () => {
+const FileToolsContent = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setIsLoading(false)
   }, [])
 
-  // List of image tools
-  const imageTools = [
+  // List of file tools
+  const fileTools = [
     {
-      icon: <FaImages />,
-      title: 'Image Converter',
-      description: 'Convert images between JPG, PNG, WebP, and more formats without uploading them',
-      link: `${routes.tools}/image/converter`,
+      icon: <FaFileAlt />,
+      title: 'File Type Detection',
+      description: 'Detect file types using AI without uploading them to a server',
+      link: `${routes.tools}/file/type-detection`,
       isComingSoon: false,
     },
     {
-      icon: <FaFileImage />,
-      title: 'Background Remover',
-      description: 'Remove the background from images and save them as PNG or JPG',
-      link: `${routes.tools}/image/background-remover`,
+      icon: <FaFileCode />,
+      title: 'File Format Converter',
+      description: 'Convert files between different formats without uploading them',
+      link: `${routes.tools}/file/format-converter`,
       isComingSoon: true,
     },
   ]
@@ -156,10 +156,10 @@ const ImageToolsContent = () => {
               >
                 ← Back to Tools
               </Link>
-              <h1 className="text-4xl font-['Press_Start_2P'] text-text-color">Image Tools</h1>
+              <h1 className="text-4xl font-['Press_Start_2P'] text-text-color">File Tools</h1>
             </div>
             <p className="text-lg text-text-color max-w-3xl font-['Press_Start_2P'] mb-4">
-              Free browser-based image tools that run locally on your device.
+              Free browser-based file tools that run locally on your device.
             </p>
             <p className="text-lg text-text-color max-w-3xl font-['Press_Start_2P']">
               Your files never leave your device - everything is processed right in your browser.
@@ -169,13 +169,13 @@ const ImageToolsContent = () => {
           {/* Tools Grid Section */}
           <section className="mb-16" aria-labelledby="available-tools">
             <h2 id="available-tools" className="text-3xl font-['Press_Start_2P'] mb-8 text-center">
-              Available Image Tools
+              Available File Tools
             </h2>
             <div className="w-full flex justify-center items-center mb-8">
               <motion.div initial="initial" animate="animate" variants={floatingAnimation}>
                 <Image
                   src="/touch-pixel-art.svg"
-                  alt="Image Tools Pixel Art"
+                  alt="File Tools Pixel Art"
                   width={128}
                   height={128}
                   className="drop-shadow-[0_8px_16px_rgba(0,0,0,0.1)] transition-[filter] duration-300 will-change-transform hover:drop-shadow-[0_12px_24px_rgba(0,0,0,0.15)]"
@@ -184,7 +184,7 @@ const ImageToolsContent = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              {imageTools.map((tool, index) => (
+              {fileTools.map((tool, index) => (
                 <ToolCard
                   key={index}
                   icon={tool.icon}
@@ -200,26 +200,26 @@ const ImageToolsContent = () => {
           {/* Features Section */}
           <section className="mb-16" aria-labelledby="features">
             <h2 id="features" className="text-3xl font-['Press_Start_2P'] mb-8 text-center">
-              Why Use Our Image Tools?
+              Why Use Our File Tools?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <FeatureCard
                 icon={<FaLock />}
                 title="100% Private"
-                description="All processing happens in your browser. Your images never leave your device or get uploaded to any server."
+                description="All processing happens in your browser. Your files never leave your device or get uploaded to any server."
               />
               <FeatureCard
                 icon={<FaRocket />}
                 title="Fast Processing"
-                description="Our tools use modern browser technologies to process your images quickly and efficiently."
+                description="Our tools use modern browser technologies to process your files quickly and efficiently."
               />
               <FeatureCard
-                icon={<FaImages />}
+                icon={<FaFileAlt />}
                 title="Multiple Formats"
-                description="Convert between common image formats like JPG, PNG, and WebP with quality control options."
+                description="Support for a wide range of file types and formats with our advanced detection algorithms."
               />
               <FeatureCard
-                icon={<FaFileImage />}
+                icon={<FaFileCode />}
                 title="Completely Free"
                 description="All tools are free to use with no hidden costs, subscriptions, or limitations."
               />
@@ -238,8 +238,7 @@ const ImageToolsContent = () => {
                 </h3>
                 <p className="font-['Press_Start_2P'] text-xs">
                   Our tools use your browser&apos;s built-in capabilities to process files locally.
-                  The images are loaded and processed entirely on your device, ensuring your
-                  privacy.
+                  The files are loaded and processed entirely on your device, ensuring your privacy.
                 </p>
               </div>
               <div className="bg-card border-2 border-border p-4 shadow-[4px_4px_0px_#000]">
@@ -248,7 +247,7 @@ const ImageToolsContent = () => {
                 </h3>
                 <p className="font-['Press_Start_2P'] text-xs">
                   Since processing happens on your device, limits depend on your browser and device
-                  capabilities. Most modern browsers can handle large images without issues.
+                  capabilities. Most modern browsers can handle large files without issues.
                 </p>
               </div>
               <div className="bg-card border-2 border-border p-4 shadow-[4px_4px_0px_#000]">
@@ -256,7 +255,7 @@ const ImageToolsContent = () => {
                   Why might my browser slow down during processing?
                 </h3>
                 <p className="font-['Press_Start_2P'] text-xs">
-                  Image processing can be CPU-intensive. When processing multiple or large images,
+                  File processing can be CPU-intensive. When processing multiple or large files,
                   your browser might temporarily slow down as it&apos;s using your device&apos;s
                   resources.
                 </p>
@@ -270,11 +269,11 @@ const ImageToolsContent = () => {
 }
 
 // Main client component
-export default function ImageTools() {
+export default function FileTools() {
   return (
     <DynamicDashboard>
-      <Suspense fallback={<PageLoading message="Loading image tools..." />}>
-        <ImageToolsContent />
+      <Suspense fallback={<PageLoading message="Loading file tools..." />}>
+        <FileToolsContent />
         <Footer />
       </Suspense>
     </DynamicDashboard>
