@@ -28,7 +28,7 @@ const serviceLinks = [
   { href: '#frontend', icon: FaReact, text: 'Full-Stack Solutions' },
   { href: '#consulting', icon: FaQuestion, text: 'Technical Consulting' },
   { href: '#career', icon: FaUserClock, text: 'Career Opportunities' },
-  { href: '#tools', icon: FaTools, text: 'Tools' },
+  { href: routes.tools, icon: FaTools, text: 'Tools' },
   { href: '#api', icon: FaCode, text: 'API' },
 ]
 

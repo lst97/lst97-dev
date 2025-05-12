@@ -8,4 +8,5 @@ export const routes = {
   resume: '/pages/resume',
   resources: '/pages/resources',
   services: '/pages/services',
+  tools: '/pages/tools',
 }

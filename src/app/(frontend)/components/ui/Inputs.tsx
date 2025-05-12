@@ -86,8 +86,8 @@ const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
         disabled={disabled}
         ref={ref}
         className={[
-          'font-mono',
-          'text-[1.1rem]',
+          'font-["Press_Start_2P"]',
+          'text-md',
           'py-2',
           'px-6',
           'relative',
@@ -103,7 +103,7 @@ const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
         ].join(' ')}
         {...props}
       >
-        <Select.ItemIndicator className="absolute left-2 inline-flex items-center justify-center">
+        <Select.ItemIndicator className="absolute left-2 inline-flex items-center justify-center font-['Press_Start_2P']">
           <CheckIcon />
         </Select.ItemIndicator>
         {children}
@@ -153,7 +153,7 @@ export const PixelSelect = React.forwardRef<HTMLButtonElement, PixelSelectProps>
         {label && (
           <label
             htmlFor={selectId}
-            className="font-pixel text-[1.2rem] text-[var(--color-text)] text-xs"
+            className="text-lg font-['Press_Start_2P'] text-[var(--color-text)]"
           >
             {label}
           </label>
@@ -164,8 +164,8 @@ export const PixelSelect = React.forwardRef<HTMLButtonElement, PixelSelectProps>
             ref={ref}
             className={[
               'relative',
-              'font-mono',
-              'text-[1.2rem]',
+              'font-["Press_Start_2P"]',
+              'text-sm',
               'p-4',
               'border-4',
               'border-[var(--color-border)]',

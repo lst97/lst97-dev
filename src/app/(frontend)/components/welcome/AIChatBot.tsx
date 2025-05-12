@@ -15,6 +15,7 @@ const DynamicTerminal = dynamic(
         alt="loading"
         width={128}
         height={128}
+        unoptimized
         style={{
           width: '128px',
           height: '128px',
