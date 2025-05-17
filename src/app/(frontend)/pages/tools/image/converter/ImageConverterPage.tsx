@@ -4,8 +4,8 @@ import React, { Suspense, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { ImageConverter } from '@/frontend/components/tools/image-converter/ImageConverter'
-import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
-import { routes } from '@/app/(frontend)/constants/routes'
+import { LoadingSpinner, PageLoading } from '@/frontend/components/common/loading/Loading'
+import { routes } from '@/frontend/constants/routes'
 import { FaInfoCircle, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
@@ -88,7 +88,6 @@ const ImageConverterContent = () => {
         <Image
           src="/image-converter-bg.png"
           alt="Image Converter Background Decoration"
-          objectFit="cover"
           quality={50}
           width={512}
           height={512}

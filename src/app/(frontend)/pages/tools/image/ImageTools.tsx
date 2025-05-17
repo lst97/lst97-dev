@@ -6,10 +6,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { FaImages, FaFileImage, FaLock, FaRocket } from 'react-icons/fa'
 import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
-import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
+import { LoadingSpinner, PageLoading } from '@/frontend/components/common/loading/Loading'
 import dynamic from 'next/dynamic'
-import { routes } from '@/app/(frontend)/constants/routes'
-import Footer from '@/app/(frontend)/components/footer/Footer'
+import { routes } from '@/frontend/constants/routes'
+import Footer from '@/frontend/components/footer/Footer'
 
 // Dynamically import the Dashboard component with SSR disabled
 const DynamicDashboard = dynamic(
@@ -117,8 +117,8 @@ const ImageToolsContent = () => {
       icon: <FaFileImage />,
       title: 'Background Remover',
       description: 'Remove the background from images and save them as PNG or JPG',
-      link: `${routes.tools}/image/background-remover`,
-      isComingSoon: true,
+      link: `${routes.tools}/image/bg-remover`,
+      isComingSoon: false,
     },
   ]
 

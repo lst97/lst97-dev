@@ -31,7 +31,6 @@ export function PkmCard({
           src={src ?? '/default-image.svg'}
           alt={title}
           fill
-          objectFit="cover"
         />
       </div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/80 border-4 border-black rounded-lg p-2 font-['Press_Start_2P',monospace] text-[1rem] text-center leading-[1.2] text-black z-[2] opacity-100 transition-all duration-200 pointer-events-auto max-w-1/2 h-2/5 group-hover:opacity-0 group-hover:h-[40px]">
@@ -64,7 +63,6 @@ export function PkmCardLite({
             src={src ?? '/default-image.svg'}
             alt={title}
             fill
-            objectFit="cover"
           />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
             <div className="font-['Press_Start_2P',monospace] text-[0.8rem] text-black bg-[#fef3c7] p-[2px_4px] border-2 border-black rounded-none uppercase tracking-[1px]">

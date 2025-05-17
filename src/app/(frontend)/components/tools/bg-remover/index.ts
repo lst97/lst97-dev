@@ -1,0 +1,1 @@
+export { BackgroundRemover } from './BackgroundRemover'

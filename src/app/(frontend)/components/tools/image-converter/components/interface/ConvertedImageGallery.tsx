@@ -6,8 +6,8 @@ import Image from 'next/image'
 import { FaFileDownload, FaFileArchive, FaSpinner, FaTrash } from 'react-icons/fa'
 import { ImageInfo, SupportedFormat } from '../../types'
 import { formatIconMap } from './FormatIcons'
-import { formatBytes } from '@/app/(frontend)/utils/formatBytes'
-import { PixelCheckbox, PixelScrollArea } from '@/app/(frontend)/components/ui'
+import { formatBytes } from '@/frontend/utils/formatBytes'
+import { PixelCheckbox, PixelScrollArea } from '@/frontend/components/ui'
 
 type ConvertedImageGalleryProps = {
   images: ImageInfo[]

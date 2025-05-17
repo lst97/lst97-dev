@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import ToolsClient from './ToolsClient'
-import { PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
+import { PageLoading } from '@/frontend/components/common/loading/Loading'
 import { Footer } from '@/frontend/components/footer'
 import type { Metadata } from 'next'
 

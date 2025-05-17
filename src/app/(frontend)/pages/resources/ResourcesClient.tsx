@@ -1,9 +1,9 @@
 'use client'
 
 import React, { Suspense } from 'react'
-import { PostsList } from '@/app/(frontend)/components/common/items/Posts'
+import { PostsList } from '@/frontend/components/common/items/Posts'
 import { usePosts } from '@/frontend/hooks/usePosts'
-import { LoadingSpinner } from '@/app/(frontend)/components/common/loading/Loading'
+import { LoadingSpinner } from '@/frontend/components/common/loading/Loading'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'

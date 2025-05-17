@@ -35,7 +35,7 @@ import { projectsData } from '@/frontend/constants/data/services'
 import { ContactForm, TanStackFormProps } from '@/frontend/components/services/forms/ContactForm'
 import Message from '@/frontend/components/common/Message'
 import { useContactForm } from '@/frontend/hooks/useContactForm'
-import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
+import { LoadingSpinner, PageLoading } from '@/frontend/components/common/loading/Loading'
 import dynamic from 'next/dynamic'
 
 // Dynamically import the Dashboard component with SSR disabled

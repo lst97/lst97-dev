@@ -58,7 +58,7 @@ export const processHeicFile = async (file: File): Promise<File> => {
   try {
     // Dynamically import our client-side converter to reduce bundle size in pages that don't need it
     const { clientSideHeicConvertor: clientSideHeicConvertor } = await import(
-      '@/app/(frontend)/components/tools/image-converter/components/engine/heicConverter'
+      '@/frontend/components/tools/image-converter/components/engine/heicConverter'
     )
 
     // Convert the HEIC file using the client-side converter

@@ -5,7 +5,7 @@ import { Post } from '@/frontend/models/Post'
 import { ContentDisplay } from '@/frontend/components/common/renderers'
 import { Tag } from '@/frontend/components/ui/Tags'
 import Image from 'next/image'
-import { PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
+import { PageLoading } from '@/frontend/components/common/loading/Loading'
 
 // Loading state component - re-export PageLoading with custom message
 export const LoadingState = () => <PageLoading message="Loading content..." />

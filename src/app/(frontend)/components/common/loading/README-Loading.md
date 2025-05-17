@@ -15,7 +15,7 @@ This directory contains components for handling loading states across both serve
 For server components, use the `ServerLoadingSpinner` or `ServerPageLoading` from the LoadingProvider:
 
 ```tsx
-import { ServerPageLoading } from '@/app/(frontend)/components/common/LoadingProvider'
+import { ServerPageLoading } from '@/frontend/components/common/LoadingProvider'
 
 export default function MyServerComponent() {
   return (
@@ -59,7 +59,7 @@ Alternatively, for simpler cases, you can create a client-only component that im
 ```tsx
 'use client'
 
-import { PageLoading } from '@/app/(frontend)/components/common/Loading'
+import { PageLoading } from '@/frontend/components/common/Loading'
 
 export default function MyClientLoadingComponent({ message }: { message?: string }) {
   return <PageLoading message={message} />

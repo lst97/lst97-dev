@@ -3,7 +3,7 @@ import { getAccessToken } from '@/frontend/utils/oauth2'
 import {
   generateAutoReplyTemplate,
   generateContactNotificationTemplate,
-} from '@/app/(frontend)/models/email/templates'
+} from '@/frontend/models/email/templates'
 
 interface EmailOptions {
   to: string

@@ -33,3 +33,6 @@ export { default as PixelCollapsible } from './Collapsible'
 
 // Checkbox
 export { default as PixelCheckbox } from './Checkbox'
+
+// ProgressBar
+export { default as PixelProgressBar } from './ProgressBar'

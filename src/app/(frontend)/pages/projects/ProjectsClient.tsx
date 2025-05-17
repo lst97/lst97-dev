@@ -3,14 +3,14 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { Dialog } from '@/app/(frontend)/components/dialog/Dialog'
+import { Dialog } from '@/frontend/components/dialog/Dialog'
 import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
 import { Button } from '@/frontend/components/ui/Buttons'
 import { Project } from '@/frontend/components/projects/ProjectCard'
 import { ProjectExplorer } from '@/frontend/components/projects'
 import { NavigationLink } from '@/frontend/components/ui/Links'
 import { routes } from '@/frontend/constants/routes'
-import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
+import { LoadingSpinner, PageLoading } from '@/frontend/components/common/loading/Loading'
 import dynamic from 'next/dynamic'
 
 // Dynamically import the Dashboard component to prevent useSearchParams issues

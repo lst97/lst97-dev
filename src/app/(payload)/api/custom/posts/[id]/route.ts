@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { Post as PayloadPost } from '@/payload-types'
 import { PostByIdResponse } from './types'
-import { Post } from '@/app/(frontend)/models/Post'
+import { Post } from '@/frontend/models/Post'
 
 // GET /api/custom/posts/[id]
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {

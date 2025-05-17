@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
-import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
+import { LoadingSpinner, PageLoading } from '@/frontend/components/common/loading/Loading'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'

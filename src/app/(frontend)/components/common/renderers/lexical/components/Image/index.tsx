@@ -23,7 +23,6 @@ export const ImageComponent: React.FC<ImageProps> = ({ node, index, alt }) => {
           height={500}
           style={{
             maxHeight: '500px',
-            objectFit: 'contain',
             imageRendering: 'pixelated',
           }}
         />

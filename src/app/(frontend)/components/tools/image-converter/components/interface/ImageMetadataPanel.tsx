@@ -5,8 +5,8 @@ import { FaImage, FaInfoCircle, FaCamera } from 'react-icons/fa'
 import { BiDetail } from 'react-icons/bi'
 import { formatIconMap } from './FormatIcons'
 import { SupportedFormat, ImageMetadata } from '../../types'
-import { formatBytes } from '@/app/(frontend)/utils/formatBytes'
-import { PixelScrollArea } from '@/app/(frontend)/components/ui'
+import { formatBytes } from '@/frontend/utils/formatBytes'
+import { PixelScrollArea } from '@/frontend/components/ui'
 
 // Map technical metadata keys to more user-friendly labels
 const technicalLabels: Record<string, string> = {

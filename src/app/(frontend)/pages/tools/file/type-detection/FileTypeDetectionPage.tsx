@@ -3,11 +3,11 @@
 import React, { Suspense } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
-import { routes } from '@/app/(frontend)/constants/routes'
+import { LoadingSpinner, PageLoading } from '@/frontend/components/common/loading/Loading'
+import { routes } from '@/frontend/constants/routes'
 import { FaInfoCircle, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'
 import { motion } from 'framer-motion'
-import { FileTypeDetector } from '@/app/(frontend)/components/tools/file-type'
+import { FileTypeDetector } from '@/frontend/components/tools/file-type'
 
 // Dynamically import the Dashboard component with SSR disabled
 const DynamicDashboard = dynamic(

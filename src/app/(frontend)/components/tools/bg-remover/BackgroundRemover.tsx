@@ -1,0 +1,243 @@
+'use client'
+
+import React, { useState, useCallback } from 'react'
+import { motion } from 'framer-motion'
+import { useBackgroundRemovalController } from './hooks'
+import type { RawModelProgressData, ModelProgressTypeForComponent } from './components/engine/types'
+
+import {
+  UploadSection,
+  ImageGallery,
+  ProcessingNotice,
+  ModelLoadingProgress,
+  JobProgressList,
+} from './components/interface'
+
+/**
+ * Props for the BackgroundRemover component.
+ */
+type BackgroundRemoverProps = {
+  /** Optional CSS class name for custom styling. */
+  className?: string
+}
+
+/**
+ * BackgroundRemover component provides a UI for users to upload images,
+ * remove their backgrounds using a machine learning model, and download the processed images.
+ * It handles model loading, batch processing, individual image processing, and error display.
+ */
+export const BackgroundRemover: React.FC<BackgroundRemoverProps> = ({ className: _className }) => {
+  const {
+    modelLoading,
+    modelLoaded,
+    imageList,
+    overallError,
+    isBatchActive,
+    handleFileChange,
+    handleStartBatchProcess,
+    downloadImage,
+    createAndDownloadZip,
+    hasPendingOrQueuedJobs,
+    remainingJobCount,
+    clearAllJobs,
+    removeJob,
+    segmentationController,
+  } = useBackgroundRemovalController()
+
+  // New state for zipping status
+  const [isZipping, setIsZipping] = useState<boolean>(false)
+
+  const rawProgressData = segmentationController?.modelLoadingProgress
+    ?.progress as RawModelProgressData
+  const currentModelStatus =
+    segmentationController?.modelLoadingProgress?.status || 'Initializing model...'
+
+  let progressForModelComponent: ModelProgressTypeForComponent = 0 // Default to 0 percent
+
+  if (typeof rawProgressData === 'number') {
+    progressForModelComponent = rawProgressData
+  } else if (typeof rawProgressData === 'object' && rawProgressData !== null) {
+    if (typeof rawProgressData.progress === 'number') {
+      progressForModelComponent = {
+        progress: rawProgressData.progress,
+        loaded: rawProgressData.loaded,
+        total: rawProgressData.total,
+        status: rawProgressData.status,
+        file: rawProgressData.file,
+      }
+    } else if (
+      typeof rawProgressData.loaded === 'number' &&
+      typeof rawProgressData.total === 'number' &&
+      rawProgressData.total > 0 // Ensure total is not zero to prevent division by zero
+    ) {
+      progressForModelComponent = {
+        loaded: rawProgressData.loaded,
+        total: rawProgressData.total,
+        status: rawProgressData.status,
+        file: rawProgressData.file,
+      }
+    }
+    // If neither of the above, progressForModelComponent remains the default (e.g., 0 or a previously valid state if this logic were in a useEffect)
+  }
+
+  // For UploadSection component (assuming it wants a numeric percentage for its 'modelLoadingProgress' prop)
+  let numericProgressForUploadSection = 0
+  if (typeof rawProgressData === 'number') {
+    numericProgressForUploadSection = rawProgressData
+  } else if (typeof rawProgressData === 'object' && rawProgressData !== null) {
+    if (typeof rawProgressData.progress === 'number') {
+      numericProgressForUploadSection = rawProgressData.progress
+    } else if (
+      typeof rawProgressData.loaded === 'number' &&
+      typeof rawProgressData.total === 'number' &&
+      rawProgressData.total > 0
+    ) {
+      numericProgressForUploadSection = Math.min(
+        (rawProgressData.loaded / rawProgressData.total) * 100,
+        100,
+      )
+    }
+  }
+
+  /**
+   * Downloads all successfully processed images as a single ZIP file.
+   * Filters for jobs that have a processedImageUrl and are marked as 'completed'.
+   */
+  const downloadAllImages = useCallback(async () => {
+    const processedJobs = imageList.filter(
+      (job) => job.processedImageUrl && job.status === 'completed',
+    )
+    if (processedJobs.length === 0) {
+      console.warn('No processed images available to download.')
+      return
+    }
+
+    setIsZipping(true)
+    console.log('Starting download of all processed images...')
+    try {
+      await createAndDownloadZip(processedJobs, 'bg-removed-images.zip')
+      console.log('Successfully created and initiated download for all images zip.')
+    } catch (error) {
+      console.error('Error downloading all images:', error)
+    } finally {
+      setIsZipping(false)
+    }
+  }, [imageList, createAndDownloadZip])
+
+  /**
+   * Downloads selected successfully processed images as a single ZIP file.
+   * @param jobIds An array of job IDs to be included in the ZIP file.
+   */
+  const downloadSelectedImages = useCallback(
+    async (jobIds: string[]) => {
+      if (jobIds.length === 0) return
+
+      setIsZipping(true)
+      console.log(`Starting download for ${jobIds.length} selected images...`)
+
+      try {
+        const selectedJobs = imageList.filter(
+          (job) => job.processedImageUrl && job.status === 'completed' && jobIds.includes(job.id),
+        )
+
+        if (selectedJobs.length === 0) {
+          console.warn('No processed images found in selection for download.')
+          return
+        }
+
+        const zipFilename =
+          selectedJobs.length === 1
+            ? `bg-removed-${selectedJobs[0].name.split('.')[0]}.zip`
+            : `bg-removed-selected-${selectedJobs.length}.zip`
+
+        await createAndDownloadZip(selectedJobs, zipFilename)
+        console.log(
+          `Successfully created and initiated download for selected images zip: ${zipFilename}`,
+        )
+      } catch (error) {
+        console.error('Error downloading selected images:', error)
+      } finally {
+        setIsZipping(false)
+      }
+    },
+    [imageList, createAndDownloadZip],
+  )
+
+  // Calculate active processing job count
+  const activeProcessingCount = imageList.filter(
+    (job) =>
+      job.status !== 'completed' &&
+      job.status !== 'error' &&
+      job.status !== 'pending_preprocessing' &&
+      job.status !== 'pending_segmentation' &&
+      job.status !== 'pending_postprocessing',
+  ).length
+
+  // Determine if processing notice should be shown
+  const isProcessingInProgress = imageList.some(
+    (job) =>
+      job.status !== 'completed' &&
+      job.status !== 'error' &&
+      job.status !== 'pending_preprocessing',
+  )
+
+  return (
+    <div className="bg-card w-full max-w-6xl mx-auto p-8 border-4 border-border shadow-[8px_8px_0_#000] rounded-none px-2 md:px-8">
+      <h2 className="text-2xl font-['Press_Start_2P'] mb-8 text-center">Background Remover</h2>
+
+      {/* Show model loading progress when the model is loading */}
+      {modelLoading && (
+        <ModelLoadingProgress
+          isLoading={modelLoading}
+          progress={progressForModelComponent}
+          status={currentModelStatus}
+        />
+      )}
+
+      {/* Upload section */}
+      <UploadSection
+        onFileUpload={handleFileChange}
+        modelLoaded={modelLoaded}
+        modelLoading={modelLoading}
+        isBatchActive={isBatchActive}
+        hasPendingOrQueuedJobs={hasPendingOrQueuedJobs}
+        onStartBatch={handleStartBatchProcess}
+        remainingJobCount={remainingJobCount}
+        modelLoadingProgress={numericProgressForUploadSection}
+        modelLoadingStatus={currentModelStatus}
+      />
+
+      {/* Processing notice for potential UI lag */}
+      <ProcessingNotice isVisible={isProcessingInProgress} jobCount={activeProcessingCount} />
+
+      {/* Job processing progress */}
+      <JobProgressList jobs={imageList} />
+
+      {/* Error message */}
+      {overallError && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-4 bg-red-100 border-4 border-red-400 text-red-700 font-['Press_Start_2P'] text-sm shadow-[4px_4px_0px_#000]"
+        >
+          {overallError}
+        </motion.div>
+      )}
+
+      {/* Image gallery */}
+      {imageList.length > 0 && (
+        <ImageGallery
+          jobs={imageList}
+          removeJob={removeJob}
+          clearAllJobs={clearAllJobs}
+          downloadImage={downloadImage}
+          downloadAllImages={downloadAllImages}
+          downloadSelectedImages={downloadSelectedImages}
+          isZipping={isZipping}
+        />
+      )}
+    </div>
+  )
+}
+
+export default BackgroundRemover

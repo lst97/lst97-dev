@@ -6,7 +6,7 @@ import { PkmTitle } from '@/frontend/components/common/Titles'
 import Image from 'next/image'
 import { Post } from '@/frontend/models/Post'
 import { usePosts } from '@/frontend/hooks/usePosts'
-import { LoadingSpinner } from '@/app/(frontend)/components/common/loading/Loading'
+import { LoadingSpinner } from '@/frontend/components/common/loading/Loading'
 
 export const MyNotes = () => {
   const { posts, isLoading, error } = usePosts({})

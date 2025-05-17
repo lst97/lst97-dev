@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 import AboutClient from './AboutClient'
-import { PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
+import { PageLoading } from '@/frontend/components/common/loading/Loading'
 
 export default function AboutPage() {
   return (

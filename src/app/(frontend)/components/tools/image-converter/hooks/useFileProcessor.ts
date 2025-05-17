@@ -71,7 +71,7 @@ export const useFileProcessor = ({ onFilesProcessed, onError }: UseFileProcessor
       try {
         // Dynamically import client-side converter
         const { clientSideHeicConvertor: clientSideHeicConvert } = await import(
-          '@/app/(frontend)/components/tools/image-converter/components/engine/heicConverter'
+          '@/frontend/components/tools/image-converter/components/engine/heicConverter'
         )
 
         // Update progress

@@ -6,10 +6,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { FaFileAlt, FaFileCode, FaLock, FaRocket } from 'react-icons/fa'
 import PixelArtAnimation from '@/frontend/components/animation/PixelArtAnimation'
-import { LoadingSpinner, PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
+import { LoadingSpinner, PageLoading } from '@/frontend/components/common/loading/Loading'
 import dynamic from 'next/dynamic'
-import { routes } from '@/app/(frontend)/constants/routes'
-import Footer from '@/app/(frontend)/components/footer/Footer'
+import { routes } from '@/frontend/constants/routes'
+import Footer from '@/frontend/components/footer/Footer'
 
 // Dynamically import the Dashboard component with SSR disabled
 const DynamicDashboard = dynamic(

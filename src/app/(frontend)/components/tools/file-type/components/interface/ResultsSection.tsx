@@ -16,7 +16,8 @@ import {
   FaExclamationTriangle,
 } from 'react-icons/fa'
 import { DetectionResult } from '../../types'
-import { PixelScrollArea } from '@/app/(frontend)/components/ui/ScrollArea'
+import { PixelScrollArea } from '@/frontend/components/ui/ScrollArea'
+import { formatBytes } from '@/frontend/utils/formatBytes'
 
 interface ResultsSectionProps {
   results: DetectionResult[]
@@ -48,13 +49,6 @@ const ResultCard: React.FC<{ result: DetectionResult }> = ({ result }) => {
       default:
         return <FaQuestion className="text-3xl" />
     }
-  }
-
-  // Format file size
-  const formatFileSize = (size: number): string => {
-    if (size < 1024) return `${size} B`
-    if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`
   }
 
   // Check if both engines detected the same file type
@@ -133,7 +127,7 @@ const ResultCard: React.FC<{ result: DetectionResult }> = ({ result }) => {
           </div>
           <div className="flex justify-between items-center">
             <span className="font-medium">Size:</span>
-            <span>{formatFileSize(result.fileSize)}</span>
+            <span>{formatBytes(result.fileSize)}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="font-medium">Score:</span>

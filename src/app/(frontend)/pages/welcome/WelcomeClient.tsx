@@ -2,7 +2,7 @@
 
 import React, { Suspense } from 'react'
 import Image from 'next/image'
-import { PageLoading } from '@/app/(frontend)/components/common/loading/Loading'
+import { PageLoading } from '@/frontend/components/common/loading/Loading'
 import dynamic from 'next/dynamic'
 import {
   AIChatBot,
