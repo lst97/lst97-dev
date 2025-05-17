@@ -21,7 +21,7 @@ importers:
         specifier: ^3.38.0
         version: 3.38.0(@neondatabase/serverless@0.9.5)(@types/pg@8.11.6)(@types/react@19.1.4)(payload@3.38.0(bufferutil@4.0.9)(graphql@16.11.0)(typescript@5.8.3)(utf-8-validate@6.0.5))(react@19.1.0)
       '@payloadcms/next':
-        specifier: 3.38.0
+        specifier: ^3.38.0
         version: 3.38.0(@types/react@19.1.4)(graphql@16.11.0)(monaco-editor@0.52.2)(next@15.3.2(@babel/core@7.27.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(payload@3.38.0(bufferutil@4.0.9)(graphql@16.11.0)(typescript@5.8.3)(utf-8-validate@6.0.5))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)
       '@payloadcms/payload-cloud':
         specifier: ^3.38.0
