@@ -22,17 +22,16 @@ export const Tooltip: React.FC<TooltipProps> = ({
       <RadixTooltip.Content
         side={side}
         sideOffset={sideOffset}
-        className={`font-['Press_Start_2P']  border-4 border-[#2c2c2c] rounded-[10px] pixel-border z-50 px-4 py-3 text-xs text-text dark:text-text-light bg-secondary dark:bg-card-dark shadow-[8px_8px_0_0_#b58900] drop-shadow-[2px_2px_4px_rgba(0,0,0,0.3)] select-none image-pixelated ${className}`}
+        className={`font-['Press_Start_2P'] border-4 border-[#2c2c2c] rounded-[10px] pixel-border z-50 px-4 py-3 text-xs text-text dark:text-text-light bg-secondary select-none image-pixelated ${className}`}
         style={{
           imageRendering: 'pixelated',
         }}
       >
-        {content}
+        <div className="w-full">{content}</div>
         <RadixTooltip.Arrow
-          className="fill-secondary/50 dark:fill-card-dark stroke-border stroke-2"
-          width={16}
-          height={8}
-          style={{ filter: 'drop-shadow(2px 2px 0 #b58900)' }}
+          className="fill-secondary/50 dark:fill-card-dark stroke-border stroke-4"
+          width={24}
+          height={16}
         />
       </RadixTooltip.Content>
     </RadixTooltip.Portal>

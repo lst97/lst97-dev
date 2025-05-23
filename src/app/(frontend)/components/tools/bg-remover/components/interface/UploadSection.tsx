@@ -14,6 +14,7 @@ type UploadSectionProps = {
   remainingJobCount: number
   modelLoadingProgress?: number
   modelLoadingStatus?: string
+  disabled?: boolean
 }
 
 export const UploadSection: React.FC<UploadSectionProps> = ({
@@ -24,11 +25,14 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
   hasPendingOrQueuedJobs,
   onStartBatch,
   remainingJobCount,
+  disabled = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const triggerFileInput = () => {
-    fileInputRef.current?.click()
+    if (!disabled) {
+      fileInputRef.current?.click()
+    }
   }
 
   return (
@@ -41,8 +45,8 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
       <div
         onClick={triggerFileInput}
         className={`p-8 border-4 border-dashed rounded-none cursor-pointer text-center transition-all 
-          ${modelLoading || isBatchActive ? 'opacity-50 cursor-not-allowed' : 'border-border hover:border-accent-color hover:bg-accent-color/10'}
-          ${modelLoading || isBatchActive ? 'pointer-events-none' : ''}
+          ${modelLoading || isBatchActive || disabled ? 'opacity-50 cursor-not-allowed' : 'border-border hover:border-accent-color hover:bg-accent-color/10'}
+          ${modelLoading || isBatchActive || disabled ? 'pointer-events-none' : ''}
         `}
       >
         <FaFileUpload className="mx-auto text-4xl mb-4 text-accent-color" />
@@ -60,7 +64,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
           accept="image/png, image/jpeg"
           multiple
           className="hidden"
-          disabled={modelLoading || isBatchActive}
+          disabled={modelLoading || isBatchActive || disabled}
         />
       </div>
 
@@ -69,7 +73,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
         <div className="mt-6 flex justify-center">
           <button
             onClick={onStartBatch}
-            disabled={!modelLoaded || isBatchActive || modelLoading}
+            disabled={!modelLoaded || isBatchActive || modelLoading || disabled}
             className="p-3 rounded-none font-['Press_Start_2P'] text-sm flex items-center justify-center gap-2 transition-all
               bg-accent-color hover:bg-accent-color/80
               disabled:opacity-50 disabled:cursor-not-allowed

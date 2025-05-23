@@ -1,18 +1,7 @@
 import { motion, Variants } from 'framer-motion'
 import Image from 'next/image'
 import { useReducedMotion } from 'framer-motion'
-
-interface FloatingElementProps {
-  src: string
-  alt: string
-  width: number
-  height: number
-  className: string
-  imageClassName?: string
-  floatDuration?: number
-  floatOffset?: number
-  hoverScale?: number
-}
+import { FloatingElementProps } from './types'
 
 // Reusable component for floating elements
 const FloatingElement = ({
@@ -59,6 +48,7 @@ const FloatingElement = ({
         width={width}
         height={height}
         className={`object-contain opacity-60 grayscale-20 brightness-110 z-20 mix-blend-multiply ${imageClassName}`}
+        priority
       />
     </motion.div>
   )

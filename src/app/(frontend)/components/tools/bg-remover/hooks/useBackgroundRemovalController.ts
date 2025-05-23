@@ -6,6 +6,7 @@ import {
   usePostprocessingController,
 } from './'
 import JSZip from 'jszip'
+import { isWebGLSupported, isWebGPUSupported } from '@/frontend/utils/browserFeatures'
 
 const MAX_PREPROCESSING_WORKERS = 2
 const MAX_SEGMENTATION_WORKERS = 4
@@ -63,6 +64,10 @@ export const useBackgroundRemovalController = () => {
 
   const [initializationPhase, setInitializationPhase] = useState<WorkerInitializationPhase>('idle')
 
+  const [webGLSupported, setWebGLSupported] = useState<boolean>(true)
+  const [webGPUSupported, setWebGPUSupported] = useState<boolean>(true)
+  const [compatibilityChecked, setCompatibilityChecked] = useState<boolean>(false)
+
   // Refs for state values to stabilize callbacks passed to sub-hooks
   // These refs ensure that functions passed to child hooks (like processNextFor...)
   // do not become stale due to closure over state that changes frequently.
@@ -94,6 +99,17 @@ export const useBackgroundRemovalController = () => {
   useEffect(() => {
     overallErrorRef.current = overallError
   }, [overallError])
+
+  useEffect(() => {
+    const checkCompatibility = async () => {
+      const glSupport = isWebGLSupported()
+      const gpuSupport = await isWebGPUSupported()
+      setWebGLSupported(glSupport)
+      setWebGPUSupported(gpuSupport)
+      setCompatibilityChecked(true)
+    }
+    checkCompatibility()
+  }, [])
 
   const commonHookOptions = {
     imageListRef,
@@ -898,5 +914,8 @@ export const useBackgroundRemovalController = () => {
     removeJob,
     setImageList, // Expose setImageList to allow direct updates to imageList state
     segmentationController,
+    webGLSupported,
+    webGPUSupported,
+    compatibilityChecked,
   }
 }

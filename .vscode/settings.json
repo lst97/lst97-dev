@@ -47,6 +47,7 @@
     "Cpath",
     "depcruise",
     "devsafe",
+    "disablekb",
     "doesn",
     "dtype",
     "exif",
@@ -58,6 +59,7 @@
     "magika",
     "maxage",
     "Meteo",
+    "modestbranding",
     "Nextdotjs",
     "onnx",
     "payloadcms",
@@ -71,6 +73,7 @@
     "RMBG",
     "scanlines",
     "sementation",
+    "showinfo",
     "skillset",
     "textareas",
     "treemap",
@@ -80,5 +83,9 @@
     "xaxis",
     "yaxis"
   ],
-  "css.customData": [".vscode/tailwind.json"]
+  "css.customData": [".vscode/tailwind.json"],
+  "sonarlint.connectedMode.project": {
+    "connectionId": "lst97",
+    "projectKey": "lst97_lst97.dev-react"
+  }
 }

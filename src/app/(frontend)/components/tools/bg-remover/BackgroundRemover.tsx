@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useBackgroundRemovalController } from './hooks'
 import type { RawModelProgressData, ModelProgressTypeForComponent } from './components/engine/types'
@@ -12,6 +12,7 @@ import {
   ModelLoadingProgress,
   JobProgressList,
 } from './components/interface'
+import { CompatibilityCheck } from './components/interface/CompatibilityCheck'
 
 /**
  * Props for the BackgroundRemover component.
@@ -42,10 +43,20 @@ export const BackgroundRemover: React.FC<BackgroundRemoverProps> = ({ className:
     clearAllJobs,
     removeJob,
     segmentationController,
+    webGLSupported,
+    webGPUSupported,
+    compatibilityChecked,
   } = useBackgroundRemovalController()
 
   // New state for zipping status
   const [isZipping, setIsZipping] = useState<boolean>(false)
+  const [isMobile, setIsMobile] = useState<boolean>(false)
+
+  useEffect(() => {
+    const userAgent = typeof window.navigator === 'undefined' ? '' : navigator.userAgent
+    const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+    setIsMobile(mobileRegex.test(userAgent))
+  }, [])
 
   const rawProgressData = segmentationController?.modelLoadingProgress
     ?.progress as RawModelProgressData
@@ -183,7 +194,45 @@ export const BackgroundRemover: React.FC<BackgroundRemoverProps> = ({ className:
 
   return (
     <div className="bg-card w-full max-w-6xl mx-auto p-8 border-4 border-border shadow-[8px_8px_0_#000] rounded-none px-2 md:px-8">
-      <h2 className="text-2xl font-['Press_Start_2P'] mb-8 text-center">Background Remover</h2>
+      <div className="flex items-center justify-between mb-8 relative">
+        <div className="flex-grow">
+          <h2 className="text-2xl font-['Press_Start_2P'] text-center">Background Remover</h2>
+        </div>
+        {compatibilityChecked && (
+          <div className="flex-shrink-0 ml-4">
+            <CompatibilityCheck webGLSupported={webGLSupported} webGPUSupported={webGPUSupported} />
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Device Warning */}
+      {isMobile && (
+        <div
+          className="mb-6 p-4 bg-yellow-100 border-4 border-yellow-400 text-yellow-700 font-['Press_Start_2P'] text-sm shadow-[4px_4px_0px_#000] rounded-none"
+          role="alert"
+        >
+          <h3 className="font-bold mb-2 text-yellow-800">Mobile Device Detected</h3>
+          <p className="text-xs">
+            This tool is not optimized for mobile devices and may experience errors or performance
+            issues due to model size and resource limitations. For the best experience, please use a
+            desktop browser.
+          </p>
+        </div>
+      )}
+
+      {/* Browser Compatibility Warning */}
+      {compatibilityChecked && !webGLSupported && (
+        <div
+          className="mb-6 p-4 bg-amber-100 border-4 border-amber-400 text-amber-700 font-['Press_Start_2P'] text-sm shadow-[4px_4px_0px_#000] rounded-none"
+          role="alert"
+        >
+          <h3 className="font-bold mb-2 text-amber-800">Browser Compatibility Issue</h3>
+          <p className="text-xs">
+            Your browser does not support WebGL, which is required for this tool to function. Please
+            consider using Google Chrome for the best experience.
+          </p>
+        </div>
+      )}
 
       {/* Show model loading progress when the model is loading */}
       {modelLoading && (
@@ -205,6 +254,7 @@ export const BackgroundRemover: React.FC<BackgroundRemoverProps> = ({ className:
         remainingJobCount={remainingJobCount}
         modelLoadingProgress={numericProgressForUploadSection}
         modelLoadingStatus={currentModelStatus}
+        disabled={compatibilityChecked && !webGLSupported}
       />
 
       {/* Processing notice for potential UI lag */}
@@ -234,10 +284,13 @@ export const BackgroundRemover: React.FC<BackgroundRemoverProps> = ({ className:
           downloadAllImages={downloadAllImages}
           downloadSelectedImages={downloadSelectedImages}
           isZipping={isZipping}
+          disabled={compatibilityChecked && !webGLSupported}
         />
       )}
     </div>
   )
 }
+
+// We now use the Tooltip component from the UI library instead of custom tooltip styles
 
 export default BackgroundRemover

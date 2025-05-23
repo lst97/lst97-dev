@@ -23,6 +23,8 @@ type ImageGalleryProps = {
   downloadSelectedImages?: (jobIds: string[]) => void
   /** Optional flag indicating if a ZIP download is currently in progress. */
   isZipping?: boolean
+  /** Optional flag to disable interactions within the gallery. */
+  disabled?: boolean
 }
 
 /**
@@ -35,6 +37,7 @@ const ImageCard = ({
   onSelect,
   onRemove,
   onDownload,
+  disabled,
 }: {
   /** The image job data to display. */
   job: ExtendedImageJob
@@ -46,6 +49,8 @@ const ImageCard = ({
   onRemove: () => void
   /** Optional callback to download the processed image for this card. */
   onDownload?: (imageUrl?: string, fileName?: string) => void
+  /** Added disabled prop */
+  disabled?: boolean
 }) => {
   const hasProcessedImage = !!job.processedImageUrl && job.status === 'completed'
   const displayUrl = job.processedImageUrl || job.originalBlobUrl
@@ -77,7 +82,11 @@ const ImageCard = ({
         onClick={(e) => {
           // Only handle click if it's not on the checkbox (to avoid double toggle)
           // and if the card is selectable (i.e., image processing is complete)
-          if (!(e.target as HTMLElement).closest('.checkbox-container') && isSelectable) {
+          if (
+            !(e.target as HTMLElement).closest('.checkbox-container') &&
+            isSelectable &&
+            !disabled
+          ) {
             onSelect(job.id, !isSelected)
           }
         }}
@@ -92,7 +101,7 @@ const ImageCard = ({
             checked={isSelected}
             onCheckedChange={(checked) => isSelectable && onSelect(job.id, checked)}
             className="bg-background/80"
-            disabled={!isSelectable}
+            disabled={!isSelectable || disabled}
           />
         </div>
 
@@ -104,6 +113,7 @@ const ImageCard = ({
               onRemove()
             }}
             className="h-6 w-6 flex items-center justify-center shadow-lg bg-black/50 text-white hover:bg-error transition-colors"
+            disabled={disabled}
           >
             <FaTimes className="text-xs" />
           </button>
@@ -210,6 +220,7 @@ const ImageCard = ({
                 border-4 border-border shadow-[4px_4px_0px_#000]
                 hover:shadow-[2px_2px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px]
                 active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
+              disabled={disabled}
             >
               <FaFileDownload />
               Download
@@ -240,6 +251,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
   downloadAllImages,
   downloadSelectedImages,
   isZipping = false,
+  disabled = false,
 }) => {
   // Filter jobs to get only those that are completed and have a processed image URL.
   // These are the jobs that can be selected and downloaded.
@@ -288,11 +300,11 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
   // Callback to initiate download of selected jobs.
   // Calls the downloadSelectedImages prop if available and jobs are selected.
   const handleDownloadSelected = useCallback(() => {
-    if (downloadSelectedImages && selectedJobIds.length > 0) {
+    if (downloadSelectedImages && selectedJobIds.length > 0 && !disabled) {
       console.log('Downloading selected jobs:', selectedJobIds) // Log: Initiating download for selected jobs
       downloadSelectedImages(selectedJobIds)
     }
-  }, [downloadSelectedImages, selectedJobIds]) // Dependencies: Re-create if props or selectedJobIds change.
+  }, [downloadSelectedImages, selectedJobIds, disabled]) // Dependencies: Re-create if props or selectedJobIds change.
 
   // If there are no jobs, don't render anything.
   if (jobs.length === 0) {
@@ -313,6 +325,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
                 onCheckedChange={handleSelectAllChange}
                 label="Select All"
                 labelClassName="text-xs"
+                disabled={disabled}
               />
 
               {/* Display the count of currently selected jobs */}
@@ -334,6 +347,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
                 border-4 border-border shadow-[4px_4px_0px_#000]
                 hover:shadow-[2px_2px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px]
                 active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
+              disabled={disabled}
             >
               <FaTrash />
               Clear All
@@ -344,7 +358,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
           {hasSelectedJobs && downloadSelectedImages && (
             <button
               onClick={handleDownloadSelected}
-              disabled={isZipping}
+              disabled={isZipping || disabled}
               className="px-4 py-2 bg-info/50 rounded-none font-['Press_Start_2P'] text-sm flex items-center gap-2 transition-all 
                 disabled:opacity-50 disabled:cursor-not-allowed
                 border-4 border-border shadow-[4px_4px_0px_#000]
@@ -369,7 +383,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
           {hasCompletedJobs && downloadAllImages && (
             <button
               onClick={downloadAllImages}
-              disabled={isZipping}
+              disabled={isZipping || disabled}
               className="px-4 py-2 bg-accent-color rounded-none font-['Press_Start_2P'] text-sm flex items-center gap-2 transition-all 
                 disabled:opacity-50 disabled:cursor-not-allowed
                 border-4 border-border shadow-[4px_4px_0px_#000]
@@ -406,6 +420,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
                   // Only provide download function if the job is completed and has a processed image
                   job.processedImageUrl && job.status === 'completed' ? downloadImage : undefined
                 }
+                disabled={disabled} // Pass disabled to ImageCard
               />
             ))}
           </div>
