@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { motion } from 'framer-motion'
 import { ExtendedImageJob } from '../../hooks/types'
 import { PixelProgressBar } from '@/frontend/components/ui/ProgressBar'
 
@@ -166,117 +165,107 @@ const JobProgressList: React.FC<JobProgressListProps> = ({ jobs }) => {
   const progressBarHeight = progressContainerHeight - 8
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-8 mt-4"
-    >
-      <h3 className="mb-4 font-['Press_Start_2P'] text-lg">Processing Progress</h3>
-
-      <div className="px-4 py-5 bg-card-background border-4 border-border rounded-none shadow-[4px_4px_0px_#000]">
-        <div className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex flex-col">
-            <div className="text-sm font-['Press_Start_2P']">
-              {currentStage ? getStatusText(currentStage as ExtendedImageJob['status']) : 'Ready'}
-            </div>
-            <div className="text-lg font-['Press_Start_2P'] mt-2">{overallProgress}% Complete</div>
+    <div>
+      <div className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col">
+          <div className="text-sm font-['Press_Start_2P']">
+            {currentStage ? getStatusText(currentStage as ExtendedImageJob['status']) : 'Ready'}
           </div>
-
-          <div className="font-['Press_Start_2P'] text-sm flex flex-wrap gap-4">
-            <div className="flex items-center">
-              <span className="inline-block h-3 w-3 bg-accent-color mr-2 border border-border"></span>
-              <span>Queued: {jobData.queuedCount}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="inline-block h-3 w-3 bg-warning mr-2 border border-border"></span>
-              <span>
-                Processing:{' '}
-                {jobData.activePreprocessingCount +
-                  jobData.activeSegmentationCount +
-                  jobData.activePostprocessingCount}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <span className="inline-block h-3 w-3 bg-success mr-2 border border-border"></span>
-              <span>Completed: {jobData.completedCount}</span>
-            </div>
-            {jobData.errorCount > 0 && (
-              <div className="flex items-center">
-                <span className="inline-block h-3 w-3 bg-error mr-2 border border-border"></span>
-                <span>Errors: {jobData.errorCount}</span>
-              </div>
-            )}
-          </div>
+          <div className="text-lg font-['Press_Start_2P'] mt-2">{overallProgress}% Complete</div>
         </div>
 
-        {/* Overall Progress Bar showing the three distinct stages: Preprocessing, Segmentation, and Postprocessing */}
-        <div
-          className="flex w-full rounded-none overflow-hidden"
-          style={{ height: `${progressContainerHeight}px` }}
-        >
-          <div className="w-1/3 h-full">
-            <PixelProgressBar
-              value={jobData.numFinishedPreprocessing}
-              max={jobData.totalCount}
-              height={progressBarHeight}
-              animated={true}
-              className="w-full !p-0 !border-l-4 !border-t-4 !border-b-4 !border-r-0 !border-border !rounded-none"
-              progressClassName="bg-[var(--color-progress-preprocess)]"
-            />
+        <div className="font-['Press_Start_2P'] text-sm flex flex-wrap gap-4">
+          <div className="flex items-center">
+            <span className="inline-block h-3 w-3 bg-accent-color mr-2 border border-border"></span>
+            <span>Queued: {jobData.queuedCount}</span>
           </div>
-          <div className="w-1/3 h-full">
-            <PixelProgressBar
-              value={jobData.numFinishedSegmentation}
-              max={jobData.totalCount}
-              height={progressBarHeight}
-              animated={true}
-              className="w-full !p-0 !border-t-4 !border-b-4 !border-l-2 !border-r-2 !border-border !rounded-none"
-              progressClassName="bg-[var(--color-progress-segment)]"
-            />
+          <div className="flex items-center">
+            <span className="inline-block h-3 w-3 bg-warning mr-2 border border-border"></span>
+            <span>
+              Processing:{' '}
+              {jobData.activePreprocessingCount +
+                jobData.activeSegmentationCount +
+                jobData.activePostprocessingCount}
+            </span>
           </div>
-          <div className="w-1/3 h-full">
-            <PixelProgressBar
-              value={jobData.numFinishedPostprocessing}
-              max={jobData.totalCount}
-              height={progressBarHeight}
-              animated={true}
-              className="w-full !p-0 !border-l-0 !border-t-4 !border-b-4 !border-r-4 !border-border !rounded-none"
-              progressClassName="bg-[var(--color-progress-postprocess)]"
-            />
+          <div className="flex items-center">
+            <span className="inline-block h-3 w-3 bg-success mr-2 border border-border"></span>
+            <span>Completed: {jobData.completedCount}</span>
           </div>
-        </div>
-
-        {/* Stage Indicators: Text labels for each stage of the progress bar */}
-        <div className="flex justify-between mt-2 font-['Press_Start_2P'] text-xs">
-          <div
-            className={
-              currentStage === 'preprocessing' ? 'text-[var(--color-progress-preprocess)]' : ''
-            }
-          >
-            Preprocessing
-          </div>
-          <div
-            className={
-              currentStage === 'segmentation' ? 'text-[var(--color-progress-segment)]' : ''
-            }
-          >
-            Segmentation
-          </div>
-          <div
-            className={
-              currentStage === 'postprocessing' ? 'text-[var(--color-progress-postprocess)]' : ''
-            }
-          >
-            Postprocessing
-          </div>
-        </div>
-
-        {/* Completion Statistics: Displays the count of completed images versus the total number of images */}
-        <div className="mt-4 font-['Press_Start_2P'] text-xs text-right">
-          {jobData.completedCount} of {jobData.totalCount} images completed
+          {jobData.errorCount > 0 && (
+            <div className="flex items-center">
+              <span className="inline-block h-3 w-3 bg-error mr-2 border border-border"></span>
+              <span>Errors: {jobData.errorCount}</span>
+            </div>
+          )}
         </div>
       </div>
-    </motion.div>
+
+      {/* Overall Progress Bar showing the three distinct stages: Preprocessing, Segmentation, and Postprocessing */}
+      <div
+        className="flex w-full rounded-none overflow-hidden"
+        style={{ height: `${progressContainerHeight}px` }}
+      >
+        <div className="w-1/3 h-full">
+          <PixelProgressBar
+            value={jobData.numFinishedPreprocessing}
+            max={jobData.totalCount}
+            height={progressBarHeight}
+            animated={true}
+            className="w-full !p-0 !border-l-4 !border-t-4 !border-b-4 !border-r-0 !border-border !rounded-none"
+            progressClassName="bg-[var(--color-progress-preprocess)]"
+          />
+        </div>
+        <div className="w-1/3 h-full">
+          <PixelProgressBar
+            value={jobData.numFinishedSegmentation}
+            max={jobData.totalCount}
+            height={progressBarHeight}
+            animated={true}
+            className="w-full !p-0 !border-t-4 !border-b-4 !border-l-2 !border-r-2 !border-border !rounded-none"
+            progressClassName="bg-[var(--color-progress-segment)]"
+          />
+        </div>
+        <div className="w-1/3 h-full">
+          <PixelProgressBar
+            value={jobData.numFinishedPostprocessing}
+            max={jobData.totalCount}
+            height={progressBarHeight}
+            animated={true}
+            className="w-full !p-0 !border-l-0 !border-t-4 !border-b-4 !border-r-4 !border-border !rounded-none"
+            progressClassName="bg-[var(--color-progress-postprocess)]"
+          />
+        </div>
+      </div>
+
+      {/* Stage Indicators: Text labels for each stage of the progress bar */}
+      <div className="flex justify-between mt-2 font-['Press_Start_2P'] text-xs">
+        <div
+          className={
+            currentStage === 'preprocessing' ? 'text-[var(--color-progress-preprocess)]' : ''
+          }
+        >
+          Preprocessing
+        </div>
+        <div
+          className={currentStage === 'segmentation' ? 'text-[var(--color-progress-segment)]' : ''}
+        >
+          Segmentation
+        </div>
+        <div
+          className={
+            currentStage === 'postprocessing' ? 'text-[var(--color-progress-postprocess)]' : ''
+          }
+        >
+          Postprocessing
+        </div>
+      </div>
+
+      {/* Completion Statistics: Displays the count of completed images versus the total number of images */}
+      <div className="mt-4 font-['Press_Start_2P'] text-xs text-right">
+        {jobData.completedCount} of {jobData.totalCount} images completed
+      </div>
+    </div>
   )
 }
 

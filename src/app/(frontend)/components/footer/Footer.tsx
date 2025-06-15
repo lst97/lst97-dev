@@ -12,6 +12,7 @@ import {
   FaBuilding,
   FaComments,
   FaQuestion,
+  FaUber,
 } from 'react-icons/fa'
 import { routes } from '@/frontend/constants/routes'
 import { contact } from '@/frontend/constants/data/contact'
@@ -28,6 +29,7 @@ const serviceLinks = [
   { href: '#frontend', icon: FaReact, text: 'Full-Stack Solutions' },
   { href: '#consulting', icon: FaQuestion, text: 'Technical Consulting' },
   { href: '#career', icon: FaUserClock, text: 'Career Opportunities' },
+  { href: '#uber delivery', icon: FaUber, text: 'Uber Delivery' },
   { href: routes.tools, icon: FaTools, text: 'Tools' },
   { href: '#api', icon: FaCode, text: 'API' },
 ]
@@ -122,6 +124,14 @@ export const Footer = () => (
       </div>
     </div>
     <div className="mt-16 pt-8 border-t-2 border-dashed border-[var(--color-border)] text-center font-['Press_Start_2P'] text-base text-[var(--text-color)] relative z-10">
+      <iframe
+        src="https://status.lst97.dev/embed-badges/live-status?align=start&background-light=FAE792&text-light=000000&background-dark=171717&text-dark=ffffff"
+        width="190"
+        height="30"
+        loading="lazy"
+        className="mx-auto border-2 shadow-[2px_2px_0_#000] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] border-border pb-[1px]"
+        scrolling="no"
+      />
       <p>© {new Date().getFullYear()} lst97.dev | All rights reserved</p>
       <p>Made with ❤️ by Nelson Lai</p>
     </div>

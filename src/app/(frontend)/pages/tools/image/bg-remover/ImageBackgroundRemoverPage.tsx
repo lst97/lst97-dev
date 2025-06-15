@@ -110,7 +110,7 @@ const BackgroundRemoverContent = () => {
             <h1 className="text-4xl font-['Press_Start_2P'] text-text-color">Background Remover</h1>
           </div>
           <p className="text-lg text-text-color max-w-3xl font-['Press_Start_2P'] mb-4">
-            Remove image backgrounds instantly using AI, right in your browser.
+            Remove image backgrounds instantly using AI, or replace them with custom colors.
           </p>
           <p className="text-sm text-text-color max-w-3xl font-['Press_Start_2P'] mb-6">
             All processing happens locally - your images never leave your device.
@@ -164,7 +164,7 @@ const BackgroundRemoverContent = () => {
               </li>
               <li>
                 <strong>Postprocessing Stage:</strong> Dedicated workers apply the segmentation mask
-                to create transparent backgrounds
+                to create transparent backgrounds or replace with custom colors
               </li>
               <li>
                 All stages happen concurrently, creating a processing pipeline for multiple images
@@ -182,7 +182,7 @@ const BackgroundRemoverContent = () => {
           <h2 id="use-cases" className="text-2xl font-['Press_Start_2P'] mb-6">
             Common Use Cases
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="bg-card border-2 border-border p-4 shadow-[4px_4px_0px_#000]">
               <h3 className="font-['Press_Start_2P'] text-sm mb-2">Product Photography</h3>
               <p className="font-['Press_Start_2P'] text-xs">
@@ -209,6 +209,13 @@ const BackgroundRemoverContent = () => {
               <p className="font-['Press_Start_2P'] text-xs">
                 Process multiple images at once with our efficient multi-threaded architecture for
                 consistent results across an entire set of photos or product catalog.
+              </p>
+            </div>
+            <div className="bg-card border-2 border-border p-4 shadow-[4px_4px_0px_#000]">
+              <h3 className="font-['Press_Start_2P'] text-sm mb-2">Background Replacement</h3>
+              <p className="font-['Press_Start_2P'] text-xs">
+                Replace backgrounds with solid colors for consistent branding, studio-style
+                photography, or creative effects without needing separate editing software.
               </p>
             </div>
           </div>

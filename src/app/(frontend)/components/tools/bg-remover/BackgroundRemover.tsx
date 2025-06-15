@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useBackgroundRemovalController } from './hooks'
 import type { RawModelProgressData, ModelProgressTypeForComponent } from './components/engine/types'
+import type { ExtendedImageJob } from './hooks/types'
 
 import {
   UploadSection,
@@ -11,8 +12,11 @@ import {
   ProcessingNotice,
   ModelLoadingProgress,
   JobProgressList,
+  BackgroundControl,
+  VersionInfo,
 } from './components/interface'
 import { CompatibilityCheck } from './components/interface/CompatibilityCheck'
+import { Accordion } from '@/frontend/components/ui/Accordion'
 
 /**
  * Props for the BackgroundRemover component.
@@ -28,6 +32,13 @@ type BackgroundRemoverProps = {
  * It handles model loading, batch processing, individual image processing, and error display.
  */
 export const BackgroundRemover: React.FC<BackgroundRemoverProps> = ({ className: _className }) => {
+  // Background color state
+  const [backgroundColor, setBackgroundColor] = useState<string | null>(null)
+  const [backgroundColorAlpha, setBackgroundColorAlpha] = useState<number>(1.0)
+  // Background image state
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null)
+  const [backgroundImageAlpha, setBackgroundImageAlpha] = useState<number>(1.0)
+
   const {
     modelLoading,
     modelLoaded,
@@ -42,11 +53,18 @@ export const BackgroundRemover: React.FC<BackgroundRemoverProps> = ({ className:
     remainingJobCount,
     clearAllJobs,
     removeJob,
+    setImageList,
     segmentationController,
     webGLSupported,
     webGPUSupported,
     compatibilityChecked,
-  } = useBackgroundRemovalController()
+    reprocessCompletedImages,
+  } = useBackgroundRemovalController(
+    backgroundColor,
+    backgroundImageUrl,
+    backgroundImageAlpha,
+    backgroundColorAlpha,
+  )
 
   // New state for zipping status
   const [isZipping, setIsZipping] = useState<boolean>(false)
@@ -57,6 +75,92 @@ export const BackgroundRemover: React.FC<BackgroundRemoverProps> = ({ className:
     const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
     setIsMobile(mobileRegex.test(userAgent))
   }, [])
+
+  // Handle background color change (UI only, no reprocessing)
+  const handleBackgroundColorChange = useCallback(
+    (color: string | null, alpha: number = 1.0) => {
+      setBackgroundColor(color)
+      setBackgroundColorAlpha(alpha)
+
+      // Update existing jobs with the new background color (for future processing)
+      setImageList((prevList: ExtendedImageJob[]) =>
+        prevList.map((job: ExtendedImageJob) => ({
+          ...job,
+          backgroundColor: color,
+          backgroundColorAlpha: alpha,
+        })),
+      )
+    },
+    [setImageList],
+  )
+
+  // Handle background image change (UI only, no reprocessing)
+  const handleBackgroundImageChange = useCallback(
+    (imageUrl: string | null, alpha: number = 1.0) => {
+      setBackgroundImageUrl(imageUrl)
+      setBackgroundImageAlpha(alpha)
+
+      // Update existing jobs with the new background image (for future processing)
+      setImageList((prevList: ExtendedImageJob[]) =>
+        prevList.map((job: ExtendedImageJob) => ({
+          ...job,
+          backgroundImageUrl: imageUrl,
+          backgroundImageAlpha: alpha,
+        })),
+      )
+    },
+    [setImageList],
+  )
+
+  // Handle background color application (triggers reprocessing)
+  const handleApplyBackgroundColor = useCallback(
+    (color: string | null, alpha: number = 1.0) => {
+      // Update the background color state
+      setBackgroundColor(color)
+      setBackgroundColorAlpha(alpha)
+      // Clear background image when applying color
+      setBackgroundImageUrl(null)
+
+      // Update existing jobs with the new background color
+      setImageList((prevList: ExtendedImageJob[]) =>
+        prevList.map((job: ExtendedImageJob) => ({
+          ...job,
+          backgroundColor: color,
+          backgroundColorAlpha: alpha,
+          backgroundImageUrl: null,
+          backgroundImageAlpha: undefined,
+        })),
+      )
+
+      // Reprocess only completed images with the new background color
+      reprocessCompletedImages()
+    },
+    [setImageList, reprocessCompletedImages],
+  )
+
+  // Handle background image application (triggers reprocessing)
+  const handleApplyBackgroundImage = useCallback(
+    (imageUrl: string | null, alpha: number = 1.0) => {
+      // Update the background image state
+      setBackgroundImageUrl(imageUrl)
+      // Clear background color when applying image
+      setBackgroundColor(null)
+
+      // Update existing jobs with the new background image
+      setImageList((prevList: ExtendedImageJob[]) =>
+        prevList.map((job: ExtendedImageJob) => ({
+          ...job,
+          backgroundImageUrl: imageUrl,
+          backgroundImageAlpha: alpha,
+          backgroundColor: null,
+        })),
+      )
+
+      // Reprocess only completed images with the new background image
+      reprocessCompletedImages()
+    },
+    [setImageList, reprocessCompletedImages],
+  )
 
   const rawProgressData = segmentationController?.modelLoadingProgress
     ?.progress as RawModelProgressData
@@ -192,8 +296,14 @@ export const BackgroundRemover: React.FC<BackgroundRemoverProps> = ({ className:
       job.status !== 'pending_preprocessing',
   )
 
+  // Check if there are any completed images for background color application
+  const hasCompletedImages = imageList.some((job) => job.status === 'completed')
+
   return (
-    <div className="bg-card w-full max-w-6xl mx-auto p-8 border-4 border-border shadow-[8px_8px_0_#000] rounded-none px-2 md:px-8">
+    <div className="bg-card w-full max-w-6xl mx-auto p-8 border-4 border-border shadow-[8px_8px_0_#000] rounded-none px-2 md:px-8 relative">
+      {/* Version Info */}
+      <VersionInfo />
+
       <div className="flex items-center justify-between mb-8 relative">
         <div className="flex-grow">
           <h2 className="text-2xl font-['Press_Start_2P'] text-center">Background Remover</h2>
@@ -257,40 +367,58 @@ export const BackgroundRemover: React.FC<BackgroundRemoverProps> = ({ className:
         disabled={compatibilityChecked && !webGLSupported}
       />
 
-      {/* Processing notice for potential UI lag */}
-      <ProcessingNotice isVisible={isProcessingInProgress} jobCount={activeProcessingCount} />
-
-      {/* Job processing progress */}
-      <JobProgressList jobs={imageList} />
-
-      {/* Error message */}
-      {overallError && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 p-4 bg-red-100 border-4 border-red-400 text-red-700 font-['Press_Start_2P'] text-sm shadow-[4px_4px_0px_#000]"
-        >
-          {overallError}
-        </motion.div>
-      )}
-
-      {/* Image gallery */}
+      {/* Accordion Sections */}
       {imageList.length > 0 && (
-        <ImageGallery
-          jobs={imageList}
-          removeJob={removeJob}
-          clearAllJobs={clearAllJobs}
-          downloadImage={downloadImage}
-          downloadAllImages={downloadAllImages}
-          downloadSelectedImages={downloadSelectedImages}
-          isZipping={isZipping}
-          disabled={compatibilityChecked && !webGLSupported}
-        />
+        <Accordion type="multiple" defaultValue={['processing', 'images']} className="mt-6">
+          {/* Background Options Section */}
+          <Accordion.Item value="background" title="Background Options">
+            <BackgroundControl
+              onBackgroundColorChange={handleBackgroundColorChange}
+              onApplyBackgroundColor={handleApplyBackgroundColor}
+              onBackgroundImageChange={handleBackgroundImageChange}
+              onApplyBackgroundImage={handleApplyBackgroundImage}
+              disabled={compatibilityChecked && !webGLSupported}
+              hasCompletedImages={hasCompletedImages}
+            />
+          </Accordion.Item>
+
+          {/* Processing Progress Section */}
+          <Accordion.Item value="processing" title="Progress">
+            {/* Processing notice for potential UI lag */}
+            <ProcessingNotice isVisible={isProcessingInProgress} jobCount={activeProcessingCount} />
+
+            {/* Job processing progress */}
+            <JobProgressList jobs={imageList} />
+
+            {/* Error message */}
+            {overallError && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-red-100 border-4 border-red-400 text-red-700 font-['Press_Start_2P'] text-sm shadow-[4px_4px_0px_#000]"
+              >
+                {overallError}
+              </motion.div>
+            )}
+          </Accordion.Item>
+
+          {/* Uploaded Images Section */}
+          <Accordion.Item value="images" title="Uploaded Images">
+            <ImageGallery
+              jobs={imageList}
+              removeJob={removeJob}
+              clearAllJobs={clearAllJobs}
+              downloadImage={downloadImage}
+              downloadAllImages={downloadAllImages}
+              downloadSelectedImages={downloadSelectedImages}
+              isZipping={isZipping}
+              disabled={compatibilityChecked && !webGLSupported}
+            />
+          </Accordion.Item>
+        </Accordion>
       )}
     </div>
   )
 }
-
-// We now use the Tooltip component from the UI library instead of custom tooltip styles
 
 export default BackgroundRemover

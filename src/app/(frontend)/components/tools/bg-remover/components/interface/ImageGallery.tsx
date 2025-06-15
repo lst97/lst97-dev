@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { FaFileDownload, FaFileArchive, FaSpinner, FaTrash, FaTimes } from 'react-icons/fa'
 import { ExtendedImageJob } from '../../hooks/types'
@@ -312,11 +311,9 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+    <div>
       <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
         <div className="flex items-center gap-4">
-          <h3 className="text-xl font-['Press_Start_2P']">Uploaded Images</h3>
-
           {/* Only show selection controls if there are completed jobs that can be downloaded */}
           {hasCompletedJobs && (
             <div className="flex items-center">
@@ -406,7 +403,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
         </div>
       </div>
 
-      <div className="border-4 border-border bg-card p-4">
+      <div className="border-4 border-border bg-card p-4 border-dashed">
         <PixelScrollArea maxHeight={600} className="w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pr-8">
             {jobs.map((job) => (
@@ -426,6 +423,6 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
           </div>
         </PixelScrollArea>
       </div>
-    </motion.div>
+    </div>
   )
 }

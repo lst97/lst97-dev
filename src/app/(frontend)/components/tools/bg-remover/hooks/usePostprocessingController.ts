@@ -314,6 +314,10 @@ export const usePostprocessingController = ({
             jobId: job.id,
             originalBlobUrl: job.preprocessedImageUrl,
             segmentationResult: job.segmentationResult,
+            backgroundColor: job.backgroundColor,
+            backgroundColorAlpha: job.backgroundColorAlpha,
+            backgroundImageUrl: job.backgroundImageUrl,
+            backgroundImageAlpha: job.backgroundImageAlpha,
           },
         })
         setImageList((prev) =>

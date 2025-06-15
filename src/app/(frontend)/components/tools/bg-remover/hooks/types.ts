@@ -47,6 +47,10 @@ export interface ExtendedImageJob extends Omit<ImageJob, 'status'> {
   preprocessedImageUrl?: string
   segmentationResult?: unknown
   processedFileSize?: number
+  backgroundColor?: string | null // Background color for replacement (null = transparent)
+  backgroundColorAlpha?: number // Alpha value for background color (0-1, default 1)
+  backgroundImageUrl?: string | null // Background image URL for replacement (null = no image)
+  backgroundImageAlpha?: number // Alpha value for background image (0-1, default 1)
 }
 
 export interface SegmentationControllerReturn {

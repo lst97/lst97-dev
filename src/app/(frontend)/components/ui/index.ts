@@ -25,6 +25,9 @@ export * from './FilterControls'
 // Tags
 export * from './Tags'
 
+// Accordion
+export { default as PixelAccordion } from './Accordion'
+
 // ScrollArea
 export { default as PixelScrollArea } from './ScrollArea'
 

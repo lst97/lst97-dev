@@ -3,7 +3,7 @@
  *
  * This worker is responsible for taking an original image and a segmentation mask
  * (which indicates the foreground) and producing a new image with the background removed
- * (i.e., made transparent).
+ * (i.e., made transparent) or replaced with a specified color or image.
  *
  * Message Handling:
  *  - Listens for messages from the main thread.
@@ -20,11 +20,16 @@
  *        - `data`: Raw pixel data of the mask (can be grayscale or RGBA).
  *        - `width`, `height`: Dimensions of the mask.
  *        The worker handles converting this legacy format into a usable mask image.
+ *   - `backgroundColor`: Optional hex color string (e.g., '#FFFFFF') to replace the background with.
+ *     If null or undefined, the background will be made transparent.
+ *   - `backgroundColorAlpha`: Optional alpha value for the background color.
+ *   - `backgroundImageUrl`: Optional image URL to use as background. Takes precedence over backgroundColor.
+ *   - `backgroundImageAlpha`: Optional alpha value for the background image.
  *
  * Output Message ('PROCESSING_RESULT'):
  *   - Sent back to the main thread upon completion or error.
  *   - Success Payload: `{ transparentImageDataUrl: string, jobId: string }`
- *     - `transparentImageDataUrl`: A PNG Data URL of the image with background removed.
+ *     - `transparentImageDataUrl`: A PNG Data URL of the image with background removed or replaced.
  *   - Error Payload: `{ error: string, jobId: string }`
  *     - `error`: A message describing the error that occurred.
  *
@@ -35,15 +40,62 @@
  *     a. Fetches and decodes the original image and the mask image.
  *     b. Creates an offscreen canvas and draws the original image.
  *     c. Iterates through the mask pixels: if a mask pixel indicates background (e.g., < 128 intensity),
- *        the corresponding pixel in the original image is made transparent by setting its alpha to 0.
+ *        the corresponding pixel in the original image is either made transparent (alpha = 0),
+ *        replaced with the specified background color, or replaced with pixels from the background image.
  *     d. The modified image is converted to a PNG Blob, then to a Data URL.
  *  4. Sends the resulting Data URL (or an error message) back to the main thread.
  */
 let workerIndex = -1
 
-// Helper function to apply a segmentation mask to an image, making the background transparent.
-async function applyMaskToImage(maskDataUrl, originalBlobUrl) {
+// Helper function to convert hex color to RGB values
+function hexToRgb(hex) {
+  if (!hex || typeof hex !== 'string') return null
+
+  // Remove # if present
+  hex = hex.replace('#', '')
+
+  // Handle 3-digit hex codes
+  if (hex.length === 3) {
+    hex = hex
+      .split('')
+      .map((char) => char + char)
+      .join('')
+  }
+
+  if (hex.length !== 6) return null
+
+  const r = parseInt(hex.substr(0, 2), 16)
+  const g = parseInt(hex.substr(2, 2), 16)
+  const b = parseInt(hex.substr(4, 2), 16)
+
+  return { r, g, b }
+}
+
+// Helper function to apply a segmentation mask to an image, making the background transparent, colored, or replaced with an image.
+async function applyMaskToImage(
+  maskDataUrl,
+  originalBlobUrl,
+  backgroundColor = null,
+  backgroundColorAlpha = 1.0,
+  backgroundImageUrl = null,
+  backgroundImageAlpha = 1.0,
+) {
   try {
+    // Prioritize transparency. If the user wants a transparent background, nothing else matters.
+    // Case 1: A background image is provided but is fully transparent (alpha is 0).
+    // Case 2: Transparent preset is selected (no background color AND no background image).
+    // Case 3: A background color is provided, but it's fully transparent (alpha is 0).
+    const isBackgroundImageTransparent = backgroundImageUrl && backgroundImageAlpha === 0
+    const isBackgroundColorTransparent = backgroundColor && backgroundColorAlpha === 0
+    const isTransparentPreset = !backgroundColor && !backgroundImageUrl
+
+    if (isBackgroundImageTransparent || isTransparentPreset || isBackgroundColorTransparent) {
+      backgroundColor = null
+      backgroundImageUrl = null
+      backgroundImageAlpha = 0
+      backgroundColorAlpha = 0
+    }
+
     // Load the original image from its blob URL.
     const originalResponse = await fetch(originalBlobUrl)
     if (!originalResponse.ok) {
@@ -59,6 +111,24 @@ async function applyMaskToImage(maskDataUrl, originalBlobUrl) {
     }
     const maskBlob = await maskResponse.blob()
     const maskImageBitmap = await createImageBitmap(maskBlob)
+
+    // Load background image only if provided and not fully transparent
+    let backgroundImageBitmap = null
+    if (backgroundImageUrl && backgroundImageAlpha > 0) {
+      try {
+        const backgroundResponse = await fetch(backgroundImageUrl)
+        if (backgroundResponse.ok) {
+          const backgroundBlob = await backgroundResponse.blob()
+          backgroundImageBitmap = await createImageBitmap(backgroundBlob)
+        }
+      } catch (error) {
+        console.warn(
+          `[PostprocessingWorker-${workerIndex}] Failed to load background image:`,
+          error,
+        )
+        // Continue without background image, will fall back to color or transparency
+      }
+    }
 
     const canvas = new OffscreenCanvas(originalImageBitmap.width, originalImageBitmap.height)
     const ctx = canvas.getContext('2d')
@@ -76,13 +146,51 @@ async function applyMaskToImage(maskDataUrl, originalBlobUrl) {
     maskCtx.drawImage(maskImageBitmap, 0, 0, canvas.width, canvas.height)
     const maskPixelData = maskCtx.getImageData(0, 0, canvas.width, canvas.height).data
 
+    // Prepare background image data if available
+    let backgroundPixelData = null
+    if (backgroundImageBitmap) {
+      const backgroundCanvas = new OffscreenCanvas(canvas.width, canvas.height)
+      const backgroundCtx = backgroundCanvas.getContext('2d')
+      backgroundCtx.drawImage(backgroundImageBitmap, 0, 0, canvas.width, canvas.height)
+      backgroundPixelData = backgroundCtx.getImageData(0, 0, canvas.width, canvas.height).data
+    }
+
+    // Parse background color if provided and no background image
+    const bgColor = !backgroundImageBitmap && backgroundColor ? hexToRgb(backgroundColor) : null
+
+    // Clamp alpha values between 0 and 1
+    const bgImageAlphaClamped = Math.max(0, Math.min(1, backgroundImageAlpha))
+    const bgColorAlphaClamped = Math.max(0, Math.min(1, backgroundColorAlpha))
+
     // Iterate through each pixel. If the corresponding mask pixel is dark (e.g., part of the background),
-    // set the original image pixel's alpha to 0 (transparent).
+    // either set the original image pixel's alpha to 0 (transparent), replace with background color, or replace with background image.
     for (let i = 0; i < data.length; i += 4) {
       const maskValue = maskPixelData[i] // Using R channel of mask (grayscale, so R=G=B)
       if (maskValue < 128) {
         // Threshold: values below 128 are considered background.
-        data[i + 3] = 0 // Set alpha channel to 0 for transparency.
+        if (backgroundPixelData) {
+          // Replace background with background image pixels
+          // First remove original background completely, then apply background image with alpha
+          const bgR = backgroundPixelData[i]
+          const bgG = backgroundPixelData[i + 1]
+          const bgB = backgroundPixelData[i + 2]
+
+          // Apply background image with alpha transparency
+          // Alpha controls how opaque the background image is (0 = transparent, 1 = opaque)
+          data[i] = bgR // Red
+          data[i + 1] = bgG // Green
+          data[i + 2] = bgB // Blue
+          data[i + 3] = Math.round(255 * bgImageAlphaClamped) // Alpha based on background image alpha
+        } else if (bgColor) {
+          // Replace background with specified color, applying backgroundColorAlpha
+          data[i] = bgColor.r // Red
+          data[i + 1] = bgColor.g // Green
+          data[i + 2] = bgColor.b // Blue
+          data[i + 3] = bgColorAlphaClamped * 255 // Apply color alpha
+        } else {
+          // Make background transparent
+          data[i + 3] = 0 // Set alpha channel to 0 for transparency.
+        }
       }
     }
 
@@ -123,7 +231,15 @@ self.onmessage = async (event) => {
     // Respond to a test message to confirm the worker is alive and responsive.
     self.postMessage({ type: 'WORKER_READY', payload: { workerIndex } })
   } else if (type === 'PROCESS_IMAGE') {
-    const { segmentationResult, originalBlobUrl, jobId } = payload
+    const {
+      segmentationResult,
+      originalBlobUrl,
+      jobId,
+      backgroundColor,
+      backgroundColorAlpha,
+      backgroundImageUrl,
+      backgroundImageAlpha,
+    } = payload
 
     if (!jobId || !originalBlobUrl) {
       console.error(
@@ -159,6 +275,14 @@ self.onmessage = async (event) => {
       Object.keys(segmentationResult),
       segmentationResult.mask_base64 ? 'Has mask_base64' : 'No mask_base64',
       Array.isArray(segmentationResult) ? 'Is array' : 'Not array',
+      backgroundColor ? `Background color: ${backgroundColor}` : 'Transparent background',
+      backgroundColorAlpha !== undefined
+        ? `Color alpha: ${backgroundColorAlpha}`
+        : 'Default color alpha',
+      backgroundImageUrl ? `Background image: ${backgroundImageUrl}` : 'No background image',
+      backgroundImageAlpha !== undefined
+        ? `Image alpha: ${backgroundImageAlpha}`
+        : 'Default image alpha',
     )
 
     try {
@@ -222,7 +346,14 @@ self.onmessage = async (event) => {
         throw new Error('Mask data is missing or invalid')
       }
 
-      const resultImageDataUrl = await applyMaskToImage(maskDataUrl, originalBlobUrl)
+      const resultImageDataUrl = await applyMaskToImage(
+        maskDataUrl,
+        originalBlobUrl,
+        backgroundColor,
+        backgroundColorAlpha,
+        backgroundImageUrl,
+        backgroundImageAlpha,
+      )
 
       console.log(
         `[PostprocessingWorker-${workerIndex}] Post-processing complete for job: ${jobId}`,
