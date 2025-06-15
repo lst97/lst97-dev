@@ -38,7 +38,7 @@ const Testimonial: React.FC<TestimonialProps> = ({
       scale: 1,
       transition: {
         duration: 0.5,
-        ease: 'easeOut',
+        ease: 'easeOut' as const,
         delay: delay * 0.0005,
       },
     },
@@ -54,7 +54,7 @@ const Testimonial: React.FC<TestimonialProps> = ({
       x: 0,
       transition: {
         duration: 0.3,
-        ease: 'easeOut',
+        ease: 'easeOut' as const,
         delay: 0.5,
       },
     },

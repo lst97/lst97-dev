@@ -12,12 +12,12 @@ const cardVariants = {
     scale: 1,
     opacity: 1,
     y: 0,
-    transition: { type: 'spring', stiffness: 400, damping: 24 },
+    transition: { type: 'spring' as const, stiffness: 400, damping: 24 },
   },
   hover: {
     scale: 1.03,
     boxShadow: '8px 8px 0 0 #b58900, 0 0 0 0px #2c2c2c',
-    transition: { type: 'spring', stiffness: 400, damping: 18 },
+    transition: { type: 'spring' as const, stiffness: 400, damping: 18 },
   },
 }
 

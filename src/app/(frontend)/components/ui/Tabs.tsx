@@ -288,7 +288,7 @@ const PixelTabPanel: React.FC<PixelTabPanelProps> = ({ tabs, defaultTab, onTabCh
       x: 0,
       opacity: 1,
       transition: {
-        x: { type: 'spring', stiffness: 400, damping: 32 },
+        x: { type: 'spring' as const, stiffness: 400, damping: 32 },
         opacity: { duration: 0.2 },
       },
     },
@@ -296,7 +296,7 @@ const PixelTabPanel: React.FC<PixelTabPanelProps> = ({ tabs, defaultTab, onTabCh
       x: direction === 'right' ? -ANIMATION_X_OFFSET : ANIMATION_X_OFFSET,
       opacity: 0,
       transition: {
-        x: { type: 'spring', stiffness: 400, damping: 32 },
+        x: { type: 'spring' as const, stiffness: 400, damping: 32 },
         opacity: { duration: 0.2 },
       },
     },

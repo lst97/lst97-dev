@@ -45,8 +45,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenCaseStu
       }}
       whileHover={{
         scale: 1.02,
-        translateX: -2,
-        translateY: -2,
+        x: -2,
+        y: -2,
         transition: { duration: 0.2 },
       }}
       transition={{ duration: 0.2 }}

@@ -35,7 +35,7 @@ const PersonalAttributes: React.FC<PersonalAttributesProps> = ({ softSkills }) =
       x: 0,
       transition: {
         duration: 0.5,
-        ease: 'easeOut',
+        ease: 'easeOut' as const,
       },
     },
   }
@@ -46,7 +46,7 @@ const PersonalAttributes: React.FC<PersonalAttributesProps> = ({ softSkills }) =
       scale: 1,
       transition: {
         delay: i * 0.1,
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 500,
         damping: 25,
       },

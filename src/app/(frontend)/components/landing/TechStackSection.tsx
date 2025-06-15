@@ -23,7 +23,7 @@ const techIconVariants = {
     transition: {
       delay: 0.05 * i,
       duration: 0.4,
-      ease: 'easeOut',
+      ease: 'easeOut' as const,
     },
   }),
 }

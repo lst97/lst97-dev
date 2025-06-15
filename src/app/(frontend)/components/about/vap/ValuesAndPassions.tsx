@@ -53,7 +53,7 @@ const ValuesAndPassions: React.FC<ValuesAndPassionsProps> = ({ inView = false })
       y: 0,
       transition: {
         duration: prefersReducedMotion ? 0.1 : 0.5,
-        ease: 'easeOut',
+        ease: 'easeOut' as const,
       },
     },
   }
