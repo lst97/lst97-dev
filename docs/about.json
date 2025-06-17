@@ -1,0 +1,214 @@
+{
+  "personal_info": {
+    "full_name": "Sio Tou (Nelson) Lai",
+    "nickname": "Nelson",
+    "codename": "lst97",
+    "age": 27,
+    "birthday": "1997-03-14",
+    "title": "Junior Software Engineer",
+    "location": "Melbourne, VIC, Australia",
+    "phone": "+61 0478 561 361",
+    "email": "laisiotou1997@gmail.com",
+    "image": "/me-pixel-art.png"
+  },
+  "background": {
+    "origin": "Hong Kong",
+    "current_residence": "Melbourne, VIC, Australia",
+    "introduction": "Hi everyone! Nelson here, hailing from the vibrant city of Hong Kong. Armed with a Computer Science degree from Deakin University (still figuring out how to wield it properly!), I'm on the hunt for thrilling software engineering escapades. In the meantime, I'm whipping up code concoctions and soaking up new knowledge like a sponge. 🥔",
+    "description": "I'm a junior software developer with a strong foundation in multiple programming languages and technologies. My current focus is on web development with Next.js, React, and TypeScript, along with backend experience in C# and various database technologies."
+  },
+  "education": [
+    {
+      "institution": "Deakin University",
+      "degree": "Bachelor of Computer Science",
+      "period": "2020 - 2023"
+    },
+    {
+      "institution": "Box Hill Institute of TAFE",
+      "degree": "Diploma of Automotive Technology",
+      "period": "2016 - 2019"
+    }
+  ],
+  "languages": [
+    {
+      "language": "Cantonese",
+      "level": "Native"
+    },
+    {
+      "language": "Mandarin",
+      "level": "Fluent"
+    },
+    {
+      "language": "English",
+      "level": "Conversational"
+    }
+  ],
+  "technical_skills": [
+    "TypeScript",
+    "NextJS",
+    "Node.js",
+    ".NET",
+    "Python",
+    "SQLite",
+    "Figma",
+    "Firebase",
+    "React",
+    "C#",
+    "JSON",
+    "CSS",
+    "JavaScript",
+    "HTML5",
+    "Tailwind",
+    "MongoDB",
+    "MySQL",
+    "PostgreSQL",
+    "Redis",
+    "AWS",
+    "Docker",
+    "Linux",
+    "Android",
+    "Flutter",
+    "Git",
+    "Postman"
+  ],
+  "soft_skills": [
+    {
+      "name": "Problem Solving",
+      "level": 3,
+      "description": "Effectively identifies and resolves complex issues, utilizing analytical skills to develop and implement practical solutions."
+    },
+    {
+      "name": "Communication",
+      "level": 2,
+      "description": "Clearly conveys information both verbally and in writing, ensuring understanding among team members and stakeholders."
+    },
+    {
+      "name": "Adaptability",
+      "level": 4,
+      "description": "Quickly adapts to new technologies and methodologies, seamlessly integrating them into projects to enhance outcomes."
+    },
+    {
+      "name": "Team Collaboration",
+      "level": 3,
+      "description": "Works effectively with team members, contributing to a collaborative environment to achieve project goals."
+    },
+    {
+      "name": "Leadership",
+      "level": 3,
+      "description": "Guides and motivates team members, fostering a positive and productive work environment."
+    },
+    {
+      "name": "Time Management",
+      "level": 3,
+      "description": "Managing time and prioritizing tasks, ensuring projects are completed efficiently and deadlines are met."
+    },
+    {
+      "name": "Creativity",
+      "level": 4,
+      "description": "Develops innovative solutions, significantly enhancing project outcomes and user experience."
+    },
+    {
+      "name": "Attention to Detail",
+      "level": 4,
+      "description": "Meticulously reviews work, ensuring high-quality deliverables and minimizing errors."
+    },
+    {
+      "name": "Conflict Resolution",
+      "level": 3,
+      "description": "Effectively mediates conflicts, implementing solutions that maintain a harmonious work environment."
+    },
+    {
+      "name": "Decision Making",
+      "level": 3,
+      "description": "Makes informed and timely decisions, ensuring project success and continuity."
+    },
+    {
+      "name": "Self-Motivation",
+      "level": 4,
+      "description": "Highly self-driven, with a strong work ethic and a commitment to continuous improvement."
+    },
+    {
+      "name": "Multi-Tasking",
+      "level": 2,
+      "description": "Handles multiple tasks simultaneously, maintaining focus and productivity."
+    }
+  ],
+  "other_experience": [
+    {
+      "title": "Kitchen Hand",
+      "hours": "200+ hours",
+      "icon": "🍳",
+      "description": "Assisted in food preparation, maintaining kitchen cleanliness, and supporting culinary operations in a fast-paced environment."
+    },
+    {
+      "title": "Uber Driver",
+      "hours": "2000+ deliveries",
+      "icon": "🚗",
+      "description": "Provided reliable and efficient transportation/delivery services, ensuring customer satisfaction and adherence to platform standards."
+    },
+    {
+      "title": "Cabineter",
+      "hours": "50+ hours",
+      "icon": "🔨",
+      "description": "Gained hands-on experience in cabinet making, including assembly, design, finishing, and quality control."
+    },
+    {
+      "title": "Blood Donation",
+      "hours": "13+ times",
+      "icon": "🩸",
+      "description": "Regularly donated blood to support community health initiatives and medical needs."
+    }
+  ],
+  "testimonials": [
+    {
+      "quote": "Nelson's attention to detail and problem-solving skills are exceptional. He delivers high-quality work and innovative solutions.",
+      "author": "Jeff Leng",
+      "role": "Senior Cabinet Maker"
+    },
+    {
+      "quote": "Nelson was a great kitchen helper. He always kept a positive attitude, even during the busiest shifts.",
+      "author": "CL",
+      "role": "Cafe Manager"
+    },
+    {
+      "quote": "Nelson showed a real desire to learn and quickly grasped automotive repair techniques during his internship.",
+      "author": "KT",
+      "role": "Manager"
+    }
+  ],
+  "coding_statistics": {
+    "description": "Nelson has moved beyond solo flights and is now confidently flying with passengers. He's not yet an airline captain, but he has solid skills and is ready for more complex journeys. Similarly, as a programmer, he transitioned from a novice to someone capable of building real applications and contributing meaningfully to software projects.",
+    "integrations": [
+      "WakaTime API for live coding statistics",
+      "GitHub API for contribution data",
+      "Real-time code activity tracking"
+    ],
+    "coding_hours": [
+      {
+        "language": "TypeScript",
+        "hours": "1,400+ hrs"
+      },
+      {
+        "language": "C#",
+        "hours": "191+ hrs"
+      },
+      {
+        "language": "JSON",
+        "hours": "36+ hrs"
+      },
+      {
+        "language": "CSS",
+        "hours": "30+ hrs"
+      },
+      {
+        "language": "JavaScript",
+        "hours": "24+ hrs"
+      },
+      {
+        "language": "Python",
+        "hours": "12+ hrs"
+      }
+    ]
+  },
+  "hobbies": ["Cycling", "Playing drums", "Playing computer games (Overwatch)"]
+}

@@ -13,6 +13,7 @@ import {
   FaComments,
   FaQuestion,
   FaUber,
+  FaBook,
 } from 'react-icons/fa'
 import { routes } from '@/frontend/constants/routes'
 import { contact } from '@/frontend/constants/data/contact'
@@ -29,13 +30,14 @@ const serviceLinks = [
   { href: '#frontend', icon: FaReact, text: 'Full-Stack Solutions' },
   { href: '#consulting', icon: FaQuestion, text: 'Technical Consulting' },
   { href: '#career', icon: FaUserClock, text: 'Career Opportunities' },
-  { href: '#uber delivery', icon: FaUber, text: 'Uber Delivery' },
+  { href: routes.uber, icon: FaUber, text: 'Uber Delivery' },
   { href: routes.tools, icon: FaTools, text: 'Tools' },
   { href: '#api', icon: FaCode, text: 'API' },
 ]
 
 const connectLinks = [
   { href: `mailto:${contact.email}`, icon: FaComments, text: 'Get in Touch' },
+  { href: routes.guestBook, icon: FaBook, text: 'Guest Book' },
   // { href: '#pricing', icon: FaDollarSign, text: 'Pricing' },
 ]
 

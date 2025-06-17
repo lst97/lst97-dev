@@ -27,6 +27,7 @@ export enum HttpStatus {
   FORBIDDEN = 403,
   NOT_FOUND = 404,
   INTERNAL_SERVER_ERROR = 500,
+  SERVICE_UNAVAILABLE = 503,
 }
 
 // Create standardized API responses
@@ -98,4 +99,5 @@ export const API_ENDPOINTS = {
   },
   WEATHER: '/api/weather',
   CONTACT: '/api/contact',
+  AI_CHAT: '/api/ai-chat',
 }

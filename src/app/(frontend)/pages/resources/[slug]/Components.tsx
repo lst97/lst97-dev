@@ -50,7 +50,7 @@ export const PostHeader = ({
     {/* Cache status indicator */}
     <div className="absolute top-2 right-2 z-10">{cacheComponent}</div>
 
-    <div className="flex flex-col sm:flex-row gap-4 m-4 justify-between relative z-1">
+    <div className="flex flex-col gap-4 m-4 justify-between">
       <div className="flex-1">
         <div className="flex flex-wrap items-center gap-4 mb-4">
           <h1 className="font-['Press_Start_2P'] text-xl sm:text-2xl text-[var(--color-text)] dark:text-[var(--color-text-light)]">
@@ -128,6 +128,22 @@ export const PostHeader = ({
             </span>
           </span>
         </div>
+
+        {/* Featured Image - Moved below likes/views */}
+        {post?.featuredImage && (
+          <div className="w-full mt-4">
+            <div className="relative aspect-video w-full border-2 border-[var(--color-border)] dark:border-[var(--color-border-dark)] rounded-md overflow-hidden shadow-[4px_4px_0_var(--shadow)]">
+              <Image
+                src={post.featuredImage}
+                alt={post.title}
+                fill
+                className="object-cover"
+                sizes="100vw"
+                priority
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   </div>

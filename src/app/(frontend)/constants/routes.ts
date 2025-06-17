@@ -8,5 +8,7 @@ export const routes = {
   resume: '/pages/resume',
   resources: '/pages/resources',
   services: '/pages/services',
+  uber: '/pages/services/uber',
   tools: '/pages/tools',
+  guestBook: '/pages/welcome/guest-book',
 }

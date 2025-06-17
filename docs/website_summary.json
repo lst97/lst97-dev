@@ -1,0 +1,172 @@
+{
+  "website_summary": {
+    "overview": {
+      "title": "LST97.DEV - Nelson Lai's Portfolio",
+      "tagline": "Full-Stack Developer & Software Engineer",
+      "description": "Personal website of Nelson Lai (LST97) - Full-Stack Developer specializing in React, Next.js, and modern web development with a focus on performance and user experience.",
+      "url": "https://lst97.dev",
+      "theme": "Retro gaming pixel art aesthetic combined with modern web development"
+    },
+    "technical_architecture": {
+      "frontend": {
+        "framework": "Next.js 15",
+        "ui_library": "React 19",
+        "language": "TypeScript",
+        "styling": "Tailwind CSS v4 + CSS Modules",
+        "animations": "Framer Motion",
+        "hosting": "Vercel"
+      },
+      "backend": {
+        "cms": "PayloadCMS (Headless)",
+        "database": "PostgreSQL (Vercel Postgres)",
+        "api": "REST API + GraphQL",
+        "authentication": "PayloadCMS built-in"
+      },
+      "features": {
+        "responsive_design": true,
+        "dark_light_theme": true,
+        "seo_optimized": true,
+        "performance_optimized": true,
+        "accessibility_compliant": true,
+        "pixel_art_theme": true
+      }
+    },
+    "website_sections": {
+      "landing_page": {
+        "hero_section": "Animated introduction with pixel art profile",
+        "features_section": "Interactive showcase of tools, services, and projects",
+        "tech_stack_section": "Technology expertise display",
+        "cta_section": "Call-to-action for engagement"
+      },
+      "about_page": {
+        "timeline": "Comprehensive project timeline (2019-present)",
+        "cv": "Interactive resume with downloadable PDF",
+        "technical_skills": "Live coding statistics from WakaTime API",
+        "coding_activity": "Detailed programming activity charts",
+        "personal_attributes": "Soft skills assessment",
+        "values_and_passions": "Personal philosophy and motivations",
+        "recognition": "Professional testimonials",
+        "connect": "Contact information and social links"
+      },
+      "projects_page": {
+        "portfolio": "Showcase of development projects",
+        "case_studies": "Detailed project breakdowns",
+        "technologies": "Tech stack for each project",
+        "testimonials": "Client feedback and reviews"
+      },
+      "services_page": {
+        "offerings": "Professional development services",
+        "project_showcase": "Featured work examples",
+        "contact_form": "Professional inquiry system"
+      },
+      "tools_page": {
+        "image_tools": "Background remover, format converter",
+        "file_tools": "File type detector",
+        "privacy_focused": "Client-side processing only"
+      },
+      "uber_delivery": {
+        "service_stats": "2000+ deliveries, 98% rating",
+        "customer_reviews": "PayloadCMS-powered review system",
+        "professional_gear": "Equipment and service quality"
+      },
+      "guest_book": {
+        "community_interaction": "Visitor comments and feedback",
+        "moderation_system": "Admin-controlled content approval"
+      }
+    },
+    "unique_features": {
+      "pixel_art_design": {
+        "description": "Consistent retro gaming aesthetic throughout",
+        "elements": ["Custom pixel art icons", "Retro color palette", "8-bit style animations"]
+      },
+      "interactive_elements": {
+        "description": "Engaging user interactions and animations",
+        "features": ["Hover effects", "Scroll-based animations", "Interactive components"]
+      },
+      "real_time_data": {
+        "description": "Live integration with external APIs",
+        "sources": ["WakaTime coding statistics", "GitHub contributions", "Weather data"]
+      },
+      "performance_optimization": {
+        "description": "Optimized for speed and user experience",
+        "techniques": ["Image optimization", "Code splitting", "Caching strategies"]
+      }
+    },
+    "content_management": {
+      "cms": "PayloadCMS",
+      "api_access": "REST and GraphQL endpoints"
+    },
+    "integrations": {
+      "external_apis": [
+        "WakaTime - Coding activity tracking",
+        "GitHub - Repository and contribution data",
+        "Weather API - Location-based weather",
+        "Turnstile - Spam prevention"
+      ],
+      "social_platforms": [
+        "GitHub - @lst97",
+        "LinkedIn - /in/lst97/",
+        "Email - laisiotou1997@gmail.com"
+      ]
+    },
+    "development_approach": {
+      "methodology": "Modern web development best practices",
+      "principles": [
+        "Component-based architecture",
+        "TypeScript for type safety",
+        "Responsive design first",
+        "Performance optimization",
+        "SEO implementation",
+        "Accessibility compliance"
+      ],
+      "code_quality": [
+        "ESLint configuration",
+        "Prettier formatting",
+        "TypeScript strict mode",
+        "Component documentation"
+      ]
+    },
+    "business_value": {
+      "professional_showcase": "Demonstrates technical expertise and creativity",
+      "client_acquisition": "Serves as portfolio for potential clients",
+      "personal_branding": "Establishes online presence and professional identity",
+      "learning_platform": "Continuous experimentation with new technologies"
+    },
+    "future_roadmap": {
+      "planned_features": [
+        "Enhanced blog functionality",
+        "More interactive tools",
+        "Advanced analytics",
+        "Performance improvements"
+      ],
+      "technology_upgrades": [
+        "Latest framework versions",
+        "New animation libraries",
+        "Advanced optimization techniques"
+      ]
+    }
+  },
+  "routes": {
+    "home": "/",
+    "welcome": "/pages/welcome",
+    "about": "/pages/about",
+    "contact": "/pages/contact",
+    "projects": "/pages/projects",
+    "blog": "/pages/blog",
+    "resume": "/pages/resume",
+    "resources": "/pages/resources",
+    "services": "/pages/services",
+    "uber": "/pages/services/uber",
+    "tools": "/pages/tools",
+    "guestBook": "/pages/welcome/guest-book"
+  },
+  "contact_information": {
+    "name": "Nelson Lai (lst97)",
+    "email": "laisiotou1997@gmail.com",
+    "phone": "+61 0478 561 361",
+    "location": "Melbourne, VIC, Australia",
+    "github": "https://github.com/lst97",
+    "linkedin": "https://www.linkedin.com/in/lst97/",
+    "website": "https://lst97.dev"
+  }
+}

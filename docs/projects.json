@@ -1,0 +1,157 @@
+{
+  "projects_timeline": {
+    "overview": {
+      "description": "A comprehensive timeline of Nelson's software development projects, showcasing growth from academic exercises to professional applications",
+      "total_projects": "30+",
+      "timespan": "2019 - Present",
+      "focus_areas": [
+        "Web Development",
+        "Mobile Applications",
+        "System Programming",
+        "Academic Projects",
+        "Open Source Libraries"
+      ]
+    },
+    "featured_projects": [
+      {
+        "id": "0",
+        "title": "SplitTab",
+        "date": "2025-1-1",
+        "description": "A web app for splitting bills with friends",
+        "category": "Current Project",
+        "features": [
+          "Expense Tracking: Easily input and categorize expenses, assign them to individuals, and track who paid.",
+          "Bill Splitting: Automatically calculate how much each person owes or is owed, with options for equal or custom splits.",
+          "Settlement Management: Create settlement requests, track their status, and simplify debt settlement with suggested transactions.",
+          "Household/Group Management: Create or join households, manage members, and control privacy settings.",
+          "Transaction History: View and export a history of all expenses and settlements.",
+          "Notifications and Reminders: Receive alerts for upcoming settlements, new expenses, and payment reminders."
+        ],
+        "repository": "https://github.com/lst97/split-tab-client",
+        "status": "Available on request"
+      },
+      {
+        "id": "1",
+        "title": "lst97.dev (Personal Website)",
+        "date": "2024-03-18",
+        "description": "Personal website with retro gaming theme",
+        "category": "Portfolio",
+        "technologies": [
+          "Next.js 15",
+          "React 19",
+          "TypeScript",
+          "Tailwind CSS v4",
+          "PayloadCMS",
+          "Vercel"
+        ],
+        "features": [
+          "Retro gaming pixel art theme",
+          "Modern web development practices",
+          "Interactive user experience",
+          "Headless CMS integration",
+          "Performance optimization",
+          "SEO implementation"
+        ]
+      },
+      {
+        "id": "2",
+        "title": "PEViewer",
+        "date": "2019-01-01 to 2019-07-31",
+        "description": "PE structure explorer components in C",
+        "category": "System Programming",
+        "technologies": ["C", "Assembly", "Win32"],
+        "learning_outcomes": [
+          "Software architecture understanding",
+          "PE structure exploration",
+          "Execution principles, storage, memory management"
+        ],
+        "repository": "https://github.com/lst97/ASSEMBLY-WIN32_practise"
+      }
+    ],
+    "project_categories": {
+      "web_development": [
+        "lst97.dev - Personal website",
+        "SplitTab - Expense management app",
+        "simple-cms-frontend - Custom CMS frontend",
+        "simple-receipt-manager - Receipt management system"
+      ],
+      "mobile_development": [
+        "e2ee-messaging-android-app - End-to-end encrypted messaging",
+        "SIT305_TruckApp - Truck management app",
+        "SIT305_Lost_Found_App - Lost and found app",
+        "SIT305_TubeApp - Tube app",
+        "SIT305_QuizeApp - Quiz application"
+      ],
+      "backend_systems": [
+        "project-st-zita-backend - Learning project backend",
+        "e2ee-messaging-android-app-backend - Messaging backend",
+        "ExpressCommonMiddlewares - Express.js middlewares",
+        "CommonServices - Reusable services library"
+      ],
+      "system_programming": [
+        "PE-Viewer - Portable Executable viewer",
+        "AntiRecoil - Gaming utility",
+        "DecimalToFloat - Number conversion utility",
+        "C-Language-Practise - C programming exercises"
+      ],
+      "academic_projects": [
+        "SIT320-Project-MD5 - MD5 implementation",
+        "SIT315-MPI-Blockchain-Project - Blockchain with MPI",
+        "SIT315-Concurrent-And-Distributed-Programming - Parallel programming",
+        "SIT210-Remote-Lock-Project - IoT lock system",
+        "Thermal_Image_Pose_Analysis - Computer vision project"
+      ],
+      "libraries_and_tools": [
+        "CommonResponse - API response structure package",
+        "CommonErrors - Error handling library",
+        "CommonResponseStructure - Response standardization",
+        "misc - Experimental code and ideas"
+      ]
+    },
+    "technology_evolution": {
+      "early_stage": {
+        "period": "2019-2021",
+        "focus": "System programming and academic projects",
+        "technologies": ["C", "Assembly", "Win32", "IoT devices"]
+      },
+      "development_phase": {
+        "period": "2022-2023",
+        "focus": "Full-stack development and mobile apps",
+        "technologies": ["Android", "Java", "Express.js", "Node.js", "Blockchain", "MPI"]
+      },
+      "current_expertise": {
+        "period": "2024-Present",
+        "focus": "Modern web development and professional applications",
+        "technologies": ["Next.js", "React", "TypeScript", "PayloadCMS", "Tailwind CSS"]
+      }
+    },
+    "project_statistics": {
+      "total_repositories": "30+",
+      "active_projects": "3",
+      "completed_projects": "25+",
+      "on_hold_projects": "2",
+      "programming_languages_used": [
+        "TypeScript/JavaScript",
+        "C#/.NET",
+        "Python",
+        "C",
+        "Java",
+        "Assembly"
+      ]
+    }
+  },
+  "current_focus": {
+    "primary_project": "SplitTab - Expense management application",
+    "learning_areas": [
+      "Advanced React patterns",
+      "Performance optimization",
+      "Modern CSS techniques",
+      "Cloud infrastructure"
+    ],
+    "upcoming_projects": [
+      "Enhanced portfolio features",
+      "Open source contributions",
+      "Client project opportunities"
+    ]
+  }
+}

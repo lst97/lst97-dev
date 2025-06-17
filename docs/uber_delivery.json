@@ -1,0 +1,61 @@
+{
+  "uber_delivery_service": {
+    "overview": {
+      "description": "Professional Uber delivery driver service with exceptional customer satisfaction",
+      "commitment": "When you order through Uber Eats, you might just get me as your driver! I'm committed to treating every delivery with the same level of care and professionalism."
+    },
+    "statistics": {
+      "deliveries_completed": "2000+",
+      "years_experience": "1+",
+      "customer_rating": "98%",
+      "cancellation_rate": "0%",
+      "description": "Based on 2000+ completed deliveries"
+    },
+    "delivery_types": [
+      {
+        "type": "Food Delivery",
+        "description": "Restaurant and food delivery services"
+      },
+      {
+        "type": "Package Delivery",
+        "description": "Package and parcel delivery services"
+      },
+      {
+        "type": "Pack & Deliver",
+        "description": "Specialized packing and delivery services"
+      }
+    ],
+    "professional_gear": [
+      {
+        "item": "Insulated delivery bags",
+        "purpose": "Maintaining food temperature during transport"
+      },
+      {
+        "item": "Phone mount and charger",
+        "purpose": "Safe communication and navigation"
+      },
+      {
+        "item": "Professional attire",
+        "purpose": "Maintaining professional appearance"
+      }
+    ],
+    "service_features": [
+      "Real-time delivery tracking",
+      "Professional communication",
+      "Temperature-controlled transport",
+      "Careful handling of orders",
+      "Timely delivery commitment",
+      "Customer feedback system"
+    ],
+    "customer_reviews": {
+      "system": "PayloadCMS-powered review system",
+      "moderation": "All reviews are moderated before publication",
+      "features": [
+        "Star rating system (0.5 to 5 stars)",
+        "Written feedback",
+        "Delivery type categorization",
+        "Spam prevention with Turnstile verification"
+      ]
+    }
+  }
+}

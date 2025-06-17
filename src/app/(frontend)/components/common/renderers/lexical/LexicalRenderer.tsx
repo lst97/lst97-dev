@@ -2,7 +2,18 @@
 
 import { useMemo } from 'react'
 import { LexicalRendererProps, LexicalNode, LexicalContent, LexicalCodeNode } from './types'
-import { Paragraph, Heading, List, Link, Quote, Code, Image, TextFormat } from './components'
+import {
+  Paragraph,
+  Heading,
+  List,
+  Link,
+  Quote,
+  Code,
+  Image,
+  TextFormat,
+  HorizontalRule,
+  Media,
+} from './components'
 
 /**
  * Renders Lexical JSON content into a React component tree.
@@ -28,7 +39,7 @@ import { Paragraph, Heading, List, Link, Quote, Code, Image, TextFormat } from '
  * @param {string | object | null | undefined} props.content - The Lexical editor state content, either as a JSON string or a parsed object.
  * @returns {React.ReactNode} The rendered React component tree or an error message.
  */
-export const LexicalRenderer = ({ content }: LexicalRendererProps) => {
+export const LexicalRenderer = ({ content }: LexicalRendererProps): React.ReactNode => {
   const processedContent = useMemo(() => {
     if (!content) return null
 
@@ -265,6 +276,29 @@ const renderLexicalNodes = (nodes: LexicalNode[]): React.ReactNode => {
           break
         case 'image':
           result.push(<Image key={`img-${i}`} node={node} index={i} alt={node.altText ?? ''} />)
+          break
+        case 'horizontalrule':
+          result.push(
+            <HorizontalRule key={`hr-${i}`} node={{ ...node, type: 'horizontalrule' }} index={i} />,
+          )
+          break
+        case 'upload':
+          // Ensure the node has required fields for media
+          if (node.id && node.relationTo && node.value) {
+            result.push(
+              <Media
+                key={`media-${i}`}
+                node={{
+                  ...node,
+                  type: 'upload',
+                  id: node.id,
+                  relationTo: node.relationTo,
+                  value: node.value,
+                }}
+                index={i}
+              />,
+            )
+          }
           break
         default:
           // If it has text or children nodes, use TextFormat

@@ -70,6 +70,8 @@ export interface Config {
     users: User;
     media: Media;
     posts: Post;
+    'uber-comments': UberComment;
+    'guest-book-comments': GuestBookComment;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -79,6 +81,8 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'uber-comments': UberCommentsSelect<false> | UberCommentsSelect<true>;
+    'guest-book-comments': GuestBookCommentsSelect<false> | GuestBookCommentsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -209,6 +213,80 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uber-comments".
+ */
+export interface UberComment {
+  id: number;
+  customerName: string;
+  orderType: 'Food Delivery' | 'Package Delivery' | 'Pack & Deliver';
+  comment: string;
+  /**
+   * Rating from 0.5 to 5 stars (half-star increments)
+   */
+  rating: number;
+  /**
+   * Comments must be approved to appear on the website (admin only)
+   */
+  status: 'pending' | 'approved' | 'rejected';
+  /**
+   * Internal notes for moderation (not visible to public)
+   */
+  moderatorNotes?: string | null;
+  /**
+   * Turnstile verification token (for spam prevention)
+   */
+  turnstileToken?: string | null;
+  /**
+   * Whether Turnstile verification was successful
+   */
+  turnstileVerified?: boolean | null;
+  /**
+   * IP address of the commenter (for spam prevention)
+   */
+  ipAddress?: string | null;
+  /**
+   * Browser user agent (for spam prevention)
+   */
+  userAgent?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guest-book-comments".
+ */
+export interface GuestBookComment {
+  id: number;
+  /**
+   * Display name for the comment (can be anonymous)
+   */
+  name: string;
+  /**
+   * The guest book comment content
+   */
+  comment: string;
+  /**
+   * Whether this comment is approved for public display (admin only)
+   */
+  approved?: boolean | null;
+  /**
+   * Whether Turnstile verification passed
+   */
+  turnstileVerified?: boolean | null;
+  turnstileToken?: string | null;
+  /**
+   * IP address of the commenter (for moderation)
+   */
+  ipAddress?: string | null;
+  /**
+   * User agent of the commenter (for moderation)
+   */
+  userAgent?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -225,6 +303,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'uber-comments';
+        value: number | UberComment;
+      } | null)
+    | ({
+        relationTo: 'guest-book-comments';
+        value: number | GuestBookComment;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -333,6 +419,39 @@ export interface PostsSelect<T extends boolean = true> {
   views?: T;
   likes?: T;
   readtime?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uber-comments_select".
+ */
+export interface UberCommentsSelect<T extends boolean = true> {
+  customerName?: T;
+  orderType?: T;
+  comment?: T;
+  rating?: T;
+  status?: T;
+  moderatorNotes?: T;
+  turnstileToken?: T;
+  turnstileVerified?: T;
+  ipAddress?: T;
+  userAgent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guest-book-comments_select".
+ */
+export interface GuestBookCommentsSelect<T extends boolean = true> {
+  name?: T;
+  comment?: T;
+  approved?: T;
+  turnstileVerified?: T;
+  turnstileToken?: T;
+  ipAddress?: T;
+  userAgent?: T;
   updatedAt?: T;
   createdAt?: T;
 }

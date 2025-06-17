@@ -1,0 +1,132 @@
+{
+  "professional_services": {
+    "overview": {
+      "description": "Professional web development and software engineering services with pixel-perfect attention to detail",
+      "philosophy": "Your website is your brand's growth engine, not a digital afterthought. Stop settling for basic – invest in expertise and make your website your competitive edge."
+    },
+    "services_offered": [
+      {
+        "id": 1,
+        "title": "Frontend Development",
+        "description": "Modern and responsive web applications built with React and Next.js. Clean, maintainable code with a focus on user experience.",
+        "features": ["Responsive Design", "Modern UI/UX", "SEO Optimization", "Performance Focus"]
+      },
+      {
+        "id": 2,
+        "title": "Full-Stack Solutions",
+        "description": "End-to-end web applications with secure backend integration. RESTful APIs and database management included.",
+        "features": ["API Development", "Database Design", "Authentication", "Cloud Deployment"]
+      },
+      {
+        "id": 3,
+        "title": "Why not DIY?",
+        "description": "DIY tools like Wix and WordPress trap you in with generic templates and limited capabilities. A professional developer crafts a custom, powerful website that captivates audiences, drives conversions, and scales with your ambitions.",
+        "features": [
+          "Tailored Customization",
+          "Technical Expertise & Advanced Functionality",
+          "Future-Proof Scalability",
+          "Brand Integrity"
+        ]
+      }
+    ],
+    "project_showcase": {
+      "featured_project": {
+        "title": "lst97.dev",
+        "banner": "A modern portfolio website built with love using Next.js and Payload CMS with retro gaming theme.",
+        "description": "Where explore the creation of a pixel art-themed personal site using Next.js and React. It showcases my journey in blending retro aesthetics with modern web development techniques.",
+        "technologies": [
+          {
+            "title": "React",
+            "icon": "RiReactjsFill"
+          },
+          {
+            "title": "Next.js",
+            "icon": "RiNextjsFill"
+          },
+          {
+            "title": "Vercel",
+            "icon": "RiVercelFill"
+          }
+        ],
+        "features": ["Responsive Design", "Dark/Light Theme", "Custom Animations", "SEO Optimized"],
+        "development_process": [
+          {
+            "title": "Planning",
+            "description": "Requirements gathering and design planning",
+            "icon": "📝"
+          },
+          {
+            "title": "UI/UX Design",
+            "description": "UI/UX design with pixel art elements",
+            "icon": "🎨"
+          },
+          {
+            "title": "Project Structure",
+            "description": "Established project structure with Next.js and implemented core components like navigation and layout",
+            "icon": "🛠️"
+          },
+          {
+            "title": "Content Integration",
+            "description": "Content sections for key areas and integrated dynamic content fetching where needed.",
+            "icon": "📦"
+          },
+          {
+            "title": "Styling",
+            "description": "Applied a consistent visual style with a retro gaming theme and ensured responsiveness.",
+            "icon": "🎮"
+          },
+          {
+            "title": "Data Handling",
+            "description": "Implemented data fetching, caching, and handled loading/error states.",
+            "icon": "🔄"
+          }
+        ],
+        "project_details": {
+          "client": "Self-initiated",
+          "industry": "Web Development",
+          "services": ["Web Design", "Frontend Development", "UI/UX Design"],
+          "live_url": "https://lst97.dev",
+          "github_url": "https://github.com/lst97/lst97.dev"
+        }
+      }
+    },
+    "contact_information": {
+      "email": "laisiotou1997@gmail.com",
+      "phone": "+61 0478 561 361",
+      "location": "Melbourne, VIC, Australia",
+      "availability": "Available for freelance projects and consulting"
+    }
+  },
+  "technical_expertise": {
+    "frontend_technologies": [
+      "React",
+      "Next.js",
+      "TypeScript",
+      "Tailwind CSS",
+      "Framer Motion",
+      "HTML5/CSS3"
+    ],
+    "backend_technologies": ["Node.js", ".NET", "C#", "Python", "RESTful APIs", "GraphQL"],
+    "databases": ["PostgreSQL", "SQLite", "Firebase"],
+    "tools_and_platforms": ["Vercel", "PayloadCMS", "Figma", "Git/GitHub", "Docker"]
+  },
+  "project_approach": {
+    "methodology": "Agile development with focus on user experience and performance",
+    "principles": [
+      "Mobile-first responsive design",
+      "Performance optimization",
+      "SEO best practices",
+      "Accessibility compliance",
+      "Clean, maintainable code",
+      "User-centered design"
+    ],
+    "deliverables": [
+      "Fully responsive website",
+      "Source code documentation",
+      "Performance optimization",
+      "SEO implementation",
+      "Cross-browser compatibility",
+      "Ongoing support options"
+    ]
+  }
+}

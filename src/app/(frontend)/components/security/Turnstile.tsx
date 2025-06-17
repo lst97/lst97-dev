@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 
 interface TurnstileOptions {
   sitekey: string
@@ -26,35 +25,30 @@ declare global {
 interface TurnstileProps {
   siteKey: string
   onVerify: (token: string) => void
+  onExpired?: () => void
   action?: string
   headless?: boolean
 }
 
 const Turnstile: React.FC<TurnstileProps> = React.memo(
-  ({ siteKey, onVerify, action = 'contact_form', headless = false }) => {
+  ({ siteKey, onVerify, onExpired, action = 'contact_form', headless = false }) => {
     const [error, setError] = useState<string | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
-    const [isVerified, setIsVerified] = useState(false)
+    const [_isLoading, setIsLoading] = useState(true)
+    const [_isVerified, setIsVerified] = useState(false)
     const widgetId = useRef<string | null>(null)
     const containerRef = useRef<HTMLDivElement>(null)
+    const onVerifyRef = useRef(onVerify)
+
+    // Keep the onVerify callback up to date without causing re-renders
+    useEffect(() => {
+      onVerifyRef.current = onVerify
+    }, [onVerify])
 
     // Create a stable ID that doesn't change on re-renders
     const instanceId = useRef<string>(`turnstile-${Math.random().toString(36).substring(2, 9)}`)
 
-    // Initialize global widget tracking if not exists - using a Map for container ID to widget ID mapping
-    useEffect(() => {
-      if (!window._turnstileWidgetIds) {
-        window._turnstileWidgetIds = new Map()
-      }
-
-      // Return cleanup function
-      return () => {
-        cleanupWidget()
-      }
-    }, [])
-
     // Function to clean up widget
-    const cleanupWidget = () => {
+    const cleanupWidget = useCallback(() => {
       try {
         // Clean up the widget when component unmounts
         if (widgetId.current && window.turnstile) {
@@ -73,7 +67,39 @@ const Turnstile: React.FC<TurnstileProps> = React.memo(
       } catch (error) {
         console.error('Error in Turnstile cleanup:', error)
       }
-    }
+    }, [])
+
+    // Stable callback for Turnstile verification
+    const handleVerify = useCallback((token: string) => {
+      onVerifyRef.current(token)
+      setIsVerified(true)
+      setIsLoading(false)
+    }, [])
+
+    // Stable callback for Turnstile expiration
+    const handleExpired = useCallback(() => {
+      // Reset on expiration
+      if (widgetId.current && window.turnstile) {
+        window.turnstile.reset(widgetId.current)
+        setIsVerified(false)
+      }
+      // Call the provided onExpired callback if available
+      if (onExpired) {
+        onExpired()
+      }
+    }, [onExpired])
+
+    // Initialize global widget tracking if not exists - using a Map for container ID to widget ID mapping
+    useEffect(() => {
+      if (!window._turnstileWidgetIds) {
+        window._turnstileWidgetIds = new Map()
+      }
+
+      // Return cleanup function
+      return () => {
+        cleanupWidget()
+      }
+    }, [cleanupWidget])
 
     useEffect(() => {
       if (!siteKey) {
@@ -105,17 +131,11 @@ const Turnstile: React.FC<TurnstileProps> = React.memo(
           sitekey: siteKey,
           callback: (token: string) => {
             if (!isMounted) return
-            onVerify(token)
-            setIsVerified(true)
-            setIsLoading(false)
+            handleVerify(token)
           },
           'expired-callback': () => {
             if (!isMounted) return
-            // Reset on expiration
-            if (widgetId.current) {
-              window.turnstile.reset(widgetId.current)
-              setIsVerified(false)
-            }
+            handleExpired()
           },
           action: action,
         })
@@ -172,7 +192,7 @@ const Turnstile: React.FC<TurnstileProps> = React.memo(
         isMounted = false
         cleanupWidget()
       }
-    }, [siteKey, onVerify, action])
+    }, [siteKey, action, handleVerify, handleExpired, cleanupWidget])
 
     if (error && !headless) {
       return (
@@ -204,36 +224,6 @@ const Turnstile: React.FC<TurnstileProps> = React.memo(
           className="flex justify-center items-center w-full my-4"
           data-testid="turnstile-container"
         ></div>
-        <div aria-live="polite">
-          <AnimatePresence>
-            {isLoading && !isVerified && (
-              <motion.div
-                key="loading"
-                className="text-text-color font-['Press_Start_2P'] absolute bottom-4 right-4 flex items-center gap-4 text-base"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <span className="animate-spin text-lg">♻️</span>🤖 Verifying...
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <AnimatePresence>
-            {isVerified && (
-              <motion.div
-                key="verified"
-                className="text-text-color font-['Press_Start_2P'] absolute bottom-4 right-4 flex items-center gap-4 text-base"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                ✅ You&apos;re not a robot (yet)!
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
       </>
     )
   },

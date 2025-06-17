@@ -1,0 +1,83 @@
+{
+  "tools_overview": {
+    "description": "Interactive tools for file type detection, image background removal, and format conversion",
+    "details": "Analyze files, remove image backgrounds, convert between formats – all running locally in your browser with AI-powered tools.",
+    "privacy": "100% Private - All processing happens in your browser. Your files never leave your device or get uploaded to any server.",
+    "performance": "Fast Processing - Our tools use modern browser technologies to process your files quickly and efficiently.",
+    "cost": "Completely Free - All tools are free to use with no hidden costs, subscriptions, or limitations."
+  },
+  "image_tools": [
+    {
+      "name": "Background Remover",
+      "description": "AI-powered background removal tool using MediaPipe Selfie Segmentation",
+      "features": [
+        "Real-time background removal",
+        "AI-powered segmentation",
+        "Multiple output formats",
+        "Batch processing support",
+        "Privacy-focused (client-side processing)"
+      ],
+      "technologies": ["MediaPipe", "TensorFlow.js", "Canvas API", "WebGL"]
+    },
+    {
+      "name": "Image Converter",
+      "description": "Convert between common image formats with quality control options",
+      "features": [
+        "Multiple format support (JPG, PNG, WebP, GIF, BMP, TIFF)",
+        "Quality control settings",
+        "Batch conversion",
+        "HEIC to JPEG/PNG conversion",
+        "Metadata extraction",
+        "Preview generation"
+      ],
+      "supported_formats": ["JPEG/JPG", "PNG", "WebP", "GIF", "BMP", "TIFF", "HEIC (input only)"],
+      "technologies": ["Canvas API", "gif.js", "heic-convert", "ExifReader"]
+    }
+  ],
+  "file_tools": [
+    {
+      "name": "File Type Detector",
+      "description": "Advanced file type detection using magic numbers and file signatures",
+      "features": [
+        "Magic number detection",
+        "File signature analysis",
+        "MIME type identification",
+        "File extension validation",
+        "Detailed file information"
+      ],
+      "technologies": ["File API", "ArrayBuffer", "Binary analysis"]
+    }
+  ],
+  "technical_implementation": {
+    "architecture": "Client-side processing with modern web APIs",
+    "privacy_model": "Zero-server processing - all operations happen locally",
+    "performance_optimization": [
+      "Web Workers for heavy processing",
+      "Streaming file processing",
+      "Memory-efficient algorithms",
+      "Progressive loading"
+    ],
+    "browser_compatibility": "Modern browsers with support for File API, Canvas, and WebGL"
+  },
+  "features": {
+    "security": [
+      "No file uploads to servers",
+      "Local processing only",
+      "No data collection",
+      "Privacy-first design"
+    ],
+    "usability": [
+      "Drag and drop interface",
+      "Batch processing",
+      "Real-time preview",
+      "Progress indicators",
+      "Error handling"
+    ],
+    "technical": [
+      "Multiple format support",
+      "Quality control",
+      "Metadata preservation",
+      "Efficient algorithms"
+    ]
+  }
+}

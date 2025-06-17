@@ -15,11 +15,12 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const PixelInput = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, id, className = '', fullWidth = false, icon, ...props }, ref) => {
-    const inputId = id || `input-${Math.random().toString(36).substring(2, 9)}`
+    const reactId = React.useId()
+    const inputId = id || reactId
 
     const baseInputClasses = [
-      'font-mono',
-      'text-[1.2rem]',
+      'font-["Press_Start_2P"]',
+      'text-xl',
       'p-4',
       'border-4',
       'border-[var(--color-border)]',
@@ -42,11 +43,16 @@ export const PixelInput = React.forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className={`flex flex-col gap-2 ${fullWidth ? 'w-full' : ''}`}>
-        {label && (
-          <label htmlFor={inputId} className="font-pixel text-[1.2rem] text-[var(--color-text)]">
-            {label}
-          </label>
-        )}
+        <div className="flex items-center gap-2">
+          {label && (
+            <label htmlFor={inputId} className="font-pixel text-[1.2rem] text-[var(--color-text)]">
+              {label}
+            </label>
+          )}
+          {props.required && (
+            <span className="text-red-500 text-lg font-['Press_Start_2P'] font-bold">*</span>
+          )}
+        </div>
         <div className="relative">
           {icon && (
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text)] opacity-70 z-10">
@@ -140,13 +146,25 @@ export const PixelSelect = React.forwardRef<HTMLButtonElement, PixelSelectProps>
     },
     ref,
   ) => {
-    const selectId = id || `select-${Math.random().toString(36).substring(2, 9)}`
+    const reactId = React.useId()
+    const selectId = id || reactId
     const selectedLabel = value
       ? options.find((option) => option.value === value)?.label
       : placeholder
 
     // This ensures value is never undefined which can cause issues with Radix UI Select
     const safeValue = value || ''
+
+    const handleValueChange = (newValue: string) => {
+      // Don't trigger onChange if the new value is empty and we already have a value
+      if (!newValue && value) {
+        return
+      }
+
+      if (onChange) {
+        onChange(newValue)
+      }
+    }
 
     return (
       <div className={`flex flex-col gap-2 ${fullWidth ? 'w-full' : ''}`}>
@@ -158,7 +176,7 @@ export const PixelSelect = React.forwardRef<HTMLButtonElement, PixelSelectProps>
             {label}
           </label>
         )}
-        <Select.Root value={safeValue} onValueChange={onChange} disabled={disabled}>
+        <Select.Root value={safeValue} onValueChange={handleValueChange} disabled={disabled}>
           <Select.Trigger
             id={selectId}
             ref={ref}

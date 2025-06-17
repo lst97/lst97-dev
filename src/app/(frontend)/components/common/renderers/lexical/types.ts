@@ -26,6 +26,24 @@ export interface LexicalNode {
   code?: string
   codeHighlight?: string
   textFormat?: number | string
+  // Properties for upload/media nodes
+  relationTo?: string
+  value?: {
+    id: number
+    alt?: string
+    filename?: string
+    url?: string
+    width?: number
+    height?: number
+    mimeType?: string
+    filesize?: number
+    createdAt?: string
+    updatedAt?: string
+    thumbnailURL?: string | null
+    focalX?: number
+    focalY?: number
+  }
+  version?: number
   // Index signature for additional properties
   [key: string]: unknown
 }
@@ -37,6 +55,35 @@ export interface LexicalCodeNode extends LexicalNode {
   codeContent?: string
   code?: string
   codeHighlight?: string
+}
+
+// Specific node type for horizontal rule
+export interface LexicalHorizontalRuleNode extends LexicalNode {
+  type: 'horizontalrule'
+  version?: number
+}
+
+// Specific node type for media/upload nodes
+export interface LexicalMediaNode extends LexicalNode {
+  type: 'upload'
+  id: string
+  relationTo: string
+  value: {
+    id: number
+    alt?: string
+    filename?: string
+    url?: string
+    width?: number
+    height?: number
+    mimeType?: string
+    filesize?: number
+    createdAt?: string
+    updatedAt?: string
+    thumbnailURL?: string | null
+    focalX?: number
+    focalY?: number
+  }
+  version?: number
 }
 
 export interface LexicalContent {
