@@ -14,6 +14,7 @@ import {
   FaQuestion,
   FaUber,
   FaBook,
+  FaGamepad,
 } from 'react-icons/fa'
 import { routes } from '@/frontend/constants/routes'
 import { contact } from '@/frontend/constants/data/contact'
@@ -32,6 +33,7 @@ const serviceLinks = [
   { href: '#career', icon: FaUserClock, text: 'Career Opportunities' },
   { href: routes.uber, icon: FaUber, text: 'Uber Delivery' },
   { href: routes.tools, icon: FaTools, text: 'Tools' },
+  { href: routes.games, icon: FaGamepad, text: 'Games' },
   { href: '#api', icon: FaCode, text: 'API' },
 ]
 
