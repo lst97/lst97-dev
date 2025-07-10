@@ -15,6 +15,7 @@ export function useAudioAnalysis(): AudioAnalysisHook {
     hiddenNotes: [],
     audioBuffer: null,
     audioContext: null,
+    audioSource: null,
     soundEffects: {
       base: null,
       hiHat: null,
@@ -163,6 +164,7 @@ export function useAudioAnalysis(): AudioAnalysisHook {
       hiddenNotes: [],
       audioBuffer: null,
       audioContext: audioContextRef.current,
+      audioSource: null,
       soundEffects: {
         base: null,
         hiHat: null,

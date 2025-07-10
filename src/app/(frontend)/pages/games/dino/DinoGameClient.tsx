@@ -43,7 +43,7 @@ const DinoGame = () => {
 
     const obstacles: { x: number; y: number; width: number; height: number }[] = []
     let frameCount = 0
-    let obstacleSpeed = 5
+    const obstacleSpeed = 5
 
     const dinoImg = new window.Image()
     dinoImg.src = '/dino_game/dinosaur.png'

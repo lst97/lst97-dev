@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useMemo, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Text, Box } from '@react-three/drei'
 import * as THREE from 'three'
+import { useTypoSyncStore } from '../store/typoSyncStore'
 import type { ThreeGameRendererProps, Keystroke, GameConfig } from '../types'
 
 /**
@@ -740,10 +741,21 @@ interface GameSceneProps {
   beatTimestamps: number[]
 }
 
-function GameScene({ keystrokeMap, gameTime, gameState, beatTimestamps }: GameSceneProps) {
+function GameScene({
+  keystrokeMap,
+  gameTime,
+  gameState,
+  beatTimestamps,
+}: GameSceneProps) {
   // Filter visible keystrokes (within canvas bounds with buffer)
+  // IMPORTANT: Hidden notes should NOT be rendered as visible key boxes
   const visibleKeystrokes = useMemo(() => {
-    return keystrokeMap.filter((keystroke) => {
+    const visible = keystrokeMap.filter((keystroke) => {
+      // Filter out hidden notes - they should be completely invisible
+      if (keystroke.type === 'hidden') {
+        return false
+      }
+      
       const timeDifference = keystroke.startTime - gameTime
       const distance = timeDifference * GAME_CONFIG.NOTE_SPEED_PPS
       const screenX = GAME_CONFIG.HIT_ZONE_X + distance
@@ -755,8 +767,29 @@ function GameScene({ keystrokeMap, gameTime, gameState, beatTimestamps }: GameSc
       }
 
       // For upcoming or missed notes, only render if within view buffer
-      return screenX > -100 && screenX < CANVAS_WIDTH + 100
+      const isVisible = screenX > -100 && screenX < CANVAS_WIDTH + 100
+      return isVisible
     })
+
+    // Debug logging every few frames
+    if (Math.floor(gameTime * 10) % 30 === 0) {
+      // Log every 3 seconds
+      const hiddenNotes = keystrokeMap.filter(k => k.type === 'hidden')
+      const regularKeys = keystrokeMap.filter(k => k.type !== 'hidden')
+      
+      console.log('🎮 Visibility check:', {
+        gameTime: gameTime.toFixed(2),
+        totalKeystrokes: keystrokeMap.length,
+        regularKeys: regularKeys.length,
+        hiddenNotes: hiddenNotes.length,
+        visibleRendered: visible.length,
+        upcomingVisible: visible.filter((k) => k.state === 'upcoming').length,
+        upcomingHidden: hiddenNotes.filter(k => k.state === 'upcoming').length,
+        nextKeystroke: keystrokeMap.find((k) => k.state === 'upcoming'),
+      })
+    }
+
+    return visible
   }, [keystrokeMap, gameTime])
 
   // Debug logging for beat timestamps
@@ -793,12 +826,19 @@ function GameScene({ keystrokeMap, gameTime, gameState, beatTimestamps }: GameSc
         />
       ))}
 
-      {/* Hidden note bursts */}
+      {/* Hidden note bursts - now unified in keystrokeMap */}
       {keystrokeMap
         .filter((k) => k.type === 'hidden' && k.state === 'hit')
-        .map((note) => (
-          <HiddenNoteBurst key={`burst-${note.startTime}`} note={note} gameTime={gameTime} />
-        ))}
+        .map((note) => {
+          console.log(`🟣 Rendering HiddenNoteBurst for hidden note at ${note.startTime.toFixed(2)}s`)
+          return (
+            <HiddenNoteBurst
+              key={`burst-hidden-${note.startTime}`}
+              note={note}
+              gameTime={gameTime}
+            />
+          )
+        })}
     </>
   )
 }
@@ -807,31 +847,81 @@ function GameScene({ keystrokeMap, gameTime, gameState, beatTimestamps }: GameSc
  * Main Three.js game renderer component
  */
 export default function ThreeGameRenderer({
-  keystrokeMap,
-  gameState,
-  analysisResult,
-}: ThreeGameRendererProps) {
+  gameConfig,
+  onKeystrokeUpdate,
+}: Omit<ThreeGameRendererProps, 'keystrokeMap' | 'gameState' | 'analysisResult'>) {
+  // Use Zustand store directly
+  const { gameState, audioState } = useTypoSyncStore()
+  const { keystrokeMap, analysisResult } = audioState
+
   const [gameTime, setGameTime] = useState(0)
+
+  // Debug logging for keystroke map changes
+  useEffect(() => {
+    const hiddenNotes = keystrokeMap.filter((k) => k.type === 'hidden')
+    const regularKeys = keystrokeMap.filter((k) => k.type !== 'hidden')
+    
+    console.log('🎮 GameRenderer: keystrokeMap updated', {
+      totalItems: keystrokeMap.length,
+      regularKeys: regularKeys.length,
+      hiddenNotes: hiddenNotes.length,
+      upcomingRegular: regularKeys.filter((k) => k.state === 'upcoming').length,
+      upcomingHidden: hiddenNotes.filter((k) => k.state === 'upcoming').length,
+      hitCount: keystrokeMap.filter((k) => k.state === 'hit').length,
+      missedCount: keystrokeMap.filter((k) => k.state === 'missed').length,
+      gameActive: gameState.isActive,
+    })
+  }, [keystrokeMap, gameState.isActive])
+
+  // Debug logging for hidden notes in keystrokeMap
+  useEffect(() => {
+    const hiddenNotes = keystrokeMap.filter(k => k.type === 'hidden')
+    console.log('🟣 GameRenderer: unified keystrokeMap hidden notes', {
+      totalHiddenNotes: hiddenNotes.length,
+      upcomingHiddenNotes: hiddenNotes.filter((h) => h.state === 'upcoming').length,
+      hitHiddenNotes: hiddenNotes.filter((h) => h.state === 'hit').length,
+      firstFewHiddenNotes: hiddenNotes.slice(0, 3).map(h => ({ time: h.startTime.toFixed(3), state: h.state })),
+    })
+  }, [keystrokeMap])
 
   // Get beat timestamps from analysisResult prop
   const beatTimestamps = useMemo(() => {
     // First, try to get beat timestamps from analysisResult prop
-    if (analysisResult && analysisResult.beat_timestamps) {
+    if (
+      analysisResult &&
+      analysisResult.beat_timestamps &&
+      analysisResult.beat_timestamps.length > 0
+    ) {
       console.log(
-        'Using beat timestamps from analysisResult prop:',
+        '✅ Using beat timestamps from analysisResult:',
         analysisResult.beat_timestamps.length,
       )
       return analysisResult.beat_timestamps
     }
 
-    // Fallback: extract beat timestamps from keystrokeMap (this is what was causing the issue)
+    // Fallback: extract beat timestamps from keystrokeMap
     const fallbackTimestamps = keystrokeMap
       .filter((k) => k.type === 'beat')
       .map((k) => k.startTime)
       .sort((a, b) => a - b)
 
-    console.log('Fallback: Using beat timestamps from keystrokeMap:', fallbackTimestamps.length)
-    return fallbackTimestamps
+    if (fallbackTimestamps.length > 0) {
+      console.log(
+        '⚠️ Fallback: Using beat timestamps from keystrokeMap:',
+        fallbackTimestamps.length,
+      )
+      return fallbackTimestamps
+    }
+
+    // Ultimate fallback: generate some basic beat timestamps based on game time
+    // This ensures the game can still work even without proper beat analysis
+    const basicBeats = []
+    for (let i = 0; i < 120; i += 0.5) {
+      // Beat every 0.5 seconds for 1 minute
+      basicBeats.push(i)
+    }
+    console.log('🚨 Ultimate fallback: Using generated beat timestamps:', basicBeats.length)
+    return basicBeats
   }, [analysisResult, keystrokeMap])
 
   // Update game time based on game state
@@ -842,8 +932,8 @@ export default function ThreeGameRenderer({
     }
 
     const updateTime = () => {
-      const currentTime = Date.now() / 1000
-      const elapsedTime = currentTime - gameState.gameStartTime!
+      const currentTime = performance.now() / 1000 // Convert to seconds to match keystroke timestamps
+      const elapsedTime = currentTime - gameState.gameStartTime! / 1000 // gameStartTime is in ms, convert to seconds
       setGameTime(elapsedTime)
     }
 
@@ -884,7 +974,8 @@ export default function ThreeGameRenderer({
       {/* Overlay UI elements matching POC style */}
       <div className="absolute top-4 left-4 text-gray-800 font-mono text-sm bg-white/80 p-2 rounded backdrop-blur-sm">
         <div>Time: {gameTime.toFixed(2)}s</div>
-        <div>Notes: {keystrokeMap.filter((k) => k.state === 'upcoming').length}</div>
+        <div>Notes: {keystrokeMap.filter((k) => k.state === 'upcoming' && k.type !== 'hidden').length}</div>
+        <div>Hidden: {keystrokeMap.filter((k) => k.state === 'upcoming' && k.type === 'hidden').length}</div>
         <div>Beats: {beatTimestamps.length}</div>
       </div>
 

@@ -32,6 +32,24 @@ export function useGameLoop(): GameLoopHook {
     feedback: '',
     feedbackColor: '#FFFFFF',
     gameLoopActive: false,
+    
+    // Enhanced metrics
+    wpm: 0,
+    accuracy: 0,
+    streak: 0,
+    maxStreak: 0,
+    totalKeystrokes: 0,
+    correctKeystrokes: 0,
+    incorrectKeystrokes: 0,
+    
+    // Timing data
+    averageReactionTime: 0,
+    hitTimings: [],
+    
+    // Session data
+    sessionStartTime: null,
+    sessionEndTime: null,
+    sessionDuration: 0,
   })
 
   // Game data - using state instead of refs for reactivity
@@ -347,7 +365,8 @@ export function useGameLoop(): GameLoopHook {
         }
 
         // Start game state
-        setGameState({
+        setGameState((prev) => ({
+          ...prev,
           isActive: true,
           isLoading: false,
           gameStartTime: Date.now() / 1000 + 0.1, // Match audio start time
@@ -355,7 +374,7 @@ export function useGameLoop(): GameLoopHook {
           feedback: '',
           feedbackColor: '#FFFFFF',
           gameLoopActive: true,
-        })
+        }))
 
         console.log('Game started successfully')
       } catch (error) {
@@ -387,7 +406,8 @@ export function useGameLoop(): GameLoopHook {
     }
 
     // Reset game state
-    setGameState({
+    setGameState((prev) => ({
+      ...prev,
       isActive: false,
       isLoading: false,
       gameStartTime: null,
@@ -395,7 +415,7 @@ export function useGameLoop(): GameLoopHook {
       feedback: '',
       feedbackColor: '#FFFFFF',
       gameLoopActive: false,
-    })
+    }))
 
     console.log('Game stopped')
   }, [])

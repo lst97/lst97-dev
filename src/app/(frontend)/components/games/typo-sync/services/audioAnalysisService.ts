@@ -185,6 +185,9 @@ export class AudioAnalysisService {
 
       if (tambourineResponse.status === 'fulfilled') {
         soundEffects.tambourine = await audioContext.decodeAudioData(tambourineResponse.value)
+        console.log('🟣 Successfully loaded tambourine.mp3')
+      } else {
+        console.error('🟣 Failed to load tambourine.mp3:', tambourineResponse.reason)
       }
     } catch (error) {
       console.warn('Error loading some sound effects:', error)

@@ -6,7 +6,7 @@ import type {
   KeystrokeGenerationResult,
   KeystrokeConfig,
 } from '../types'
-import { mockWords } from './mockWords'
+import { generateWordForKeystroke } from './wordGeneration'
 
 /**
  * Configuration constants for keystroke map generation
@@ -64,13 +64,13 @@ function generateKeystrokeMapLinear(unifiedEvents: UnifiedEvent[]): Keystroke[] 
   let lastWasDelimiter = false
   const flushWord = () => {
     if (!wordBuffer.length) return
-    const len = Math.min(wordBuffer.length, 12)
-    const wordList = mockWords[len] || mockWords[12]
-    const pick = wordList[Math.floor(Math.random() * wordList.length)]
+    const targetLength = Math.min(wordBuffer.length, 12)
+    const word = generateWordForKeystroke(targetLength)
+
     wordBuffer.forEach((mel, i) => {
-      if (i < pick.length) {
+      if (i < word.length) {
         keystrokes.push({
-          key: pick[i],
+          key: word[i],
           startTime: mel.startTime,
           duration: 0.05,
           state: 'upcoming',
@@ -83,6 +83,7 @@ function generateKeystrokeMapLinear(unifiedEvents: UnifiedEvent[]): Keystroke[] 
   }
 
   const T = KEYSTROKE_CONFIG.CONFLICT_THRESHOLD
+  let beatCounter = 0 // Track beat count for [Enter] placement
   for (const beat of beatEvents) {
     // Advance melodyIdx to events that are before current beat - T
     while (
@@ -108,7 +109,10 @@ function generateKeystrokeMapLinear(unifiedEvents: UnifiedEvent[]): Keystroke[] 
 
     // Only emit delimiter if lastWasDelimiter is false
     if (!lastWasDelimiter) {
-      const delimKey = Math.random() < 0.1 ? '[Enter]' : '[Space]'
+      beatCounter++
+      // Use EVERY_NTH_BEAT_ENTER configuration for more predictable [Enter] placement
+      const delimKey =
+        beatCounter % KEYSTROKE_CONFIG.EVERY_NTH_BEAT_ENTER === 0 ? '[Enter]' : '[Space]'
       keystrokes.push({
         key: delimKey,
         startTime: beat.startTime,
@@ -117,6 +121,10 @@ function generateKeystrokeMapLinear(unifiedEvents: UnifiedEvent[]): Keystroke[] 
         type: 'beat',
       })
       lastWasDelimiter = true
+
+      console.log(
+        `📝 Generated delimiter: ${delimKey} at ${beat.startTime.toFixed(2)}s (beat #${beatCounter})`,
+      )
     }
     // If lastWasDelimiter is true, skip this delimiter
   }
@@ -132,45 +140,87 @@ function generateKeystrokeMapLinear(unifiedEvents: UnifiedEvent[]): Keystroke[] 
 }
 
 /**
- * Generate hidden notes from unused beat timestamps
+ * Add hidden notes directly to the keystroke map
+ * Hidden notes are placed at beat timestamps that are NOT too close to existing keystrokes
+ * Keys have higher priority - hidden notes will not replace or conflict with keys
  */
-function generateHiddenNotes(beatTimestamps: number[], keystrokeMap: Keystroke[]): HiddenNote[] {
-  // Get delimiter times from the keystroke map
-  const delimiterTimes = new Set(
-    keystrokeMap.filter((k) => k.type === 'beat').map((k) => k.startTime.toFixed(4)), // Use toFixed for float comparison
+function addHiddenNotesToKeystrokeMap(
+  keystrokeMap: Keystroke[], 
+  beatTimestamps: number[]
+): Keystroke[] {
+  const CONFLICT_THRESHOLD = 0.15 // 150ms - hidden notes must be this far from any key
+
+  // Get all existing keystroke times (melody and beat keys)
+  const existingKeystrokeTimes = keystrokeMap.map((k) => k.startTime)
+
+  // Filter beat timestamps to find valid positions for hidden notes
+  const validHiddenNoteTimes = beatTimestamps.filter((beatTime) => {
+    // Check if this beat is too close to any existing keystroke
+    const tooCloseToKeystroke = existingKeystrokeTimes.some(
+      (keystrokeTime) => Math.abs(beatTime - keystrokeTime) < CONFLICT_THRESHOLD,
+    )
+
+    return !tooCloseToKeystroke
+  })
+
+  // Create hidden note keystrokes
+  const hiddenNoteKeystrokes: Keystroke[] = validHiddenNoteTimes.map((t) => ({
+    key: '[Space]',
+    startTime: t,
+    duration: 0.1,
+    state: 'upcoming',
+    type: 'hidden',
+  }))
+
+  // Merge hidden notes with existing keystrokes and sort by time
+  const unifiedKeystrokeMap = [...keystrokeMap, ...hiddenNoteKeystrokes].sort(
+    (a, b) => a.startTime - b.startTime
   )
 
-  // Generate hidden notes from unused beat timestamps
-  const hiddenNotes: HiddenNote[] = beatTimestamps
-    .filter((t) => !delimiterTimes.has(t.toFixed(4)))
-    .map((t) => ({
-      key: '[Space]',
-      startTime: t,
-      duration: 0.1,
-      state: 'upcoming',
-      type: 'hidden',
-    }))
-
-  console.log(`Generated ${hiddenNotes.length} hidden notes`)
-  return hiddenNotes
+  console.log(
+    `🟣 Added ${hiddenNoteKeystrokes.length} hidden notes to keystroke map (filtered out ${beatTimestamps.length - validHiddenNoteTimes.length} beats too close to keys)`,
+  )
+  console.log(`📊 Total unified keystroke map: ${unifiedKeystrokeMap.length} items`)
+  console.log(`📊 Breakdown: ${keystrokeMap.length} keys + ${hiddenNoteKeystrokes.length} hidden notes`)
+  
+  return unifiedKeystrokeMap
 }
 
 /**
- * Optimized version of the complete keystroke map generation
- * Improved performance while maintaining the same output quality
+ * Optimized version of the complete keystroke map generation with unified keystroke map
+ * Returns a single keystrokeMap containing both regular keys and hidden notes
  */
 export function generateCompleteKeystrokeMapOptimized(
   bpm: number,
   beatTimestamps: number[],
   melodyMap: MelodyNote[],
 ): KeystrokeGenerationResult {
-  // Step 1: create unified events
+  console.log('🗺️ Starting unified keystroke map generation:', {
+    bpm,
+    beatCount: beatTimestamps.length,
+    melodyCount: melodyMap.length,
+  })
+
+  // Step 1: create unified events for melody and beat processing
   const unifiedEvents = createUnifiedEvents(beatTimestamps, melodyMap)
-  // Step 2: linear generator
-  const keystrokeMap = generateKeystrokeMapLinear(unifiedEvents)
-  // Step 3: hidden notes (reuse existing helper)
-  const hiddenNotes = generateHiddenNotes(beatTimestamps, keystrokeMap)
-  return { keystrokeMap, hiddenNotes }
+  console.log(`📊 Created ${unifiedEvents.length} unified events`)
+
+  // Step 2: generate regular keystrokes (melody + beat delimiters)
+  const regularKeystrokes = generateKeystrokeMapLinear(unifiedEvents)
+  console.log(`⌨️ Generated ${regularKeystrokes.length} regular keystrokes`)
+
+  // Step 3: add hidden notes to create unified keystroke map
+  // Keys have priority - hidden notes won't be placed too close to existing keys
+  const unifiedKeystrokeMap = addHiddenNotesToKeystrokeMap(regularKeystrokes, beatTimestamps)
+  
+  console.log(`✅ Final unified keystroke map: ${unifiedKeystrokeMap.length} total items`)
+  console.log(`📊 Types: melody=${unifiedKeystrokeMap.filter(k => k.type === 'melody').length}, beat=${unifiedKeystrokeMap.filter(k => k.type === 'beat').length}, hidden=${unifiedKeystrokeMap.filter(k => k.type === 'hidden').length}`)
+
+  // Return unified keystroke map with empty hiddenNotes array (legacy compatibility)
+  return { 
+    keystrokeMap: unifiedKeystrokeMap, 
+    hiddenNotes: [] // No longer used - all notes are in keystrokeMap
+  }
 }
 
 // Default export uses the optimized linear version

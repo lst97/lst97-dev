@@ -24,7 +24,6 @@ export {
 // Utility exports
 export {
   generateCompleteKeystrokeMap,
-  generateCompleteKeystrokeMapLegacy,
   generateCompleteKeystrokeMapOptimized,
   KEYSTROKE_CONFIG,
 } from './utils/keystrokeGeneration'
@@ -32,10 +31,7 @@ export {
 export { mockWords, generate } from './utils/mockWords'
 
 // Test utilities (development only)
-export {
-  testKeystrokeGenerationAlgorithms,
-  quickValidationTest,
-} from './utils/keystrokeGeneration.test'
+// Note: Test utilities are not currently implemented
 
 // Type exports
 export type * from './types'

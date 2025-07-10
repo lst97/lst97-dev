@@ -176,6 +176,9 @@ importers:
       pg:
         specifier: 8.11.3
         version: 8.11.3
+      random-words:
+        specifier: ^2.0.1
+        version: 2.0.1
       react:
         specifier: ^19.1.0
         version: 19.1.0
@@ -5468,6 +5471,9 @@ packages:
         optional: true
       '@types/react-dom':
         optional: true
+
+  random-words@2.0.1:
+    resolution: {integrity: sha512-nZNJAmgcFmtJMTDDIUCm/iK4R6RydC6NvALvWhYItXQrgYGk1F7Gww416LpVROFQtfVd5TaLEf4WuSsko03N7w==}
 
   range-parser@1.2.1:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
@@ -12654,6 +12660,10 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.1.8
       '@types/react-dom': 19.1.6(@types/react@19.1.8)
+
+  random-words@2.0.1:
+    dependencies:
+      seedrandom: 3.0.5
 
   range-parser@1.2.1: {}
 

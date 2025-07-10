@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "npx depcheck --skip-missing=true --ignores='pg,magika,zustand,@tailwindcss/postcss,dependency-cruiser,path-browserify,tailwindcss,typescript,prettier,eslint,eslint-config-next,@aws-sdk/client-s3' && npx depcruise -v -T dot src | dot -T svg | npx depcruise-wrap-stream-in-html > dependency-graph.html && cross-env NODE_OPTIONS=--no-deprecation next build",
+    "build": "npx depcheck --skip-missing=true --ignores='pg,magika,zustand,@tailwindcss/postcss,dependency-cruiser,path-browserify,tailwindcss,typescript,prettier,eslint,eslint-config-next,@aws-sdk/client-s3,ts-node,tsconfig-paths' && npx depcruise -v -T dot src | dot -T svg | npx depcruise-wrap-stream-in-html > dependency-graph.html && cross-env NODE_OPTIONS=--no-deprecation next build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --turbopack",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
@@ -72,6 +72,7 @@
     "nodemailer": "^7.0.3",
     "payload": "^3.42.0",
     "pg": "8.11.3",
+    "random-words": "^2.0.1",
     "react": "^19.1.0",
     "react-apexcharts": "^1.7.0",
     "react-dom": "19.1.0",
