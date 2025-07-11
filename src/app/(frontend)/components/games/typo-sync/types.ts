@@ -52,6 +52,8 @@ export interface Keystroke {
   state: 'upcoming' | 'hit' | 'missed' | 'typo'
   type: 'beat' | 'melody' | 'hidden'
   id?: string
+  timingAccuracy?: 'sync' | 'early' | 'late' | 'miss' // For animation effects
+  hitTiming?: number // Actual timing difference for animation intensity
 }
 
 export interface HiddenNote {
@@ -104,6 +106,9 @@ export interface GameState {
   feedback: string
   feedbackColor: string
   gameLoopActive: boolean
+  isPaused: boolean
+  pauseStartTime: number | null
+  totalPauseTime: number
 
   // Enhanced metrics
   wpm: number
@@ -289,8 +294,10 @@ export interface TypoSyncStore {
     audioBuffer: AudioBuffer,
     keystrokeMap: Keystroke[],
     hiddenNotes: HiddenNote[],
-  ) => void
+  ) => Promise<void>
   stopGame: () => void
+  pauseGame: () => void
+  resumeGame: () => void
   resetGame: () => void
 
   // Audio analysis actions
@@ -306,6 +313,12 @@ export interface TypoSyncStore {
   // Keystroke handling
   handleKeyPress: (key: string, currentTime: number) => void
   updateKeystrokeState: (keystroke: Keystroke, newState: Keystroke['state']) => void
+  updateKeystrokeStateWithTiming: (
+    keystroke: Keystroke,
+    newState: Keystroke['state'],
+    timingAccuracy: 'sync' | 'early' | 'late' | 'miss',
+    hitTiming: number,
+  ) => void
 
   // Statistics actions
   calculateWPM: () => void
@@ -332,6 +345,10 @@ export interface TypoSyncStore {
   startMissDetection: () => void
   stopMissDetection: () => void
   checkForMissedKeystrokes: () => void
+
+  // Import/Export functionality
+  importBeatMap: (beatMapData: any) => void
+  importKeystrokeMap: (keystrokeMapData: any) => void
 
   // Persistence
   saveToLocalStorage: () => void

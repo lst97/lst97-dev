@@ -28,6 +28,9 @@ const initialGameState: GameState = {
   feedback: '',
   feedbackColor: '#ffffff',
   gameLoopActive: false,
+  isPaused: false,
+  pauseStartTime: null,
+  totalPauseTime: 0,
 
   // Enhanced metrics
   wpm: 0,
@@ -87,7 +90,7 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
       error: null,
 
       // Game control actions
-      startGame: (audioBuffer, keystrokeMap, hiddenNotes) => {
+      startGame: async (audioBuffer, keystrokeMap, hiddenNotes) => {
         const now = performance.now()
         const { audioState } = get()
 
@@ -100,27 +103,73 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
         })
 
         try {
+          // Reset keystroke map states for replay
+          const resetKeystrokeMap = keystrokeMap.map((k) => ({
+            ...k,
+            state: 'upcoming' as const,
+            timingAccuracy: undefined,
+            hitTiming: undefined,
+          }))
+
+          const resetHiddenNotes = hiddenNotes.map((h) => ({
+            ...h,
+            state: 'upcoming' as const,
+          }))
+
+          console.log('🔄 Reset keystroke map states for replay')
+
           // Create audio source and start playback
           if (audioState.audioContext && audioBuffer) {
-            const audioSource = audioState.audioContext.createBufferSource()
-            audioSource.buffer = audioBuffer
-            audioSource.connect(audioState.audioContext.destination)
-            audioSource.start(0)
+            try {
+              // Resume audio context if it's suspended (required by browser policies)
+              if (audioState.audioContext.state === 'suspended') {
+                console.log('🔊 Resuming suspended audio context')
+                await audioState.audioContext.resume()
+              }
 
-            // Set up game end handler
-            audioSource.onended = () => {
-              get().stopGame()
+              const audioSource = audioState.audioContext.createBufferSource()
+              audioSource.buffer = audioBuffer
+              audioSource.connect(audioState.audioContext.destination)
+
+              // Set up game end handler
+              audioSource.onended = () => {
+                console.log('🎵 Audio playback ended naturally - duration:', audioBuffer.duration)
+                const currentTime = performance.now()
+                const gameRunTime = currentTime - now
+                console.log('🎮 Game ran for:', gameRunTime, 'ms before audio ended')
+
+                // Don't stop the game if audio ended too quickly (likely an error)
+                if (gameRunTime < 2000) {
+                  console.warn('⚠️ Audio ended too quickly, continuing game without audio')
+                  return
+                }
+
+                get().stopGame()
+              }
+
+              // Add error handler
+              audioSource.addEventListener('error', (event: Event) => {
+                console.error('🚨 Audio playback error:', event)
+                // Don't stop the game on audio error, let it continue without sound
+              })
+
+              audioSource.start(0)
+
+              // Store audio source for stopping later
+              set((state) => ({
+                audioState: {
+                  ...state.audioState,
+                  audioSource,
+                },
+              }))
+
+              console.log('🎵 Audio playback started successfully')
+            } catch (error) {
+              console.error('🚨 Failed to start audio playback:', error)
+              // Continue with the game even if audio fails
             }
-
-            // Store audio source for stopping later
-            set((state) => ({
-              audioState: {
-                ...state.audioState,
-                audioSource,
-              },
-            }))
-
-            console.log('🎵 Audio playback started')
+          } else {
+            console.log('🔇 No audio context or buffer available - running in silent mode')
           }
 
           set((state) => ({
@@ -145,8 +194,8 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
             audioState: {
               ...state.audioState,
               audioBuffer,
-              keystrokeMap,
-              hiddenNotes,
+              keystrokeMap: resetKeystrokeMap,
+              hiddenNotes: resetHiddenNotes,
             },
           }))
 
@@ -166,7 +215,15 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
       },
 
       stopGame: () => {
-        const { audioState } = get()
+        const { audioState, gameState } = get()
+
+        console.log('🛑 stopGame called - Game state:', {
+          isActive: gameState.isActive,
+          gameStartTime: gameState.gameStartTime,
+          gameRunTime: gameState.gameStartTime ? performance.now() - gameState.gameStartTime : 0,
+          hasAudioSource: !!audioState.audioSource,
+          callStack: new Error().stack,
+        })
 
         // Stop audio playback if it's playing
         if (audioState.audioSource) {
@@ -200,6 +257,62 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
         // End session and save
         get().endSession()
         get().saveSession()
+      },
+
+      pauseGame: () => {
+        const { audioState } = get()
+
+        // Pause audio context
+        if (audioState.audioContext) {
+          try {
+            audioState.audioContext.suspend()
+          } catch (error) {
+            console.log('Audio context suspension not supported')
+          }
+        }
+
+        set((state) => ({
+          gameState: {
+            ...state.gameState,
+            isPaused: true,
+            pauseStartTime: Date.now(),
+          },
+        }))
+
+        // Stop miss detection while paused
+        get().stopMissDetection()
+
+        console.log('🔄 Game paused')
+      },
+
+      resumeGame: () => {
+        const { audioState, gameState } = get()
+
+        // Resume audio context
+        if (audioState.audioContext) {
+          try {
+            audioState.audioContext.resume()
+          } catch (error) {
+            console.log('Audio context resume not supported')
+          }
+        }
+
+        // Calculate total pause time
+        const pauseTime = gameState.pauseStartTime ? Date.now() - gameState.pauseStartTime : 0
+
+        set((state) => ({
+          gameState: {
+            ...state.gameState,
+            isPaused: false,
+            pauseStartTime: null,
+            totalPauseTime: state.gameState.totalPauseTime + pauseTime,
+          },
+        }))
+
+        // Resume miss detection
+        get().startMissDetection()
+
+        console.log('▶️ Game resumed')
       },
 
       resetGame: () => {
@@ -325,6 +438,12 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
               console.log('Analysis complete:', result.result)
               setAnalysisResult(result.result)
               setAnalyzing(false)
+
+              // Auto-generate keystroke map after analysis completes
+              console.log('🗺️ Auto-generating keystroke map from analysis results')
+              setTimeout(() => {
+                get().generateKeystrokeMap()
+              }, 100) // Small delay to ensure state is updated
             },
             // onError
             (error) => {
@@ -400,10 +519,13 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
       // Keystroke handling
       handleKeyPress: (key, currentTime) => {
         const { gameState, audioState } = get()
-        if (!gameState.isActive) return
+        if (!gameState.isActive || gameState.isPaused) return
 
-        // Calculate current game time
-        const gameTime = gameState.gameStartTime ? currentTime - gameState.gameStartTime / 1000 : 0
+        // Calculate current game time (excluding pause time)
+        const totalGameTime = gameState.gameStartTime
+          ? currentTime - gameState.gameStartTime / 1000
+          : 0
+        const gameTime = totalGameTime - gameState.totalPauseTime / 1000
 
         // Find upcoming keystrokes that match the pressed key
         const matchingKeystrokes = audioState.keystrokeMap.filter(
@@ -468,30 +590,17 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
               // Update hidden note state to hit in keystrokeMap
               get().updateKeystrokeState(closestHiddenNote, 'hit')
 
-              // Update score and feedback
+              // Update score for hidden note
               set((state) => ({
                 gameState: {
                   ...state.gameState,
                   score: state.gameState.score + 25,
-                  feedback: 'HIDDEN!',
-                  feedbackColor: '#ff00ff',
                 },
               }))
 
               console.log(
                 `🟣 Hidden note hit! (${(hiddenNoteTiming * 1000).toFixed(0)}ms, +25 pts)`,
               )
-
-              // Clear feedback after delay
-              setTimeout(() => {
-                set((state) => ({
-                  gameState: {
-                    ...state.gameState,
-                    feedback: '',
-                    feedbackColor: '#ffffff',
-                  },
-                }))
-              }, 800)
 
               return
             }
@@ -503,14 +612,23 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
           return
         }
 
-        if (matchingKeystrokes.length === 0) {
-          // No matching upcoming keystrokes and no hidden note - ignore the key press
-          console.log(`🔇 Key '${key}' ignored - no matching upcoming keystrokes`)
+        // Define timing windows
+        const HIT_WINDOW = 0.15 // 150ms window for hit
+        const TYPO_WINDOW = 0.25 // 250ms window for typo detection
+        const IGNORE_WINDOW = 0.5 // 500ms - beyond this, ignore the key press
+
+        // Check for any upcoming keystrokes near the hit zone (regardless of key)
+        const nearbyKeystrokes = audioState.keystrokeMap.filter(
+          (k) => k.state === 'upcoming' && k.type !== 'hidden',
+        )
+
+        if (nearbyKeystrokes.length === 0) {
+          console.log(`🔇 Key '${key}' ignored - no upcoming keystrokes`)
           return
         }
 
-        // Find the closest upcoming keystroke in time
-        const closestKeystroke = matchingKeystrokes.reduce((closest, current) => {
+        // Find the closest upcoming keystroke in time (regardless of key)
+        const closestKeystroke = nearbyKeystrokes.reduce((closest, current) => {
           const closestTiming = Math.abs(gameTime - closest.startTime)
           const currentTiming = Math.abs(gameTime - current.startTime)
           return currentTiming < closestTiming ? current : closest
@@ -520,10 +638,6 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
         const timing = gameTime - closestKeystroke.startTime
         const timingAbs = Math.abs(timing)
 
-        // Define timing windows
-        const HIT_WINDOW = 0.15 // 150ms window for hit
-        const IGNORE_WINDOW = 0.5 // 500ms - beyond this, ignore the key press
-
         // If the key is pressed too far from any keystroke, ignore it
         if (timingAbs > IGNORE_WINDOW) {
           console.log(
@@ -532,33 +646,68 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
           return
         }
 
+        // Check if the pressed key matches the closest keystroke
+        const isCorrectKey = closestKeystroke.key === key
+
         // Determine hit result
         let isCorrect = false
         let feedback = 'MISS'
         let feedbackColor = '#ff0000'
         let points = -25
+        let timingAccuracy: 'sync' | 'early' | 'late' | 'miss' = 'miss'
+        let newState: 'hit' | 'missed' | 'typo' = 'missed'
 
-        if (timingAbs <= HIT_WINDOW) {
-          isCorrect = true
-          if (timingAbs <= 0.05) {
-            // Perfect hit
-            feedback = 'PERFECT!'
-            feedbackColor = '#00ff00'
-            points = 100
+        if (timingAbs <= TYPO_WINDOW) {
+          if (isCorrectKey && timingAbs <= HIT_WINDOW) {
+            // Correct key within hit window
+            isCorrect = true
+            newState = 'hit'
+            if (timingAbs <= 0.08) {
+              // Perfect hit - expanded window from 50ms to 80ms for better sync detection
+              feedback = 'PERFECT!'
+              feedbackColor = '#00ff00'
+              points = 100
+              timingAccuracy = 'sync'
+            } else {
+              // Good hit
+              feedback = timing < 0 ? 'EARLY' : 'LATE'
+              feedbackColor = '#ffff00'
+              points = 50
+              timingAccuracy = timing < 0 ? 'early' : 'late'
+            }
+
+            // Play appropriate sound effect
+            get().playKeystrokeSound(closestKeystroke.key)
+          } else if (!isCorrectKey) {
+            // Wrong key within typo window
+            isCorrect = false
+            newState = 'typo'
+            feedback = 'TYPO!'
+            feedbackColor = '#ff8800'
+            points = -50
+            timingAccuracy = 'miss'
+            console.log(`🔥 Typo detected: pressed '${key}' but expected '${closestKeystroke.key}'`)
           } else {
-            // Good hit
-            feedback = timing < 0 ? 'EARLY' : 'LATE'
-            feedbackColor = '#ffff00'
-            points = 50
+            // Correct key but outside hit window (late miss)
+            isCorrect = false
+            newState = 'missed'
+            feedback = 'MISS'
+            feedbackColor = '#ff0000'
+            points = -25
+            timingAccuracy = 'miss'
           }
-
-          // Play appropriate sound effect
-          get().playKeystrokeSound(closestKeystroke.key)
+        } else {
+          // Too far from any keystroke
+          isCorrect = false
+          newState = 'missed'
+          feedback = 'MISS'
+          feedbackColor = '#ff0000'
+          points = -25
+          timingAccuracy = 'miss'
         }
 
-        // Update keystroke state
-        const newState = isCorrect ? 'hit' : 'missed'
-        get().updateKeystrokeState(closestKeystroke, newState)
+        // Update keystroke state with timing information
+        get().updateKeystrokeStateWithTiming(closestKeystroke, newState, timingAccuracy, timing)
 
         // Update metrics
         get().updateStreak(isCorrect)
@@ -566,13 +715,11 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
         get().calculateWPM()
         get().calculateAccuracy()
 
-        // Update score and feedback
+        // Update score and metrics
         set((state) => ({
           gameState: {
             ...state.gameState,
             score: state.gameState.score + points,
-            feedback,
-            feedbackColor,
             totalKeystrokes: state.gameState.totalKeystrokes + 1,
             correctKeystrokes: isCorrect
               ? state.gameState.correctKeystrokes + 1
@@ -583,18 +730,9 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
           },
         }))
 
-        console.log(`🎹 Key '${key}': ${feedback} (${(timing * 1000).toFixed(0)}ms, ${points} pts)`)
-
-        // Clear feedback after a short delay
-        setTimeout(() => {
-          set((state) => ({
-            gameState: {
-              ...state.gameState,
-              feedback: '',
-              feedbackColor: '#ffffff',
-            },
-          }))
-        }, 800)
+        console.log(
+          `🎹 Key '${key}': ${feedback} (${(timing * 1000).toFixed(0)}ms, ${points} pts, ${timingAccuracy})`,
+        )
       },
 
       updateKeystrokeState: (keystroke, newState) => {
@@ -610,14 +748,52 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
         }))
       },
 
+      updateKeystrokeStateWithTiming: (keystroke, newState, timingAccuracy, hitTiming) => {
+        set((state) => ({
+          audioState: {
+            ...state.audioState,
+            keystrokeMap: state.audioState.keystrokeMap.map((k) =>
+              k.startTime === keystroke.startTime && k.key === keystroke.key
+                ? { ...k, state: newState, timingAccuracy, hitTiming }
+                : k,
+            ),
+          },
+        }))
+      },
+
       // Statistics calculations
       calculateWPM: () => {
         const { gameState } = get()
-        if (!gameState.sessionStartTime) return
+        if (!gameState.gameStartTime) return
 
-        const timeElapsed = (Date.now() - gameState.sessionStartTime) / 1000 / 60 // minutes
+        // Calculate effective game time (excluding pause time)
+        const currentTime = performance.now()
+        const totalGameTime = currentTime - gameState.gameStartTime
+        const pauseTime =
+          gameState.isPaused && gameState.pauseStartTime
+            ? currentTime - gameState.pauseStartTime
+            : 0
+        const effectiveGameTime = totalGameTime - gameState.totalPauseTime - pauseTime
+
+        const timeElapsed = effectiveGameTime / 1000 / 60 // minutes
         const wordsTyped = gameState.correctKeystrokes / 5 // Standard: 5 characters = 1 word
-        const wpm = timeElapsed > 0 ? Math.round(wordsTyped / timeElapsed) : 0
+
+        // Only calculate WPM if we have at least 3 seconds of game time and some keystrokes
+        let wpm = 0
+        if (timeElapsed > 3 / 60 && gameState.correctKeystrokes > 0) {
+          // At least 3 seconds
+          wpm = Math.round(wordsTyped / timeElapsed)
+        }
+
+        console.log('🔢 WPM Calculation:', {
+          effectiveGameTime: effectiveGameTime / 1000,
+          timeElapsed,
+          correctKeystrokes: gameState.correctKeystrokes,
+          wordsTyped,
+          wpm,
+          gameStartTime: gameState.gameStartTime,
+          currentTime,
+        })
 
         set((state) => ({
           gameState: {
@@ -832,7 +1008,7 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
       playKeystrokeSound: (key: string) => {
         const { audioState } = get()
         console.log(`🔊 playKeystrokeSound called for key: ${key}`)
-        
+
         if (!audioState.audioContext || !audioState.soundEffects) {
           console.warn(`🔇 Cannot play sound for key ${key}: missing audioContext or soundEffects`)
           return
@@ -905,10 +1081,12 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
           const { gameState } = get()
           if (gameState.isActive) {
             get().checkForMissedKeystrokes()
+            // Also update WPM regularly
+            get().calculateWPM()
           }
         }, 100)
 
-        console.log('🕐 Started automatic miss detection')
+        console.log('🕐 Started automatic miss detection and WPM updates')
       },
 
       stopMissDetection: () => {
@@ -921,10 +1099,11 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
 
       checkForMissedKeystrokes: () => {
         const { gameState, audioState } = get()
-        if (!gameState.isActive || !gameState.gameStartTime) return
+        if (!gameState.isActive || !gameState.gameStartTime || gameState.isPaused) return
 
         const currentTime = performance.now() / 1000
-        const gameTime = currentTime - gameState.gameStartTime / 1000
+        const totalGameTime = currentTime - gameState.gameStartTime / 1000
+        const gameTime = totalGameTime - gameState.totalPauseTime / 1000
         const MISS_WINDOW = 0.2 // 200ms window after hit zone for marking as missed
 
         // Find regular keystrokes that have passed the miss window and should be marked as missed
@@ -953,8 +1132,8 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
           )
 
           regularKeystrokesToMiss.forEach((keystroke) => {
-            // Update keystroke state to missed
-            get().updateKeystrokeState(keystroke, 'missed')
+            // Update keystroke state to missed with timing info
+            get().updateKeystrokeStateWithTiming(keystroke, 'missed', 'miss', 0)
 
             // Update streak (breaks streak)
             get().updateStreak(false)
@@ -988,6 +1167,86 @@ export const useTypoSyncStore = create<TypoSyncStore>()(
 
             console.log(`🧹 Cleaned up hidden note at ${hiddenNote.startTime.toFixed(2)}s`)
           })
+        }
+      },
+
+      // Import/Export functionality
+      importBeatMap: (beatMapData: any) => {
+        try {
+          // Handle both simple and complete beat map formats
+          let beatTimestamps: number[]
+          let melodyMap: any[] = []
+          let analysisInfo: any = {}
+          let bpm: number = 120
+
+          if (beatMapData.beatMap) {
+            // Complete beat map format
+            beatTimestamps = beatMapData.beatMap.beatTimestamps
+            melodyMap = beatMapData.beatMap.melodyMap || []
+            analysisInfo = beatMapData.beatMap.analysisInfo || {}
+            bpm = beatMapData.beatMap.bpm || 120
+          } else {
+            // Simple beat map format (legacy)
+            beatTimestamps = beatMapData.beatTimestamps || beatMapData
+          }
+
+          if (Array.isArray(beatTimestamps)) {
+            set((state) => ({
+              audioState: {
+                ...state.audioState,
+                analysisResult: {
+                  beat_timestamps: beatTimestamps,
+                  melody_map: melodyMap,
+                  analysis_info: analysisInfo,
+                  bpm: bpm,
+                },
+              },
+            }))
+            console.log(
+              '✅ Beat map imported successfully with',
+              beatTimestamps.length,
+              'timestamps',
+              melodyMap.length > 0 ? `and ${melodyMap.length} melody notes` : '',
+            )
+          } else {
+            throw new Error('Invalid beat map format')
+          }
+        } catch (error) {
+          console.error('❌ Failed to import beat map:', error)
+          get().setError('Failed to import beat map')
+        }
+      },
+
+      importKeystrokeMap: (keystrokeMapData: any) => {
+        try {
+          const keystrokeMap = keystrokeMapData.keystrokeMap || keystrokeMapData
+
+          if (Array.isArray(keystrokeMap)) {
+            // Reset states for imported keystrokes
+            const resetKeystrokeMap = keystrokeMap.map((k: any) => ({
+              ...k,
+              state: 'upcoming' as const,
+              timingAccuracy: undefined,
+              hitTiming: undefined,
+            }))
+
+            set((state) => ({
+              audioState: {
+                ...state.audioState,
+                keystrokeMap: resetKeystrokeMap,
+              },
+            }))
+            console.log(
+              '✅ Keystroke map imported successfully with',
+              keystrokeMap.length,
+              'keystrokes',
+            )
+          } else {
+            throw new Error('Invalid keystroke map format')
+          }
+        } catch (error) {
+          console.error('❌ Failed to import keystroke map:', error)
+          get().setError('Failed to import keystroke map')
         }
       },
 
