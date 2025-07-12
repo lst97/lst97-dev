@@ -6,13 +6,12 @@
 // Import it directly from that path when needed
 
 // Component exports
-export { default as ThreeGameRenderer } from './components/GameRenderer'
-export { default as GameControls } from './components/GameControls'
-export { default as GameStats } from './components/GameStats'
+export { default as GameRenderer } from './components/GameRenderer'
+export { GameControls, GameStats } from './components/ui'
 
 // Hook exports
-export { useAudioAnalysis } from './hooks/useAudioAnalysis'
-export { useGameLoop } from './hooks/useGameLoop'
+export { useAudioAnalysis } from './hooks'
+export { useGameLoop } from './hooks'
 
 // Service exports
 export {
@@ -24,11 +23,9 @@ export {
 // Utility exports
 export {
   generateCompleteKeystrokeMap,
-  generateCompleteKeystrokeMapOptimized,
+  generateCompleteKeystrokeMap as generateCompleteKeystrokeMapOptimized,
   KEYSTROKE_CONFIG,
 } from './utils/keystrokeGeneration'
-
-export { mockWords, generate } from './utils/mockWords'
 
 // Test utilities (development only)
 // Note: Test utilities are not currently implemented

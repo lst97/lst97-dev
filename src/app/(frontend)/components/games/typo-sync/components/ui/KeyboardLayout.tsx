@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import type { Keystroke } from '../types'
+import type { Keystroke } from '../../types'
 
 interface KeyboardLayoutProps {
   keystrokeMap: Keystroke[]

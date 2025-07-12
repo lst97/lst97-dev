@@ -114,10 +114,6 @@ export class AudioAnalysisService {
       onError(new Error('Connection error to analysis server'))
     }
 
-    this.eventSource.onopen = () => {
-      console.log('SSE connection opened for task:', taskId)
-    }
-
     // Return cleanup function
     return () => {
       if (this.eventSource) {
@@ -185,7 +181,6 @@ export class AudioAnalysisService {
 
       if (tambourineResponse.status === 'fulfilled') {
         soundEffects.tambourine = await audioContext.decodeAudioData(tambourineResponse.value)
-        console.log('🟣 Successfully loaded tambourine.mp3')
       } else {
         console.error('🟣 Failed to load tambourine.mp3:', tambourineResponse.reason)
       }
@@ -194,26 +189,6 @@ export class AudioAnalysisService {
     }
 
     return soundEffects
-  }
-
-  /**
-   * Load metronome sound for rhythm guidance
-   * @param audioContext - Web Audio API context
-   * @param baseUrl - Base URL for sound files
-   * @returns Promise with decoded metronome buffer
-   */
-  async loadMetronomeSound(
-    audioContext: AudioContext,
-    baseUrl = '/typo-sync/',
-  ): Promise<AudioBuffer | null> {
-    try {
-      const response = await fetch(`${baseUrl}beat.wav`)
-      const arrayBuffer = await response.arrayBuffer()
-      return audioContext.decodeAudioData(arrayBuffer)
-    } catch (error) {
-      console.error('Error loading metronome sound:', error)
-      return null
-    }
   }
 
   /**

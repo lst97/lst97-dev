@@ -1,10 +1,10 @@
 'use client'
 
 import React from 'react'
-import { useTypoSyncStore } from '../store/typoSyncStore'
+import { useTypoSyncStore } from '../../store'
 import { FaTrophy, FaKeyboard, FaFire, FaClock, FaChartLine, FaCrosshairs } from 'react-icons/fa'
 
-export default function EnhancedGameStats() {
+export default function GameStats() {
   const { gameState, performanceMetrics, getTimingHistogram } = useTypoSyncStore()
 
   // Calculate real-time statistics

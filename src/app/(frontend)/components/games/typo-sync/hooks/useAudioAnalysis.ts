@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import type { AudioAnalysisHook, AudioState, AnalysisResult } from '../types'
+import type { AudioAnalysisHook, AudioState } from '../types'
 import { audioAnalysisService, safeServiceCall } from '../services/audioAnalysisService'
 import { generateCompleteKeystrokeMap } from '../utils/keystrokeGeneration'
 
@@ -77,12 +77,9 @@ export function useAudioAnalysis(): AudioAnalysisHook {
         cleanupStreamRef.current = audioAnalysisService.streamAnalysisResults(
           task_id,
           // onUpdate
-          (status) => {
-            console.log('Analysis update:', status.status)
-          },
+          () => {},
           // onComplete
           (result) => {
-            console.log('Analysis complete:', result.result)
             setAudioState((prev) => ({
               ...prev,
               isAnalyzing: false,
@@ -122,12 +119,6 @@ export function useAudioAnalysis(): AudioAnalysisHook {
     try {
       const { bpm, beat_timestamps, melody_map } = audioState.analysisResult
 
-      console.log('Generating keystroke map with:', {
-        bpm,
-        beats: beat_timestamps.length,
-        melodyNotes: melody_map.length,
-      })
-
       const result = generateCompleteKeystrokeMap(bpm, beat_timestamps, melody_map)
 
       setAudioState((prev) => ({
@@ -135,11 +126,6 @@ export function useAudioAnalysis(): AudioAnalysisHook {
         keystrokeMap: result.keystrokeMap,
         hiddenNotes: result.hiddenNotes,
       }))
-
-      console.log('Keystroke map generated:', {
-        keystrokes: result.keystrokeMap.length,
-        hiddenNotes: result.hiddenNotes.length,
-      })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Keystroke generation failed'
       console.error('Keystroke generation error:', err)

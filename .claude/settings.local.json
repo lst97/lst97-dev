@@ -2,9 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(cd:*)",
-      "Bash(cd:*)",
-      "Bash(cd:*)",
-      "Bash(cd:*)"
+      "Bash(wc:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

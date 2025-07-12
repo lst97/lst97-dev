@@ -1,24 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import type { GameLoopHook, GameState, Keystroke, HiddenNote, HitResult } from '../types'
 import { audioAnalysisService } from '../services/audioAnalysisService'
-
-/**
- * Game configuration constants - must match GameRenderer values
- */
-const GAME_CONFIG = {
-  NOTE_SPEED_PPS: 300, // Updated to match GameRenderer
-  HIT_ZONE_X: 150, // Updated to match GameRenderer
-  TIMING_WINDOWS: {
-    SYNC: 0.05, // +/- 50ms for "Sync"
-    LATE_EARLY: 0.15, // +/- 150ms for "Late" or "Early"
-  },
-  SCORING: {
-    SYNC: 100,
-    LATE_EARLY: 50,
-    TYPO: -25,
-    OFF: -50,
-  },
-}
+import { GAME_CONFIG } from '../config'
 
 /**
  * Hook for managing game loop and player interactions
@@ -32,20 +15,24 @@ export function useGameLoop(): GameLoopHook {
     feedback: '',
     feedbackColor: '#FFFFFF',
     gameLoopActive: false,
-    
+    isPaused: false,
+    pauseStartTime: null,
+    totalPauseTime: 0,
+
     // Enhanced metrics
     wpm: 0,
     accuracy: 0,
     streak: 0,
+    combo: 0,
     maxStreak: 0,
     totalKeystrokes: 0,
     correctKeystrokes: 0,
     incorrectKeystrokes: 0,
-    
+
     // Timing data
     averageReactionTime: 0,
     hitTimings: [],
-    
+
     // Session data
     sessionStartTime: null,
     sessionEndTime: null,
@@ -216,7 +203,6 @@ export function useGameLoop(): GameLoopHook {
       const target = currentKeystrokeMap.find((k) => k.state === 'upcoming')
 
       if (!target) {
-        console.log('No upcoming notes found, ignoring input:', pressedKey)
         return
       }
 
@@ -226,13 +212,8 @@ export function useGameLoop(): GameLoopHook {
 
       // Ignore inputs that are far too early
       if (timeDiff < -GAME_CONFIG.TIMING_WINDOWS.LATE_EARLY) {
-        console.log(`Input '${pressedKey}' ignored: too early for target '${target.key}'`)
         return
       }
-
-      console.log(
-        `Processing hit - Key: '${pressedKey}', Target: '${target.key}', GameTime: ${gameTime.toFixed(3)}s, TargetTime: ${target.startTime.toFixed(3)}s`,
-      )
 
       // Check for typo first
       if (pressedKey !== target.key) {
@@ -375,8 +356,6 @@ export function useGameLoop(): GameLoopHook {
           feedbackColor: '#FFFFFF',
           gameLoopActive: true,
         }))
-
-        console.log('Game started successfully')
       } catch (error) {
         console.error('Error starting game:', error)
         setGameState((prev) => ({ ...prev, isLoading: false }))
@@ -416,8 +395,6 @@ export function useGameLoop(): GameLoopHook {
       feedbackColor: '#FFFFFF',
       gameLoopActive: false,
     }))
-
-    console.log('Game stopped')
   }, [])
 
   /**

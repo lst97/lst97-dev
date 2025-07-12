@@ -19,6 +19,7 @@ export interface AnalysisResult {
   beat_timestamps: number[]
   melody_map: MelodyNote[]
   analysis_info: AnalysisInfo
+  lyrics?: string
 }
 
 // Backend API response types
@@ -76,10 +77,17 @@ export interface GameConfig {
     MISSED: string
     TYPO: string
     HIT_ZONE: string
+    SYNC: string
+    LATE: string
+    EARLY: string
+    OFF: string
   }
   TIMING_WINDOWS: {
     SYNC: number
     LATE_EARLY: number
+    HIT: number
+    TYPO: number
+    IGNORE: number
   }
   SCORING: {
     SYNC: number
@@ -114,6 +122,7 @@ export interface GameState {
   wpm: number
   accuracy: number
   streak: number
+  combo: number
   maxStreak: number
   totalKeystrokes: number
   correctKeystrokes: number
@@ -161,7 +170,7 @@ export interface MockWords {
 }
 
 // Three.js game renderer props
-export interface ThreeGameRendererProps {
+export interface GameRendererProps {
   keystrokeMap: Keystroke[]
   gameState: GameState
   gameConfig?: GameConfig
@@ -172,12 +181,19 @@ export interface ThreeGameRendererProps {
 // Game controls props
 export interface GameControlsProps {
   onFileUpload: (file: File) => void
-  onGenerateKeystrokeMap: () => void
-  onPlayWithMetronome: () => void
-  onPlayMelody: () => void
+  onRegenerateKeystrokeMap: () => void
+  onStartGame: () => void
+  onPauseGame: () => void
+  onResumeGame: () => void
+  onStopGame: () => void
   isAnalyzing: boolean
-  canGenerateMap: boolean
+  hasKeystrokeMap: boolean
   canPlay: boolean
+  gameState: {
+    isActive: boolean
+    isPaused: boolean
+  }
+  uploadedFileName: string
 }
 
 // Game stats props

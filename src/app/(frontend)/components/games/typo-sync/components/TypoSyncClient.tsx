@@ -1,21 +1,12 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useTypoSyncStore } from '../store/typoSyncStore'
-import ThreeGameRenderer from './GameRenderer'
-import KeyboardLayout from './KeyboardLayout'
+import { useTypoSyncStore } from '../store'
+import GameRenderer from './GameRenderer'
 import { motion } from 'framer-motion'
-import {
-  FaInfoCircle,
-  FaCheckCircle,
-  FaCog,
-  FaPlay,
-  FaRedo,
-  FaUpload,
-  FaStop,
-  FaPause,
-} from 'react-icons/fa'
-import { MdAnalytics } from 'react-icons/md'
+import { FaInfoCircle, FaCheckCircle, FaCog } from 'react-icons/fa'
+import { GAME_CONFIG } from '../config'
+import { GameControls, KeyboardLayout } from './ui'
 
 export default function TypoSyncClient() {
   const {
@@ -75,7 +66,6 @@ export default function TypoSyncClient() {
    * Pause game handler
    */
   const handlePauseGame = useCallback(() => {
-    console.log('⏸️ Pausing game')
     pauseGame()
   }, [pauseGame])
 
@@ -83,7 +73,6 @@ export default function TypoSyncClient() {
    * Resume game handler
    */
   const handleResumeGame = useCallback(() => {
-    console.log('▶️ Resuming game')
     resumeGame()
   }, [resumeGame])
 
@@ -129,7 +118,6 @@ export default function TypoSyncClient() {
    */
   const handleFileUpload = useCallback(
     async (file: File) => {
-      console.log('🎵 Starting audio analysis for:', file.name)
       setUploadedFileName(file.name)
       await analyzeAudio(file)
       // Auto-generation happens in the store after analysis completes
@@ -141,7 +129,6 @@ export default function TypoSyncClient() {
    * Manual regenerate keystroke map handler
    */
   const handleRegenerateKeystrokeMap = useCallback(() => {
-    console.log('🔄 Regenerating keystroke map from analysis results')
     generateKeystrokeMap()
   }, [generateKeystrokeMap])
 
@@ -151,12 +138,6 @@ export default function TypoSyncClient() {
   const handleStartGame = useCallback(() => {
     const { audioBuffer, keystrokeMap, hiddenNotes } = audioState
 
-    console.log('🎮 Start game handler called', {
-      hasAudioBuffer: !!audioBuffer,
-      keystrokeMapLength: keystrokeMap.length,
-      hiddenNotesLength: hiddenNotes.length,
-    })
-
     if (!audioBuffer || keystrokeMap.length === 0) {
       console.error('Cannot start game: missing audio data or keystroke map', {
         audioBuffer: !!audioBuffer,
@@ -164,8 +145,6 @@ export default function TypoSyncClient() {
       })
       return
     }
-
-    console.log('🎵 Starting/restarting game with existing keystroke map')
 
     // Activate keyboard listener
     keyboardListenerActiveRef.current = true
@@ -178,30 +157,9 @@ export default function TypoSyncClient() {
    * Stop game handler
    */
   const handleStopGame = useCallback(() => {
-    console.log('🛑 Stopping game')
     keyboardListenerActiveRef.current = false
     stopGame()
   }, [stopGame])
-
-  /**
-   * Keystroke update handler for the Three.js renderer
-   */
-  const handleKeystrokeUpdate = useCallback((keystroke: any) => {
-    console.log('Keystroke visual update:', keystroke.key, keystroke.state)
-  }, [])
-
-  /**
-   * File input handler
-   */
-  const handleFileInputChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0]
-      if (file) {
-        handleFileUpload(file)
-      }
-    },
-    [handleFileUpload],
-  )
 
   /**
    * Determine control states
@@ -340,105 +298,24 @@ export default function TypoSyncClient() {
           </div>
         </section>
 
-        {/* Unified Game Controls */}
+        {/* Game Controls */}
         <div className="mb-8">
-          <div className="bg-card border-2 border-border shadow-[4px_4px_0px_#000] pixel-border p-6">
-            <div className="flex flex-col items-center gap-4">
-              {/* Control Buttons Row */}
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                {/* File Upload Button */}
-                <div className="flex flex-col items-center gap-2">
-                  <input
-                    type="file"
-                    accept="audio/*"
-                    onChange={handleFileInputChange}
-                    className="hidden"
-                    id="audio-file-input"
-                    disabled={audioState.isAnalyzing}
-                  />
-                  <label
-                    htmlFor="audio-file-input"
-                    className={`
-                      bg-primary text-white font-['Press_Start_2P'] text-sm border-2 border-primary 
-                      px-6 py-3 shadow-[4px_4px_0px_#000] pixel-border cursor-pointer
-                      flex items-center gap-2 min-w-[200px] justify-center
-                      ${
-                        audioState.isAnalyzing
-                          ? 'opacity-50 cursor-not-allowed'
-                          : 'hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200'
-                      }
-                    `}
-                  >
-                    {audioState.isAnalyzing ? (
-                      <>
-                        <MdAnalytics className="animate-spin" />
-                        ANALYZING...
-                      </>
-                    ) : (
-                      <>
-                        <FaUpload />
-                        CHOOSE AUDIO FILE
-                      </>
-                    )}
-                  </label>
-
-                  {/* File name display during analysis */}
-                  {audioState.isAnalyzing && uploadedFileName && (
-                    <div className="text-xs text-text opacity-70 font-['Press_Start_2P'] mt-1">
-                      {uploadedFileName}
-                    </div>
-                  )}
-                </div>
-
-                {/* Control Buttons - Show after keystroke map is generated */}
-                {hasKeystrokeMap && (
-                  <>
-                    {/* Regenerate Map Button */}
-                    <button
-                      onClick={handleRegenerateKeystrokeMap}
-                      disabled={audioState.isAnalyzing}
-                      className="bg-secondary text-white font-['Press_Start_2P'] text-sm border-2 border-secondary p-3 shadow-[4px_4px_0px_#000] pixel-border hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center w-12 h-12"
-                      title="Regenerate keystroke map"
-                    >
-                      <FaRedo />
-                    </button>
-
-                    {/* Play/Pause/Stop Buttons */}
-                    {gameState.isActive ? (
-                      <div className="flex gap-2">
-                        {/* Pause/Resume Button */}
-                        <button
-                          onClick={gameState.isPaused ? handleResumeGame : handlePauseGame}
-                          className="bg-warning text-white font-['Press_Start_2P'] text-sm border-2 border-warning p-3 shadow-[4px_4px_0px_#000] pixel-border hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200 flex items-center justify-center w-12 h-12"
-                          title={gameState.isPaused ? 'Resume game' : 'Pause game'}
-                        >
-                          {gameState.isPaused ? <FaPlay /> : <FaPause />}
-                        </button>
-
-                        {/* Stop Button */}
-                        <button
-                          onClick={handleStopGame}
-                          className="bg-error text-white font-['Press_Start_2P'] text-sm border-2 border-error p-3 shadow-[4px_4px_0px_#000] pixel-border hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200 flex items-center justify-center w-12 h-12"
-                          title="Stop game"
-                        >
-                          <FaStop />
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={handleStartGame}
-                        disabled={!canPlay}
-                        className="bg-accent text-white font-['Press_Start_2P'] text-sm border-2 border-accent p-3 shadow-[4px_4px_0px_#000] pixel-border hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center w-12 h-12"
-                        title="Start game"
-                      >
-                        <FaPlay />
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
+          <GameControls
+            onFileUpload={handleFileUpload}
+            onRegenerateKeystrokeMap={handleRegenerateKeystrokeMap}
+            onStartGame={handleStartGame}
+            onPauseGame={handlePauseGame}
+            onResumeGame={handleResumeGame}
+            onStopGame={handleStopGame}
+            isAnalyzing={audioState.isAnalyzing}
+            hasKeystrokeMap={hasKeystrokeMap}
+            canPlay={canPlay}
+            gameState={{
+              isActive: gameState.isActive,
+              isPaused: gameState.isPaused,
+            }}
+            uploadedFileName={uploadedFileName}
+          />
         </div>
 
         {/* Main Game Area - Show only after keystroke map is generated */}
@@ -447,30 +324,15 @@ export default function TypoSyncClient() {
             {/* Three.js Game Renderer */}
             <div className="bg-card border-4 border-border shadow-[8px_8px_0_#000] pixel-border">
               <div className="h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden">
-                <ThreeGameRenderer
+                <GameRenderer
                   gameConfig={{
-                    NOTE_SPEED_PPS: 200,
-                    HIT_ZONE_X: 100,
-                    NOTE_FONT: '32px Consolas',
-                    COLORS: {
-                      UPCOMING: '#2c2c2c',
-                      HIT: '#4caf50',
-                      MISSED: '#d7263d',
-                      TYPO: '#ffb300',
-                      HIT_ZONE: '#b58900',
-                    },
-                    TIMING_WINDOWS: {
-                      SYNC: 0.05,
-                      LATE_EARLY: 0.15,
-                    },
-                    SCORING: {
-                      SYNC: 100,
-                      LATE_EARLY: 50,
-                      TYPO: -25,
-                      OFF: -50,
-                    },
+                    NOTE_SPEED_PPS: GAME_CONFIG.NOTE_SPEED_PPS,
+                    HIT_ZONE_X: GAME_CONFIG.HIT_ZONE_X,
+                    NOTE_FONT: GAME_CONFIG.NOTE_FONT,
+                    COLORS: GAME_CONFIG.COLORS,
+                    TIMING_WINDOWS: GAME_CONFIG.TIMING_WINDOWS,
+                    SCORING: GAME_CONFIG.SCORING,
                   }}
-                  onKeystrokeUpdate={handleKeystrokeUpdate}
                 />
               </div>
             </div>
