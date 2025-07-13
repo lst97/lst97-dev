@@ -105,7 +105,7 @@ export interface KeystrokeConfig {
   EVERY_NTH_BEAT_ENTER: number
 }
 
-// Enhanced game state types
+//  Game state types
 export interface GameState {
   isActive: boolean
   isLoading: boolean
@@ -176,6 +176,7 @@ export interface GameRendererProps {
   gameConfig?: GameConfig
   analysisResult?: AnalysisResult | null
   onKeystrokeUpdate?: (keystroke: Keystroke) => void
+  onPlayAgain?: () => void
 }
 
 // Game controls props

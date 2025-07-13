@@ -6,16 +6,20 @@ import { useTypoSyncStore } from '../store'
 import type { GameRendererProps } from '../types'
 import { GameScene } from './GameScene'
 import { InGameOverlay } from './ui'
+import PostGameStats from './PostGameStats'
 import { GAME_CONFIG } from '../config'
 
 export default function GameRenderer({
   gameConfig = GAME_CONFIG,
   onKeystrokeUpdate,
+  onPlayAgain,
 }: Omit<GameRendererProps, 'keystrokeMap' | 'gameState' | 'analysisResult'>) {
-  const { gameState, audioState } = useTypoSyncStore()
-  const { keystrokeMap, analysisResult } = audioState
+  const { gameState, audioState, resetGame, startGame } = useTypoSyncStore()
+  const { keystrokeMap, analysisResult, audioBuffer, hiddenNotes } = audioState
 
   const [gameTime, setGameTime] = useState(0)
+  const [showPostGameStats, setShowPostGameStats] = useState(false)
+  const [lastShownSessionEndTime, setLastShownSessionEndTime] = useState<number | null>(null)
 
   const beatTimestamps = useMemo(() => {
     if (
@@ -83,6 +87,65 @@ export default function GameRenderer({
     gameState.totalPauseTime,
   ])
 
+  // Detect when game ends and show post-game stats
+  useEffect(() => {
+    if (
+      gameState.sessionEndTime &&
+      !gameState.isActive &&
+      !showPostGameStats &&
+      gameState.sessionEndTime !== lastShownSessionEndTime
+    ) {
+      setShowPostGameStats(true)
+      setLastShownSessionEndTime(gameState.sessionEndTime)
+    }
+  }, [gameState.sessionEndTime, gameState.isActive, showPostGameStats, lastShownSessionEndTime])
+
+  const handleCloseStats = () => {
+    setShowPostGameStats(false)
+  }
+
+  const handlePlayAgain = () => {
+    setShowPostGameStats(false)
+    if (onPlayAgain) {
+      // Use the parent's play again handler which properly sets up keyboard listeners
+      onPlayAgain()
+    } else {
+      // Fallback to local logic (though this won't have keyboard listener)
+      resetGame()
+      if (audioBuffer && keystrokeMap.length > 0) {
+        startGame(audioBuffer, keystrokeMap, hiddenNotes)
+      }
+    }
+  }
+
+  const handleHome = () => {
+    setShowPostGameStats(false)
+    resetGame()
+  }
+
+  const handleShare = () => {
+    const shareText = `I just played TypoSync at ${window.location.href}! Score: ${gameState.score.toLocaleString()}, Accuracy: ${Math.round((gameState.correctKeystrokes / gameState.totalKeystrokes) * 100)}%, WPM: ${Math.round(gameState.wpm)}`
+
+    if (navigator.share) {
+      navigator
+        .share({
+          title: 'TypoSync Game Results',
+          text: shareText,
+          url: window.location.href,
+        })
+        .catch(console.error)
+    } else {
+      navigator.clipboard
+        .writeText(shareText)
+        .then(() => {
+          alert('Results copied to clipboard!')
+        })
+        .catch(() => {
+          alert('Unable to share results')
+        })
+    }
+  }
+
   return (
     <div className="w-full h-full min-h-[400px] bg-gradient-to-b from-background to-card overflow-hidden">
       <div className="relative w-full h-full">
@@ -120,6 +183,18 @@ export default function GameRenderer({
         </Canvas>
 
         <InGameOverlay gameState={gameState} keystrokeMap={keystrokeMap} gameTime={gameTime} />
+
+        {/* Post-game statistics overlay */}
+        <PostGameStats
+          isVisible={showPostGameStats}
+          gameState={gameState}
+          keystrokeMap={keystrokeMap}
+          audioBuffer={audioBuffer}
+          onClose={handleCloseStats}
+          onPlayAgain={handlePlayAgain}
+          onHome={handleHome}
+          onShare={handleShare}
+        />
       </div>
     </div>
   )

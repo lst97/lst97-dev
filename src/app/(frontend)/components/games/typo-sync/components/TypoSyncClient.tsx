@@ -198,20 +198,6 @@ export default function TypoSyncClient() {
     }
   }, [gameState.isActive])
 
-  /**
-   * Debug logging
-   */
-  useEffect(() => {
-    console.log('🎮 Enhanced game state:', {
-      isActive: gameState.isActive,
-      score: gameState.score,
-      wpm: gameState.wpm,
-      accuracy: gameState.accuracy,
-      streak: gameState.streak,
-      maxStreak: gameState.maxStreak,
-    })
-  }, [gameState])
-
   // InfoBox Component for consistent styling
   const InfoBox: React.FC<{ title: string; children: React.ReactNode; icon: React.ReactNode }> = ({
     title,
@@ -333,6 +319,7 @@ export default function TypoSyncClient() {
                     TIMING_WINDOWS: GAME_CONFIG.TIMING_WINDOWS,
                     SCORING: GAME_CONFIG.SCORING,
                   }}
+                  onPlayAgain={handleStartGame}
                 />
               </div>
             </div>

@@ -294,7 +294,21 @@ export default function KeyboardLayout({
 
     keystrokeMap.forEach((keystroke) => {
       if (keystroke.state === 'hit') {
-        const key = keystroke.key.toUpperCase()
+        let key = keystroke.key.toUpperCase()
+        
+        // Normalize key names to match keyboard layout
+        if (key === ' ' || key === 'SPACE' || key === '[SPACE]') {
+          key = '[SPACE]'
+        } else if (key === 'ENTER' || key === '[ENTER]') {
+          key = 'ENTER'
+        } else if (key === 'TAB' || key === '[TAB]') {
+          key = 'TAB'
+        } else if (key === 'BACKSPACE' || key === '[BACKSPACE]') {
+          key = 'BACKSPACE'
+        } else if (key === 'SHIFT' || key === '[SHIFT]') {
+          key = 'SHIFT'
+        }
+        
         frequency[key] = (frequency[key] || 0) + 1
       }
     })
@@ -309,8 +323,16 @@ export default function KeyboardLayout({
 
   // Get hit intensity (0-1) for a key
   const getKeyIntensity = (key: string): number => {
-    const normalizedKey = key.toUpperCase()
-    const hitCount = keyHitFrequency[normalizedKey] || 0
+    let normalizedKey = key.toUpperCase()
+    
+    // Handle special key mappings
+    if (normalizedKey === '[SPACE]') {
+      normalizedKey = '[SPACE]'
+    } else if (normalizedKey === 'ENTER') {
+      normalizedKey = 'ENTER'
+    }
+    
+    const hitCount = keyHitFrequency[normalizedKey] || keyHitFrequency[key.toUpperCase()] || 0
     return hitCount / maxHitCount
   }
 
@@ -439,10 +461,10 @@ export default function KeyboardLayout({
                       {displayText}
                     </span>
 
-                    {/* Hit count badge for high-frequency keys (only in heatmap mode) */}
-                    {showHeatmap && intensity > 0.3 && (
-                      <div className="absolute -top-1 -right-1 bg-primary text-background text-xs rounded-full w-4 h-4 flex items-center justify-center font-['Press_Start_2P'] text-[8px] z-20">
-                        {keyHitFrequency[keyData.key.toUpperCase()] || 0}
+                    {/* Hit count badge for all hit keys (only in heatmap mode) */}
+                    {showHeatmap && intensity > 0 && (
+                      <div className="absolute -top-1 -right-1 bg-primary text-background text-xs rounded-full min-w-4 h-4 px-1 flex items-center justify-center font-['Press_Start_2P'] text-[8px] z-20">
+                        {keyHitFrequency[keyData.key.toUpperCase()] || keyHitFrequency[keyData.key] || 0}
                       </div>
                     )}
 
