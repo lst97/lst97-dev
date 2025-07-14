@@ -1,4 +1,5 @@
 export { default as GameControls } from './GameControls'
-export { default as GameStats } from './GameStats'
-export { InGameOverlay } from './InGameOverlay'
+export { InGameOverlay } from './overlay/InGameOverlay'
 export { default as KeyboardLayout } from './KeyboardLayout'
+export { default as PauseOverlay } from './overlay/PauseOverlay'
+export { default as PostGameStatsOverlay } from './overlay/PostGameStatsOverlay'

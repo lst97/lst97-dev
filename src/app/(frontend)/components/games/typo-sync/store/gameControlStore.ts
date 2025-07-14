@@ -123,6 +123,11 @@ export const createGameControlActions = (set: any, get: any): GameControlActions
   stopGame: () => {
     const { audioState, gameState } = get()
 
+    // Prevent multiple calls to stopGame
+    if (!gameState.isActive) {
+      return
+    }
+
     if (audioState.audioSource) {
       try {
         audioState.audioSource.stop()
@@ -131,14 +136,16 @@ export const createGameControlActions = (set: any, get: any): GameControlActions
       }
     }
 
+    const endTime = Date.now()
+
     set((state: any) => ({
       gameState: {
         ...state.gameState,
         isActive: false,
         gameLoopActive: false,
-        sessionEndTime: Date.now(),
+        sessionEndTime: endTime,
         sessionDuration: state.gameState.sessionStartTime
-          ? Date.now() - state.gameState.sessionStartTime
+          ? endTime - state.gameState.sessionStartTime
           : 0,
       },
       audioState: {

@@ -5,8 +5,7 @@ import { Canvas } from '@react-three/fiber'
 import { useTypoSyncStore } from '../store'
 import type { GameRendererProps } from '../types'
 import { GameScene } from './GameScene'
-import { InGameOverlay } from './ui'
-import PostGameStats from './PostGameStats'
+import { InGameOverlay, PostGameStatsOverlay, PauseOverlay } from './ui'
 import { GAME_CONFIG } from '../config'
 
 export default function GameRenderer({
@@ -14,7 +13,7 @@ export default function GameRenderer({
   onKeystrokeUpdate,
   onPlayAgain,
 }: Omit<GameRendererProps, 'keystrokeMap' | 'gameState' | 'analysisResult'>) {
-  const { gameState, audioState, resetGame, startGame } = useTypoSyncStore()
+  const { gameState, audioState, resetGame, startGame, resumeGame, stopGame } = useTypoSyncStore()
   const { keystrokeMap, analysisResult, audioBuffer, hiddenNotes } = audioState
 
   const [gameTime, setGameTime] = useState(0)
@@ -118,11 +117,6 @@ export default function GameRenderer({
     }
   }
 
-  const handleHome = () => {
-    setShowPostGameStats(false)
-    resetGame()
-  }
-
   const handleShare = () => {
     const shareText = `I just played TypoSync at ${window.location.href}! Score: ${gameState.score.toLocaleString()}, Accuracy: ${Math.round((gameState.correctKeystrokes / gameState.totalKeystrokes) * 100)}%, WPM: ${Math.round(gameState.wpm)}`
 
@@ -184,15 +178,21 @@ export default function GameRenderer({
 
         <InGameOverlay gameState={gameState} keystrokeMap={keystrokeMap} gameTime={gameTime} />
 
+        {/* Pause overlay */}
+        <PauseOverlay
+          isVisible={gameState.isActive && gameState.isPaused}
+          onResume={resumeGame}
+          onStop={stopGame}
+        />
+
         {/* Post-game statistics overlay */}
-        <PostGameStats
+        <PostGameStatsOverlay
           isVisible={showPostGameStats}
           gameState={gameState}
           keystrokeMap={keystrokeMap}
           audioBuffer={audioBuffer}
           onClose={handleCloseStats}
           onPlayAgain={handlePlayAgain}
-          onHome={handleHome}
           onShare={handleShare}
         />
       </div>

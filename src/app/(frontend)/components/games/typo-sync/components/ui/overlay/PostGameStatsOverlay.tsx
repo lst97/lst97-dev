@@ -3,32 +3,28 @@
 import React, { useMemo, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaTimes, FaShare, FaRedo, FaInfoCircle } from 'react-icons/fa'
-import { GameState, Keystroke } from '../types'
-import { PixelProgressBar } from '@/frontend/components/ui/ProgressBar'
-import KeyboardLayout from './ui/KeyboardLayout'
-import { PixelScrollArea } from '@/frontend/components/ui/ScrollArea'
-import { Tooltip } from '@/frontend/components/ui/Tooltips'
+import { GameState, Keystroke } from '../../../types'
+import { PixelProgressBar, PixelScrollArea, Tooltip } from '@/frontend/components/ui'
+import KeyboardLayout from '../KeyboardLayout'
 import * as RadixTooltip from '@radix-ui/react-tooltip'
 
-interface PostGameStatsProps {
+interface PostGameStatsOverlayProps {
   isVisible: boolean
   gameState: GameState
   keystrokeMap: Keystroke[]
   audioBuffer: AudioBuffer | null
   onClose: () => void
   onPlayAgain: () => void
-  onHome: () => void
   onShare?: () => void
 }
 
-const PostGameStats: React.FC<PostGameStatsProps> = ({
+const PostGameStatsOverlay: React.FC<PostGameStatsOverlayProps> = ({
   isVisible,
   gameState,
   keystrokeMap,
   audioBuffer,
   onClose,
   onPlayAgain,
-  onHome,
   onShare,
 }) => {
   const stats = useMemo(() => {
@@ -696,4 +692,4 @@ const PostGameStats: React.FC<PostGameStatsProps> = ({
   )
 }
 
-export default PostGameStats
+export default PostGameStatsOverlay

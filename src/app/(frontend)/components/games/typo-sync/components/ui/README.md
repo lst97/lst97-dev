@@ -13,14 +13,14 @@ This folder contains all React UI components for the TypoSync game that are rend
 - **GameControls.tsx**  
   Provides the main game control panel, including audio file upload, keystroke map generation, and playback mode selection.
 
-- **GameStats.tsx**  
-  Displays real-time and session-based game statistics such as score, WPM, accuracy, streaks, and timing histograms.
-
-- **InGameOverlay.tsx**  
-  Renders live overlays during gameplay, including progress bars, score, WPM, accuracy, streak, reaction time, and upcoming words.
-
 - **KeyboardLayout.tsx**  
   Shows a visual keyboard layout for finger positioning and a heatmap of key usage, adapting to the current game state.
+
+- **overlay/**  
+  Contains overlay UI components rendered above the main game, such as:
+  - **PauseOverlay.tsx**: Displays a modal overlay when the game is paused, with options to resume or stop the game.
+  - **PostGameStatsOverlay.tsx**: Shows detailed statistics and insights after a game session ends.
+  - **InGameOverlay.tsx**  Renders live overlays during gameplay, including progress bars, score, WPM, accuracy, streak, reaction time, and upcoming words.
 
 ## Usage
 
@@ -34,5 +34,5 @@ These components are used to build the interactive UI for the TypoSync game, pro
 
 To add new UI features or panels:
 
-- Create a new component in this folder.
+- Create a new component in this folder or in the `overlay/` subfolder for overlays.
 - Use the existing components as reference for integrating with the TypoSync game state and events.

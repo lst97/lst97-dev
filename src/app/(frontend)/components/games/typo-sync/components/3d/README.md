@@ -11,8 +11,13 @@ This folder contains all Three.js-based animation and UI components for the Typo
 
 ## Key Components
 
-- **BackgroundEffect.tsx**  
-  Renders animated background effects that respond to player timing and accuracy, using custom shaders for visual feedback.
+- **Background Effects (`background/`):**
+  - **AnimatedGrid.tsx**  
+    Renders a dynamic, animated grid background that responds to game state and timing. Uses instanced rendering for performance and provides visual rhythm cues.
+  - **MorphingShapes.tsx**  
+    Displays two morphing 2D/3D shapes in the background that change form and position in response to player hits, using custom shaders for smooth morphing transitions and movement logic.
+  - **WaveHitEffect.tsx**  
+    Creates animated wave effects in the background when the player hits notes, with different visual styles for sync and late hits. Uses custom shaders for ripple and color blending.
 
 - **PixelParticle.tsx**  
   Represents individual 3D particles (pixel shards, fire, etc.) used in burst and break effects when notes are hit or missed.
@@ -44,5 +49,5 @@ These components are used within the TypoSync game renderer to provide immersive
 
 To add new 3D effects or visuals:
 
-- Create a new component in this folder.
+- Create a new component in this folder or in the `background/` subfolder for background effects.
 - Use the existing components as reference for integrating with the TypoSync game state and animation loop.

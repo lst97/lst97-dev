@@ -2,7 +2,14 @@
 
 import React, { useMemo } from 'react'
 import type { Keystroke, GameConfig } from '../types'
-import { KeystrokeNote, HitZone, BackgroundEffect, HiddenNoteBurst } from './3d'
+import {
+  KeystrokeNote,
+  HitZone,
+  WaveHitEffect,
+  HiddenNoteBurst,
+  MorphingShapes,
+  AnimatedGrid,
+} from './3d'
 import { GAME_CONFIG, CANVAS_WIDTH } from '../config'
 
 interface GameSceneProps {
@@ -49,7 +56,11 @@ export function GameScene({
       <ambientLight intensity={0.8} />
       <pointLight position={[0, 0, 5]} intensity={0.6} />
 
-      <BackgroundEffect keystrokeMap={keystrokeMap} gameTime={gameTime} gameState={gameState} />
+      {/* Animated grid background - lowest render priority */}
+      <AnimatedGrid />
+
+      <WaveHitEffect keystrokeMap={keystrokeMap} gameTime={gameTime} />
+      <MorphingShapes keystrokeMap={keystrokeMap} gameTime={gameTime} gameState={gameState} />
 
       <mesh position={[-8, 0, 0]}>
         <boxGeometry args={[0.1, 6, 0.5]} />

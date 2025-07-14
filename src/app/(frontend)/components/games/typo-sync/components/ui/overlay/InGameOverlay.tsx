@@ -2,8 +2,8 @@
 
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { RollingNumber } from '../animation/RollingDigit'
-import type { GameState, Keystroke } from '../../types'
+import { RollingNumber } from '../../animation/RollingDigit'
+import type { GameState, Keystroke } from '../../../types'
 
 interface InGameOverlayProps {
   gameState: GameState
