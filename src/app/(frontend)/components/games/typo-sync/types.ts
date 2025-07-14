@@ -177,6 +177,7 @@ export interface GameRendererProps {
   analysisResult?: AnalysisResult | null
   onKeystrokeUpdate?: (keystroke: Keystroke) => void
   onPlayAgain?: () => void
+  onStopGame?: () => void
 }
 
 // Game controls props
@@ -366,8 +367,53 @@ export interface TypoSyncStore {
   // Import/Export functionality
   importBeatMap: (beatMapData: any) => void
   importKeystrokeMap: (keystrokeMapData: any) => void
+  exportGameMap: () => GameMapExport | null
+  importGameMap: (
+    gameMapData: GameMapExport,
+    currentMusicFile?: File,
+  ) => Promise<GameMapValidationResult>
 
   // Persistence
   saveToLocalStorage: () => void
   loadFromLocalStorage: () => void
+}
+
+// Map Import/Export Types
+export interface GameMapExport {
+  version: string
+  exportedAt: string
+  musicHash: string
+  musicName: string
+  musicDuration: number
+  bpm: number
+  beat_timestamps: number[]
+  melody_map: MelodyNote[]
+  keystroke_map?: Keystroke[]
+  hidden_notes?: HiddenNote[]
+  analysis_info: AnalysisInfo
+  lyrics?: string
+  checksum: string
+}
+
+export interface GameMapValidationResult {
+  isValid: boolean
+  errors: string[]
+  warnings: string[]
+  hashMatch: boolean
+  timestampErrors: string[]
+}
+
+export interface CloudProcessingState {
+  enabled: boolean
+  setEnabled: (enabled: boolean) => void
+}
+
+// Extended GameControlsProps to include new functionality
+export interface ExtendedGameControlsProps extends GameControlsProps {
+  onExportMap: () => void
+  onImportMap: (file: File) => void
+  cloudProcessingEnabled: boolean
+  onCloudProcessingToggle: (enabled: boolean) => void
+  isAudioLoadedForPreAnalyzed: boolean
+  mapFileName?: string
 }

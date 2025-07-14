@@ -12,8 +12,9 @@ export default function GameRenderer({
   gameConfig = GAME_CONFIG,
   onKeystrokeUpdate,
   onPlayAgain,
+  onStopGame,
 }: Omit<GameRendererProps, 'keystrokeMap' | 'gameState' | 'analysisResult'>) {
-  const { gameState, audioState, resetGame, startGame, resumeGame, stopGame } = useTypoSyncStore()
+  const { gameState, audioState, resetGame, startGame, resumeGame, stopGame, setKeystrokeMap, setHiddenNotes } = useTypoSyncStore()
   const { keystrokeMap, analysisResult, audioBuffer, hiddenNotes } = audioState
 
   const [gameTime, setGameTime] = useState(0)
@@ -99,12 +100,42 @@ export default function GameRenderer({
     }
   }, [gameState.sessionEndTime, gameState.isActive, showPostGameStats, lastShownSessionEndTime])
 
+  // Reset tracking when a new game starts
+  useEffect(() => {
+    if (gameState.isActive && gameState.gameStartTime) {
+      setLastShownSessionEndTime(null)
+    }
+  }, [gameState.isActive, gameState.gameStartTime])
+
   const handleCloseStats = () => {
     setShowPostGameStats(false)
+    
+    // Reset game state and keystroke states when closing stats
+    resetGame()
+    
+    // Reset keystroke and hidden note states to 'upcoming' for next game
+    const resetKeystrokeMap = keystrokeMap.map((k) => ({
+      ...k,
+      state: 'upcoming' as const,
+      timingAccuracy: undefined,
+      hitTiming: undefined,
+    }))
+    
+    const resetHiddenNotes = hiddenNotes.map((h) => ({
+      ...h,
+      state: 'upcoming' as const,
+    }))
+    
+    // Update the store with reset states
+    setKeystrokeMap(resetKeystrokeMap)
+    setHiddenNotes(resetHiddenNotes)
   }
 
   const handlePlayAgain = () => {
     setShowPostGameStats(false)
+    // Reset the tracking variable to prevent stats from showing again
+    setLastShownSessionEndTime(null)
+    
     if (onPlayAgain) {
       // Use the parent's play again handler which properly sets up keyboard listeners
       onPlayAgain()
@@ -182,7 +213,7 @@ export default function GameRenderer({
         <PauseOverlay
           isVisible={gameState.isActive && gameState.isPaused}
           onResume={resumeGame}
-          onStop={stopGame}
+          onStop={onStopGame || stopGame}
         />
 
         {/* Post-game statistics overlay */}

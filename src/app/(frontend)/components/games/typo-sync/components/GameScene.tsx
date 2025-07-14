@@ -41,31 +41,24 @@ export function GameScene({
 
       if (keystroke.state === 'hit') {
         const timeSinceHit = gameTime - keystroke.startTime
-        return timeSinceHit <= 6.0
+        return timeSinceHit <= 2.0 // Reduced from 6 to 2 seconds for performance
       }
 
       const isVisible = screenX > -100 && screenX < CANVAS_WIDTH + 100
       return isVisible
     })
 
-    return visible
+    // Limit concurrent keystrokes to prevent WebGL resource exhaustion
+    const maxConcurrentKeystrokes = 24
+    return visible.slice(0, maxConcurrentKeystrokes)
   }, [keystrokeMap, gameTime, gameConfig])
 
   return (
     <>
-      <ambientLight intensity={0.8} />
-      <pointLight position={[0, 0, 5]} intensity={0.6} />
-
-      {/* Animated grid background - lowest render priority */}
       <AnimatedGrid />
 
       <WaveHitEffect keystrokeMap={keystrokeMap} gameTime={gameTime} />
       <MorphingShapes keystrokeMap={keystrokeMap} gameTime={gameTime} gameState={gameState} />
-
-      <mesh position={[-8, 0, 0]}>
-        <boxGeometry args={[0.1, 6, 0.5]} />
-        <meshBasicMaterial color="#000000" transparent opacity={0.0} />
-      </mesh>
 
       <HitZone
         keystrokeMap={keystrokeMap}
@@ -77,7 +70,7 @@ export function GameScene({
 
       {visibleKeystrokes.map((keystroke) => (
         <KeystrokeNote
-          key={`${keystroke.startTime.toFixed(4)}-${keystroke.key}-${keystroke.type}`}
+          key={`${Number.isFinite(keystroke.startTime) ? keystroke.startTime.toFixed(4) : '0.0000'}-${keystroke.key}-${keystroke.type}`}
           keystroke={keystroke}
           gameTime={gameTime}
           gameConfig={gameConfig}

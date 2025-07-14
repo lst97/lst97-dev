@@ -54,6 +54,7 @@
     "dtype",
     "exif",
     "exifreader",
+    "flac",
     "frameloop",
     "headshots",
     "horizontalrule",

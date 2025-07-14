@@ -7,7 +7,7 @@
 
 // Component exports
 export { default as GameRenderer } from './components/GameRenderer'
-export { GameControls, GameStats } from './components/ui'
+export { GameControls } from './components/ui'
 
 // Hook exports
 export { useAudioAnalysis } from './hooks'
@@ -19,6 +19,10 @@ export {
   AudioAnalysisService,
   safeServiceCall,
 } from './services/audioAnalysisService'
+export {
+  mapImportExportService,
+  MapImportExportService,
+} from './services/mapImportExportService'
 
 // Utility exports
 export {

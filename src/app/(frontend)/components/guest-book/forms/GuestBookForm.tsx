@@ -29,7 +29,7 @@ const validateGuestBookForm = (
     if (error instanceof ZodError) {
       const formattedErrors: { [key in keyof GuestBookCommentFormData]?: string } = {}
 
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         const field = err.path[0] as keyof GuestBookCommentFormData
         formattedErrors[field] = err.message
       })

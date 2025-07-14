@@ -174,7 +174,9 @@ export const createAudioActions = (set: any, get: any): AudioActions => ({
     try {
       let soundBuffer = null
 
-      if (key === '[Space]' || key === '[Enter]') {
+      if (type === 'beat') {
+        soundBuffer = soundEffects.beat
+      } else if (key === '[Space]' || key === '[Enter]') {
         soundBuffer = soundEffects.base
       } else {
         soundBuffer = soundEffects.hiHat
@@ -185,7 +187,13 @@ export const createAudioActions = (set: any, get: any): AudioActions => ({
         source.buffer = soundBuffer
 
         const gainNode = audioState.audioContext.createGain()
-        gainNode.gain.value = 0.3
+        if (type === 'beat') {
+          gainNode.gain.value = 0.8
+        } else if (key === '[Space]' || key === '[Enter]') {
+          gainNode.gain.value = 0.5
+        } else {
+          gainNode.gain.value = 0.2
+        }
 
         source.connect(gainNode)
         gainNode.connect(audioState.audioContext.destination)

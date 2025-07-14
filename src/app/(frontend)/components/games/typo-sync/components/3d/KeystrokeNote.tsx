@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useRef, useEffect, useMemo, useState } from 'react'
+import React, { useRef, useEffect, useMemo, useState, Suspense } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Text, Box } from '@react-three/drei'
+import { Box, Text } from '@react-three/drei'
 import * as THREE from 'three'
 import { useTypoSyncStore } from '../../store'
 import type { Keystroke, GameConfig } from '../../types'
@@ -22,12 +22,30 @@ export function KeystrokeNote({
   gameConfig = GAME_CONFIG,
   onKeystrokeUpdate,
 }: KeystrokeNoteProps) {
+  if (
+    !keystroke ||
+    !Number.isFinite(keystroke.startTime) ||
+    !keystroke.key ||
+    !keystroke.type ||
+    !Number.isFinite(gameTime)
+  ) {
+    console.error('Invalid KeystrokeNote props detected:', {
+      keystroke,
+      gameTime,
+      hasValidStartTime: keystroke ? Number.isFinite(keystroke.startTime) : false,
+      hasValidKey: keystroke ? !!keystroke.key : false,
+      hasValidType: keystroke ? !!keystroke.type : false,
+      hasValidGameTime: Number.isFinite(gameTime),
+    })
+    return null // Don't render if props are invalid
+  }
+
   const groupRef = useRef<THREE.Group>(null)
   const boxRef = useRef<THREE.Mesh>(null)
   const [isBreaking, setIsBreaking] = useState(false)
   const [breakStartTime, setBreakStartTime] = useState(0)
   const [fadeOpacity, setFadeOpacity] = useState(1.0)
-  const [glassParticles, setGlassParticles] = useState<
+  const [pixelParticles, setPixelParticles] = useState<
     Array<{
       id: number
       position: [number, number, number]
@@ -42,11 +60,12 @@ export function KeystrokeNote({
 
   const prevStateRef = useRef(keystroke.state)
 
-  const uniqueId = useMemo(
-    () =>
-      `${keystroke.startTime.toFixed(4)}-${keystroke.key}-${keystroke.type}-${Math.random().toString(36).substr(2, 9)}`,
-    [keystroke.startTime, keystroke.key, keystroke.type],
-  )
+  const uniqueId = useMemo(() => {
+    // Ensure startTime is valid before using toFixed
+    const timeStr = Number.isFinite(keystroke.startTime) ? keystroke.startTime.toFixed(4) : '0.0000'
+
+    return `${timeStr}-${keystroke.key}-${keystroke.type}-${Math.random().toString(36).substr(2, 9)}`
+  }, [keystroke.startTime, keystroke.key, keystroke.type])
 
   const displayKey = useMemo(() => {
     switch (keystroke.key) {
@@ -110,14 +129,14 @@ export function KeystrokeNote({
 
       switch (keystroke.timingAccuracy) {
         case 'sync':
-          numParticles = 8 + Math.floor(Math.random() * 4)
+          numParticles = Math.min(8 + Math.floor(Math.random() * 4), 10) // Cap at 10
           velocityMultiplier = 2.0
           sizeMultiplier = 1.2
           particleColor = '#00ff88'
           break
         case 'early':
         case 'late':
-          numParticles = 6 + Math.floor(Math.random() * 3)
+          numParticles = Math.min(6 + Math.floor(Math.random() * 3), 8) // Cap at 8
           velocityMultiplier = 1.0
           sizeMultiplier = 0.8
           particleColor = '#ffaa00'
@@ -132,7 +151,7 @@ export function KeystrokeNote({
       }
 
       if (currentState === 'typo' || currentState === 'missed') {
-        numParticles = 8 + Math.floor(Math.random() * 4)
+        numParticles = Math.min(8 + Math.floor(Math.random() * 4), 10) // Cap at 10
         velocityMultiplier = 1.5
         sizeMultiplier = 0.9
         particleColor = currentState === 'typo' ? '#ff4444' : '#ff6666'
@@ -191,7 +210,7 @@ export function KeystrokeNote({
         })
       }
 
-      setGlassParticles(particles)
+      setPixelParticles(particles)
     }
 
     prevStateRef.current = currentState
@@ -214,11 +233,31 @@ export function KeystrokeNote({
       const animationAge = (Date.now() - breakStartTime) / 1000
       if (animationAge > 6.0) {
         setIsBreaking(false)
-        setGlassParticles([])
+        setPixelParticles([])
         setBreakStartTime(0)
       }
     }
   }, [gameTime, keystroke.startTime, uniqueId, isBreaking, breakStartTime])
+
+  // Cleanup particles when component unmounts or after extended time
+  useEffect(() => {
+    return () => {
+      // Clean up particles when component unmounts
+      setPixelParticles([])
+    }
+  }, [])
+
+  // Emergency cleanup for particles after 10 seconds
+  useEffect(() => {
+    if (pixelParticles.length > 0) {
+      const emergencyCleanup = setTimeout(() => {
+        setPixelParticles([])
+        setIsBreaking(false)
+      }, 10000) // 10 seconds max particle lifetime
+
+      return () => clearTimeout(emergencyCleanup)
+    }
+  }, [pixelParticles.length])
 
   useFrame(() => {
     if (!groupRef.current) return
@@ -227,6 +266,22 @@ export function KeystrokeNote({
 
     if (gameState.isPaused) return
 
+    // Data validation: Check for invalid values that would crash WebGL
+    if (
+      !Number.isFinite(keystroke.startTime) ||
+      !Number.isFinite(gameTime) ||
+      !Number.isFinite(gameConfig.NOTE_SPEED_PPS) ||
+      !Number.isFinite(gameConfig.HIT_ZONE_X)
+    ) {
+      console.warn('Invalid data detected in KeystrokeNote, skipping frame', {
+        startTime: keystroke.startTime,
+        gameTime,
+        noteSpeed: gameConfig.NOTE_SPEED_PPS,
+        hitZone: gameConfig.HIT_ZONE_X,
+      })
+      return
+    }
+
     const timeDifference = keystroke.startTime - gameTime
     const distance = timeDifference * gameConfig.NOTE_SPEED_PPS
 
@@ -234,6 +289,18 @@ export function KeystrokeNote({
     const screenY = CANVAS_HEIGHT / 2
 
     const worldPos = screenToGameSpace(screenX, screenY)
+
+    // Validate world position before applying to Three.js object
+    if (!Number.isFinite(worldPos.x) || !Number.isFinite(worldPos.y)) {
+      console.warn('Invalid world position calculated, skipping frame', {
+        worldPos,
+        screenX,
+        screenY,
+        timeDifference,
+        distance,
+      })
+      return
+    }
 
     const shouldBeHidden = keystroke.state === 'hit' || keystroke.state === 'missed'
 
@@ -252,8 +319,8 @@ export function KeystrokeNote({
         groupRef.current.visible = false
       }
 
-      if (breakTime >= breakDuration && glassParticles.length > 0) {
-        setGlassParticles([])
+      if (breakTime >= breakDuration && pixelParticles.length > 0) {
+        setPixelParticles([])
       }
     } else if (shouldBeHidden) {
       groupRef.current.visible = false
@@ -272,30 +339,41 @@ export function KeystrokeNote({
     <>
       <group ref={groupRef}>
         <Box args={[0.9, 0.9, 0.08]}>
-          <meshBasicMaterial color="#666666" transparent opacity={fadeOpacity} />
+          <meshBasicMaterial
+            color="#666666"
+            transparent
+            opacity={Number.isFinite(fadeOpacity) ? fadeOpacity : 1.0}
+          />
         </Box>
 
         <Box ref={boxRef} args={[0.8, 0.8, 0.1]}>
-          <meshBasicMaterial color={boxColor} transparent opacity={fadeOpacity} />
+          <meshBasicMaterial
+            color={boxColor}
+            transparent
+            opacity={Number.isFinite(fadeOpacity) ? fadeOpacity : 1.0}
+          />
         </Box>
 
-        <Text
-          position={[0, 0, 0.06]}
-          fontSize={0.4}
-          color={textColor}
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/PressStart2P-Regular.ttf"
-          outlineWidth={0.008}
-          outlineColor="#FFFFFF"
-          visible={fadeOpacity > 0}
-        >
-          {displayKey}
-        </Text>
+        {/* TODO: Do a bug report to Github. the previous commit does not require Suspense. No useful log about this error, just a warning - WebGL context lost. */}
+        <Suspense fallback={null}>
+          <Text
+            position={[0, 0, 0.06]}
+            fontSize={0.4}
+            color={textColor}
+            anchorX="center"
+            anchorY="middle"
+            font="/fonts/PressStart2P-Regular.ttf"
+            outlineWidth={0.008}
+            outlineColor="#FFFFFF"
+            visible={Number.isFinite(fadeOpacity) && fadeOpacity > 0}
+          >
+            {displayKey}
+          </Text>
+        </Suspense>
       </group>
 
       {isBreaking &&
-        glassParticles.map((particle) => {
+        pixelParticles.map((particle) => {
           const currentPos = groupRef.current?.position || new THREE.Vector3(0, 0, 0)
           const particleWorldPos: [number, number, number] = [
             currentPos.x + particle.position[0],

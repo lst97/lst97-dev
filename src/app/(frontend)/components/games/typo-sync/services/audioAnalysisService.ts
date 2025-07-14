@@ -157,18 +157,21 @@ export class AudioAnalysisService {
     base: AudioBuffer | null
     hiHat: AudioBuffer | null
     tambourine: AudioBuffer | null
+    beat: AudioBuffer | null
   }> {
     const soundEffects = {
       base: null as AudioBuffer | null,
       hiHat: null as AudioBuffer | null,
       tambourine: null as AudioBuffer | null,
+      beat: null as AudioBuffer | null,
     }
 
     try {
-      const [baseResponse, hiHatResponse, tambourineResponse] = await Promise.allSettled([
+      const [baseResponse, hiHatResponse, tambourineResponse, beatResponse] = await Promise.allSettled([
         fetch(`${baseUrl}base.mp3`).then((res) => res.arrayBuffer()),
         fetch(`${baseUrl}hi-hat.mp3`).then((res) => res.arrayBuffer()),
         fetch(`${baseUrl}tambourine.mp3`).then((res) => res.arrayBuffer()),
+        fetch(`${baseUrl}beat.wav`).then((res) => res.arrayBuffer()),
       ])
 
       if (baseResponse.status === 'fulfilled') {
@@ -182,7 +185,13 @@ export class AudioAnalysisService {
       if (tambourineResponse.status === 'fulfilled') {
         soundEffects.tambourine = await audioContext.decodeAudioData(tambourineResponse.value)
       } else {
-        console.error('🟣 Failed to load tambourine.mp3:', tambourineResponse.reason)
+        console.error('Failed to load tambourine.mp3:', tambourineResponse.reason)
+      }
+
+      if (beatResponse.status === 'fulfilled') {
+        soundEffects.beat = await audioContext.decodeAudioData(beatResponse.value)
+      } else {
+        console.error('Failed to load beat.wav:', beatResponse.reason)
       }
     } catch (error) {
       console.warn('Error loading some sound effects:', error)

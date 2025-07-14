@@ -459,7 +459,7 @@ const PostGameStatsOverlay: React.FC<PostGameStatsOverlayProps> = ({
                             </div>
                             <PixelProgressBar
                               value={stats.syncHits}
-                              max={stats.hitKeystrokes}
+                              max={Math.max(stats.hitKeystrokes, 1)}
                               height={20}
                               className="w-full"
                               progressClassName="bg-success"
@@ -484,7 +484,7 @@ const PostGameStatsOverlay: React.FC<PostGameStatsOverlayProps> = ({
                             </div>
                             <PixelProgressBar
                               value={stats.earlyHits}
-                              max={stats.hitKeystrokes}
+                              max={Math.max(stats.hitKeystrokes, 1)}
                               height={20}
                               className="w-full"
                               progressClassName="bg-warning"
@@ -509,7 +509,7 @@ const PostGameStatsOverlay: React.FC<PostGameStatsOverlayProps> = ({
                             </div>
                             <PixelProgressBar
                               value={stats.lateHits}
-                              max={stats.hitKeystrokes}
+                              max={Math.max(stats.hitKeystrokes, 1)}
                               height={20}
                               className="w-full"
                               progressClassName="bg-info"

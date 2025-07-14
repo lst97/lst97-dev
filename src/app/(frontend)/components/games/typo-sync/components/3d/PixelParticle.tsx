@@ -26,6 +26,21 @@ export function PixelParticle({
   const particleRef = useRef<THREE.Group>(null)
   const velocityRef = useRef<[number, number, number]>([...velocity])
   const prevTimeRef = useRef<number>(Date.now())
+  const geometriesToDispose = useRef<THREE.BufferGeometry[]>([])
+  const materialsToDispose = useRef<THREE.Material[]>([])
+
+  // Callback refs to collect geometries and materials for disposal
+  const collectGeometry = React.useCallback((geometry: THREE.BufferGeometry) => {
+    if (geometry && !geometriesToDispose.current.includes(geometry)) {
+      geometriesToDispose.current.push(geometry)
+    }
+  }, [])
+
+  const collectMaterial = React.useCallback((material: THREE.Material) => {
+    if (material && !materialsToDispose.current.includes(material)) {
+      materialsToDispose.current.push(material)
+    }
+  }, [])
 
   useFrame(() => {
     if (!particleRef.current) return
@@ -81,8 +96,8 @@ export function PixelParticle({
     particleRef.current.rotation.z += rotationSpeed[2] * delta * 0.8
 
     const elapsed = (now - startTime) / 1000
-    const fadeTime = 4.0
-    const fadeStart = 2.0
+    const fadeTime = 2.0 // Reduced from 4.0 to 2.0 seconds
+    const fadeStart = 1.0 // Reduced from 2.0 to 1.0 seconds
 
     let opacity = 1.0
     if (elapsed > fadeStart) {
@@ -105,15 +120,48 @@ export function PixelParticle({
     return baseColor.clone().multiplyScalar(0.6)
   }, [color])
 
+  // Cleanup function to dispose Three.js resources
+  React.useEffect(() => {
+    return () => {
+      // Dispose all collected geometries
+      geometriesToDispose.current.forEach(geometry => {
+        geometry.dispose()
+      })
+      geometriesToDispose.current = []
+      
+      // Dispose all collected materials
+      materialsToDispose.current.forEach(material => {
+        material.dispose()
+      })
+      materialsToDispose.current = []
+    }
+  }, [])
+
   return (
     <group ref={particleRef} position={position as any}>
       <mesh>
-        <boxGeometry args={[size * 1.1, size * 1.1, size * 1.1]} />
-        <meshBasicMaterial color={borderColor} transparent opacity={1.0} />
+        <boxGeometry 
+          ref={collectGeometry} 
+          args={[size * 1.1, size * 1.1, size * 1.1]} 
+        />
+        <meshBasicMaterial 
+          ref={collectMaterial}
+          color={borderColor} 
+          transparent 
+          opacity={1.0} 
+        />
       </mesh>
       <mesh>
-        <boxGeometry args={[size, size, size]} />
-        <meshBasicMaterial color={color} transparent opacity={1.0} />
+        <boxGeometry 
+          ref={collectGeometry}
+          args={[size, size, size]} 
+        />
+        <meshBasicMaterial 
+          ref={collectMaterial}
+          color={color} 
+          transparent 
+          opacity={1.0} 
+        />
       </mesh>
     </group>
   )

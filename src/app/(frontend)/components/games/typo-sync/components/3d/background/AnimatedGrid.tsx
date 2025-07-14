@@ -129,22 +129,11 @@ export default function AnimatedGrid() {
 
     mesh.instanceMatrix.needsUpdate = true
 
-    // Debug: Log corner positions
-    console.log(`🔧 Grid initialized: ${GRID_SIZE_X}x${GRID_SIZE_Y} = ${TOTAL_SQUARES} squares`)
-    console.log(
-      `📐 Camera bounds: X(${CAMERA_LEFT} to ${CAMERA_RIGHT}), Y(${CAMERA_BOTTOM} to ${CAMERA_TOP})`,
-    )
-    console.log(`📏 Grid spacing: X=${GRID_SPACING_X}, Y=${GRID_SPACING_Y}, Square=${SQUARE_SIZE}`)
-
     // Calculate center position
     const centerX = GRID_SIZE_X - 3
     const centerY = GRID_SIZE_Y - 3
     const centerPosX = CAMERA_LEFT + centerX * GRID_SPACING_X + GRID_SPACING_X / 2
     const centerPosY = CAMERA_TOP - centerY * GRID_SPACING_Y - GRID_SPACING_Y / 2
-
-    console.log(
-      `📍 Center grid: (${centerX}, ${centerY}) → Screen position: (${centerPosX}, ${centerPosY})`,
-    )
   }, [tempMatrix])
 
   // Initialize grid and matrices
@@ -203,9 +192,6 @@ export default function AnimatedGrid() {
     const centerX = GRID_SIZE_X - 3
     const centerY = GRID_SIZE_Y - 3
     const centerSquare = squareStates.current.find((s) => s.x === centerX && s.y === centerY)
-    console.log(
-      `   📊 New squares: ${newSquares} | Center area: ${bottomRightActivity} (${percentage}%) | Center (${centerX},${centerY}): ${centerSquare?.isVisible ? 'YES' : 'NO'}`,
-    )
   }, [])
 
   // Main animation frame loop
@@ -227,11 +213,6 @@ export default function AnimatedGrid() {
       animationCounter.current++
       triggerAnimations(currentTime)
       lastUpdateTime.current = currentTime // Reset timer to current time
-
-      // Debug timing and distribution
-      console.log(
-        `🎲 GLOBAL DICE ROLL #${animationCounter.current} after ${timeSinceLastUpdate.toFixed(0)}ms`,
-      )
     }
 
     // Update all squares

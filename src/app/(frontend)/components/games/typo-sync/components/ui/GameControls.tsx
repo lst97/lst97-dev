@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useRef } from 'react'
-import type { GameControlsProps } from '../../types'
-import { FaUpload, FaPlay, FaPause, FaStop, FaRedo } from 'react-icons/fa'
-import { MdAnalytics } from 'react-icons/md'
+import type { ExtendedGameControlsProps } from '../../types'
+import { FaUpload, FaPlay, FaPause, FaStop, FaRedo, FaDownload, FaFileImport } from 'react-icons/fa'
+import { MdAnalytics, MdCloud, MdCloudOff } from 'react-icons/md'
+import { PixelCheckbox } from '@/app/(frontend)/components/ui'
 
 export default function GameControls({
   onFileUpload,
@@ -17,8 +18,15 @@ export default function GameControls({
   canPlay,
   gameState,
   uploadedFileName,
-}: GameControlsProps) {
+  onExportMap,
+  onImportMap,
+  cloudProcessingEnabled,
+  onCloudProcessingToggle,
+  mapFileName,
+  isAudioLoadedForPreAnalyzed,
+}: ExtendedGameControlsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const mapImportInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -31,12 +39,46 @@ export default function GameControls({
     fileInputRef.current?.click()
   }
 
+  const handleMapImportChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      onImportMap(file)
+    }
+  }
+
+  const handleMapImportClick = () => {
+    mapImportInputRef.current?.click()
+  }
+
   return (
     <div className="bg-card border-2 border-border shadow-[4px_4px_0px_#000] pixel-border p-6">
       <div className="flex flex-col items-center gap-4">
+        {/* Cloud Processing Toggle */}
+        <div className="flex items-center gap-4 p-4 bg-hover border-2 border-border rounded">
+          <PixelCheckbox
+            checked={cloudProcessingEnabled}
+            onCheckedChange={onCloudProcessingToggle}
+            label="Cloud Processing"
+            disabled={isAnalyzing}
+          />
+          <div className="flex items-center gap-2 text-sm text-text font-['Press_Start_2P']">
+            {cloudProcessingEnabled ? (
+              <>
+                <MdCloud className="text-accent" />
+                <span>Server Analysis</span>
+              </>
+            ) : (
+              <>
+                <MdCloudOff className="text-warning" />
+                <span>Pre-analyzed Map</span>
+              </>
+            )}
+          </div>
+        </div>
+
         {/* Control Buttons Row */}
         <div className="flex flex-wrap items-center justify-center gap-4">
-          {/* File Upload Button */}
+          {/* Audio File Upload - Always available */}
           <div className="flex flex-col items-center gap-2">
             <input
               ref={fileInputRef}
@@ -63,7 +105,7 @@ export default function GameControls({
               {isAnalyzing ? (
                 <>
                   <MdAnalytics className="animate-spin" />
-                  ANALYZING...
+                  {cloudProcessingEnabled ? 'ANALYZING...' : 'LOADING...'}
                 </>
               ) : (
                 <>
@@ -72,18 +114,59 @@ export default function GameControls({
                 </>
               )}
             </button>
-
-            {/* File name display during analysis */}
-            {isAnalyzing && uploadedFileName && (
-              <div className="text-xs text-text opacity-70 font-['Press_Start_2P'] mt-1">
-                {uploadedFileName}
-              </div>
-            )}
           </div>
+
+          {/* Local Processing Mode: Map Import */}
+          {!cloudProcessingEnabled && (
+            <div className="flex flex-col items-center gap-2">
+              <input
+                ref={mapImportInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleMapImportChange}
+                className="hidden"
+                disabled={isAnalyzing || !isAudioLoadedForPreAnalyzed}
+              />
+              <button
+                onClick={handleMapImportClick}
+                disabled={isAnalyzing || !isAudioLoadedForPreAnalyzed}
+                title={
+                  isAnalyzing
+                    ? 'Please wait while loading...'
+                    : !isAudioLoadedForPreAnalyzed
+                    ? 'Please load an audio file first'
+                    : 'Import pre-analyzed map'
+                }
+                className={`
+                  bg-accent text-white font-['Press_Start_2P'] text-sm border-2 border-accent 
+                  px-6 py-3 shadow-[4px_4px_0px_#000] pixel-border cursor-pointer
+                  flex items-center gap-2 min-w-[200px] justify-center
+                  ${
+                    isAnalyzing || !isAudioLoadedForPreAnalyzed
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200'
+                  }
+                `}
+              >
+                <FaFileImport />
+                IMPORT MAP
+              </button>
+            </div>
+          )}
 
           {/* Control Buttons - Show after keystroke map is generated */}
           {hasKeystrokeMap && (
             <>
+              {/* Export Map Button */}
+              <button
+                onClick={onExportMap}
+                disabled={isAnalyzing}
+                className="bg-secondary text-white font-['Press_Start_2P'] text-sm border-2 border-secondary p-3 shadow-[4px_4px_0px_#000] pixel-border hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center w-12 h-12"
+                title="Export game map"
+              >
+                <FaDownload />
+              </button>
+
               {/* Regenerate Map Button */}
               <button
                 onClick={onRegenerateKeystrokeMap}
@@ -128,6 +211,14 @@ export default function GameControls({
             </>
           )}
         </div>
+
+        {/* File Name Display */}
+        {(uploadedFileName || mapFileName) && (
+          <div className="text-xs text-text opacity-70 font-['Press_Start_2P'] mt-2 text-center">
+            {uploadedFileName && <p>Audio: {uploadedFileName}</p>}
+            {mapFileName && <p>Map: {mapFileName}</p>}
+          </div>
+        )}
       </div>
     </div>
   )

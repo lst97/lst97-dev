@@ -6,7 +6,12 @@ import GameRenderer from './GameRenderer'
 import { motion } from 'framer-motion'
 import { FaInfoCircle, FaCheckCircle, FaCog } from 'react-icons/fa'
 import { GAME_CONFIG } from '../config'
+import Image from 'next/image'
+
+import { mapImportExportService } from '../services/mapImportExportService'
 import { GameControls, KeyboardLayout } from './ui'
+import { NotificationOverlay } from './ui/overlay'
+// Types for import/export functionality (used by the handlers)
 
 export default function TypoSyncClient() {
   const {
@@ -17,10 +22,17 @@ export default function TypoSyncClient() {
     stopGame,
     pauseGame,
     resumeGame,
+    resetGame,
     handleKeyPress,
     analyzeAudio,
     generateKeystrokeMap,
     loadSessionHistory,
+    setAnalysisResult,
+    setKeystrokeMap,
+    setHiddenNotes,
+    setAudioBuffer,
+    setAudioContext,
+    setError,
   } = useTypoSyncStore()
 
   // Refs for keyboard handling
@@ -29,8 +41,21 @@ export default function TypoSyncClient() {
   // Mobile device detection
   const [isMobile, setIsMobile] = useState(false)
 
-  // Local state for uploaded file name
   const [uploadedFileName, setUploadedFileName] = useState<string>('')
+  const [mapFileName, setMapFileName] = useState<string>('')
+
+  // Cloud processing state
+  const [cloudProcessingEnabled, setCloudProcessingEnabled] = useState(false)
+
+  // Current uploaded file reference for hash validation
+  const [currentAudioFile, setCurrentAudioFile] = useState<File | null>(null)
+
+  // Track if audio is loaded in pre-analyzed mode
+  const [isAudioLoadedForPreAnalyzed, setIsAudioLoadedForPreAnalyzed] = useState(false)
+
+  // Validation warnings state
+  const [validationWarnings, setValidationWarnings] = useState<string[]>([])
+  const [showWarnings, setShowWarnings] = useState(false)
 
   useEffect(() => {
     const userAgent = typeof window.navigator === 'undefined' ? '' : navigator.userAgent
@@ -77,6 +102,14 @@ export default function TypoSyncClient() {
   }, [resumeGame])
 
   /**
+   * Stop game handler - Just stop the game, let stats show, reset when user closes stats
+   */
+  const handleStopGame = useCallback(() => {
+    keyboardListenerActiveRef.current = false
+    stopGame()
+  }, [stopGame])
+
+  /**
    * Global keyboard event handler
    */
   const handleKeyDown = useCallback(
@@ -119,10 +152,33 @@ export default function TypoSyncClient() {
   const handleFileUpload = useCallback(
     async (file: File) => {
       setUploadedFileName(file.name)
-      await analyzeAudio(file)
-      // Auto-generation happens in the store after analysis completes
+      setCurrentAudioFile(file)
+
+      if (cloudProcessingEnabled) {
+        // Cloud processing: send to server for analysis
+        await analyzeAudio(file)
+        // Auto-generation happens in the store after analysis completes
+      } else {
+        // Pre-analyzed data mode: load audio buffer for playback only
+        try {
+          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+          const arrayBuffer = await file.arrayBuffer()
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+
+          // Set both audio context and buffer in the store
+          setAudioContext(audioContext)
+          setAudioBuffer(audioBuffer)
+          setIsAudioLoadedForPreAnalyzed(true)
+
+          // Clear any existing error and show success
+          setError(null)
+        } catch (error) {
+          setError(`Oh no! The audio file couldn't be loaded. Please try a different file.`)
+          setIsAudioLoadedForPreAnalyzed(false)
+        }
+      }
     },
-    [analyzeAudio],
+    [analyzeAudio, cloudProcessingEnabled, setError, setAudioBuffer, setAudioContext],
   )
 
   /**
@@ -136,7 +192,7 @@ export default function TypoSyncClient() {
    * Start game handler
    */
   const handleStartGame = useCallback(() => {
-    const { audioBuffer, keystrokeMap, hiddenNotes } = audioState
+    const { audioBuffer, keystrokeMap, hiddenNotes, audioContext } = audioState
 
     if (!audioBuffer || keystrokeMap.length === 0) {
       console.error('Cannot start game: missing audio data or keystroke map', {
@@ -154,12 +210,151 @@ export default function TypoSyncClient() {
   }, [audioState, startGame])
 
   /**
-   * Stop game handler
+   * Export game map handler
    */
-  const handleStopGame = useCallback(() => {
-    keyboardListenerActiveRef.current = false
-    stopGame()
-  }, [stopGame])
+  const handleExportMap = useCallback(async () => {
+    if (!audioState.analysisResult || !currentAudioFile) {
+      setError('Cannot export the map. Please analyze an audio file first.')
+      return
+    }
+
+    try {
+      const gameMapData = await mapImportExportService.exportGameMap(
+        audioState.analysisResult,
+        audioState.keystrokeMap,
+        audioState.hiddenNotes,
+        currentAudioFile,
+        uploadedFileName,
+      )
+
+      mapImportExportService.downloadGameMap(gameMapData, uploadedFileName)
+    } catch (error) {
+      setError(`Something went wrong during the export. Please try again.`)
+    }
+  }, [audioState, currentAudioFile, uploadedFileName, setError])
+
+  /**
+   * Import game map handler
+   */
+  const handleImportMap = useCallback(
+    async (file: File) => {
+      try {
+        const reader = new FileReader()
+        reader.onload = async (e) => {
+          const jsonString = e.target?.result as string
+          if (!jsonString) {
+            setError('Could not read the map file. It might be corrupted.')
+            return
+          }
+
+          const { validationResult, gameMapData } =
+            await mapImportExportService.importGameMapFromJSON(
+              jsonString,
+              currentAudioFile || undefined,
+            )
+
+          // Show validation results
+          if (validationResult.warnings.length > 0) {
+            setValidationWarnings(validationResult.warnings)
+            setShowWarnings(true)
+          } else {
+            setValidationWarnings([])
+            setShowWarnings(false)
+          }
+
+          if (validationResult.errors.length > 0) {
+            setError(`This map file is not compatible. Please try a different one.`)
+            return
+          }
+
+          if (validationResult.timestampErrors.length > 0) {
+            setError(`This map file has timing issues. Please try a different one.`)
+            return
+          }
+
+          if (!gameMapData) {
+            setError('Could not find a valid game map in this file.')
+            return
+          }
+
+          // Import the data into the store
+          const analysisResult = mapImportExportService.createAnalysisResultFromImport(gameMapData)
+          setAnalysisResult(analysisResult)
+
+          // Import keystroke map if available, otherwise generate it
+          if (gameMapData.keystroke_map && gameMapData.keystroke_map.length > 0) {
+            setKeystrokeMap(gameMapData.keystroke_map)
+          } else {
+            // Generate keystroke map from imported analysis result
+            generateKeystrokeMap()
+          }
+
+          // Import hidden notes if available
+          if (gameMapData.hidden_notes && gameMapData.hidden_notes.length > 0) {
+            setHiddenNotes(gameMapData.hidden_notes)
+          }
+
+          // If we have an audio file loaded, keep it for playback
+          // Otherwise, clear the audio buffer
+          if (!currentAudioFile) {
+            setAudioBuffer(null)
+          }
+
+          // Update file name
+          setUploadedFileName(gameMapData.musicName)
+          setMapFileName(file.name)
+
+          // Show success message
+          if (currentAudioFile) {
+            console.log(
+              'Pre-analyzed map imported successfully:',
+              gameMapData.musicName,
+              '- Ready to play!',
+            )
+          } else {
+            setError('Map loaded! Now, please upload the matching audio file to start playing.')
+          }
+        }
+
+        reader.readAsText(file)
+      } catch (error) {
+        setError(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+    },
+    [
+      currentAudioFile,
+      setAnalysisResult,
+      setKeystrokeMap,
+      setHiddenNotes,
+      setAudioBuffer,
+      setError,
+      generateKeystrokeMap,
+    ],
+  )
+
+  /**
+   * Cloud processing toggle handler
+   */
+  const handleCloudProcessingToggle = useCallback(
+    (enabled: boolean) => {
+      setCloudProcessingEnabled(enabled)
+      // Clear any existing error when switching modes
+      setError(null)
+      // Reset audio loaded state when switching modes
+      setIsAudioLoadedForPreAnalyzed(false)
+      // Clear current file reference when switching modes
+      setCurrentAudioFile(null)
+      setUploadedFileName('')
+
+      // Clear audio state when switching modes to ensure clean state
+      setAudioContext(null)
+      setAudioBuffer(null)
+      setKeystrokeMap([])
+      setHiddenNotes([])
+      setAnalysisResult(null)
+    },
+    [setError, setAudioContext, setAudioBuffer, setKeystrokeMap, setHiddenNotes, setAnalysisResult],
+  )
 
   /**
    * Determine control states
@@ -214,7 +409,7 @@ export default function TypoSyncClient() {
   )
 
   return (
-    <div className="relative w-full min-h-screen flex flex-col bg-background">
+    <div className="relative w-full min-h-screen flex flex-col bg-transparent">
       {/* Background decoration with floating animation */}
       <motion.div
         className="absolute inset-0 z-[-1] opacity-10"
@@ -231,7 +426,28 @@ export default function TypoSyncClient() {
       >
         <div className="absolute top-0 right-40 w-[30vw] h-[30vw] max-w-[400px] max-h-[400px] bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-3xl" />
       </motion.div>
-
+      <motion.div
+        className="absolute inset-0 z-[-1] opacity-30"
+        animate={{
+          y: [0, -10, 0],
+          x: [0, 5, 0],
+        }}
+        transition={{
+          duration: 10,
+          ease: 'easeInOut',
+          repeat: Infinity,
+          repeatType: 'mirror',
+        }}
+      >
+        <Image
+          src="/metronome-pixel-art.gif"
+          alt="Metronome Pixel Art"
+          quality={100}
+          width={1024}
+          height={1024}
+          className="absolute top-0 right-40 w-[30vw] h-[30vw] max-w-[1024px] max-h-[1024px] object-contain"
+        />
+      </motion.div>
       <main className="relative flex-grow w-full max-w-[1800px] mx-auto py-4 sm:py-6 md:py-8 mt-[100px] sm:mt-[120px] md:mt-[140px] lg:mt-[180px] px-4 sm:px-6 md:px-8">
         {/* Header Section */}
         <section className="mb-8">
@@ -301,6 +517,12 @@ export default function TypoSyncClient() {
               isPaused: gameState.isPaused,
             }}
             uploadedFileName={uploadedFileName}
+            onExportMap={handleExportMap}
+            onImportMap={handleImportMap}
+            cloudProcessingEnabled={cloudProcessingEnabled}
+            onCloudProcessingToggle={handleCloudProcessingToggle}
+            mapFileName={mapFileName}
+            isAudioLoadedForPreAnalyzed={isAudioLoadedForPreAnalyzed}
           />
         </div>
 
@@ -320,6 +542,7 @@ export default function TypoSyncClient() {
                     SCORING: GAME_CONFIG.SCORING,
                   }}
                   onPlayAgain={handleStartGame}
+                  onStopGame={handleStopGame}
                 />
               </div>
             </div>
@@ -369,26 +592,16 @@ export default function TypoSyncClient() {
         </section>
       </main>
 
-      {/* Error Display */}
-      {error && (
-        <div className="fixed bottom-4 right-4 max-w-md z-50">
-          <div className="bg-error border-2 border-error text-white p-4 shadow-[4px_4px_0px_#000] pixel-border">
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">⚠️</span>
-              <div>
-                <h4 className="font-['Press_Start_2P'] text-sm mb-2">ERROR</h4>
-                <p className="text-xs mb-3 leading-relaxed">{error}</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="bg-white text-error px-3 py-1 font-['Press_Start_2P'] text-xs border border-white hover:bg-error hover:text-white transition-all duration-200"
-                >
-                  🔄 RELOAD
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <NotificationOverlay
+        error={error}
+        validationWarnings={validationWarnings}
+        showWarnings={showWarnings}
+        onCloseWarnings={() => setShowWarnings(false)}
+        onDismissWarnings={() => {
+          setShowWarnings(false)
+          setValidationWarnings([])
+        }}
+      />
     </div>
   )
 }

@@ -114,7 +114,7 @@ const validateUberCommentForm = (
     if (error instanceof ZodError) {
       const formattedErrors: { [key in keyof UberCommentFormData]?: string } = {}
 
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         const field = err.path[0] as keyof UberCommentFormData
         formattedErrors[field] = err.message
       })

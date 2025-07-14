@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
 
     // Handle Zod validation errors
     if (error instanceof ZodError) {
-      const errorMessage = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
+      const errorMessage = error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
       return NextResponse.json(
         createErrorResponse('VALIDATION_ERROR', `Invalid input: ${errorMessage}`),
         { status: HttpStatus.BAD_REQUEST },
