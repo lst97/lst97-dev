@@ -22,7 +22,6 @@ export default function TypoSyncClient() {
     stopGame,
     pauseGame,
     resumeGame,
-    resetGame,
     handleKeyPress,
     analyzeAudio,
     generateKeystrokeMap,
@@ -168,6 +167,7 @@ export default function TypoSyncClient() {
       } else {
         // Pre-analyzed data mode: load audio buffer for playback only
         try {
+          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
           const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
           const arrayBuffer = await file.arrayBuffer()
           const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
@@ -179,7 +179,7 @@ export default function TypoSyncClient() {
 
           // Clear any existing error and show success
           setError(null)
-        } catch (error) {
+        } catch {
           setError(`Oh no! The audio file couldn't be loaded. Please try a different file.`)
           setIsAudioLoadedForPreAnalyzed(false)
         }
@@ -199,7 +199,7 @@ export default function TypoSyncClient() {
    * Start game handler
    */
   const handleStartGame = useCallback(() => {
-    const { audioBuffer, keystrokeMap, hiddenNotes, audioContext } = audioState
+    const { audioBuffer, keystrokeMap, hiddenNotes } = audioState
 
     if (!audioBuffer || keystrokeMap.length === 0) {
       console.error('Cannot start game: missing audio data or keystroke map', {
@@ -235,7 +235,7 @@ export default function TypoSyncClient() {
       )
 
       mapImportExportService.downloadGameMap(gameMapData, uploadedFileName)
-    } catch (error) {
+    } catch {
       setError(`Something went wrong during the export. Please try again.`)
     }
   }, [audioState, currentAudioFile, uploadedFileName, setError])
@@ -342,22 +342,16 @@ export default function TypoSyncClient() {
   /**
    * Demo selection handler
    */
-  const handleDemoSelection = useCallback(
-    (demoLevel: string) => {
-      setSelectedDemo(demoLevel)
-    },
-    [],
-  )
+  const handleDemoSelection = useCallback((demoLevel: string) => {
+    setSelectedDemo(demoLevel)
+  }, [])
 
   /**
    * Demo loading state handler
    */
-  const handleDemoLoadingSet = useCallback(
-    (loading: boolean) => {
-      setIsDemoLoading(loading)
-    },
-    [],
-  )
+  const handleDemoLoadingSet = useCallback((loading: boolean) => {
+    setIsDemoLoading(loading)
+  }, [])
 
   /**
    * Cloud processing toggle handler
@@ -470,6 +464,7 @@ export default function TypoSyncClient() {
       >
         <Image
           src="/metronome-pixel-art.gif"
+          unoptimized
           alt="Metronome Pixel Art"
           quality={100}
           width={1024}

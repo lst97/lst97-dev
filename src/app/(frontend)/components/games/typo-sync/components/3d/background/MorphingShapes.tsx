@@ -3,12 +3,12 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import type { Keystroke } from '../../../types'
+import type { GameState, Keystroke } from '../../../types'
 
 interface MorphingShapesProps {
   keystrokeMap: Keystroke[]
   gameTime: number
-  gameState: any
+  gameState: GameState
 }
 
 interface ShapeState {

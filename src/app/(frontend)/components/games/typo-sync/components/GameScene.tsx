@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import type { Keystroke, GameConfig } from '../types'
+import type { Keystroke, GameConfig, GameState } from '../types'
 import {
   KeystrokeNote,
   HitZone,
@@ -15,7 +15,7 @@ import { GAME_CONFIG, CANVAS_WIDTH } from '../config'
 interface GameSceneProps {
   keystrokeMap: Keystroke[]
   gameTime: number
-  gameState: any
+  gameState: GameState
   beatTimestamps: number[]
   gameConfig?: GameConfig
   onKeystrokeUpdate?: (keystroke: Keystroke) => void

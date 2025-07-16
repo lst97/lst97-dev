@@ -138,7 +138,7 @@ export function PixelParticle({
   }, [])
 
   return (
-    <group ref={particleRef} position={position as any}>
+    <group ref={particleRef} position={position}>
       <mesh>
         <boxGeometry 
           ref={collectGeometry} 

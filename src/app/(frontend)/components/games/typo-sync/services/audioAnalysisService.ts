@@ -464,7 +464,7 @@ export class AudioAnalysisService {
 }
 
 // Create default instance
-export const audioAnalysisService = new AudioAnalysisService()
+export const audioAnalysisService = new AudioAnalysisService(process.env.TYPO_SYNC_BACKEND_URL)
 
 // Types for service responses
 export type AudioServiceResult<T> = {

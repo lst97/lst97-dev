@@ -1,4 +1,9 @@
-import type { SessionStats } from '../types'
+import type {
+  SessionStats,
+  TypoSyncStore,
+  ZustandGetter,
+  ZustandSetter,
+} from '../types'
 // TODO: Add session history to local storage and make use of it
 export interface SessionActions {
   startSession: () => void
@@ -7,9 +12,14 @@ export interface SessionActions {
   loadSessionHistory: () => void
 }
 
-export const createSessionActions = (set: any, get: any): SessionActions => ({
+export const createSessionActions = (
+  set: ZustandSetter<TypoSyncStore>,
+  get: ZustandGetter<TypoSyncStore>,
+): SessionActions => ({
   startSession: () => {
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const sessionId = `session_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`
 
     const newSession: SessionStats = {
       id: sessionId,
@@ -28,7 +38,7 @@ export const createSessionActions = (set: any, get: any): SessionActions => ({
       averageReactionTime: 0,
     }
 
-    set((state: any) => ({
+    set(() => ({
       currentSession: newSession,
     }))
   },
@@ -54,7 +64,7 @@ export const createSessionActions = (set: any, get: any): SessionActions => ({
       averageReactionTime: gameState.averageReactionTime,
     }
 
-    set((state: any) => ({
+    set(() => ({
       currentSession: updatedSession,
     }))
   },
@@ -64,7 +74,7 @@ export const createSessionActions = (set: any, get: any): SessionActions => ({
 
     if (!currentSession || !currentSession.endTime) return
 
-    set((state: any) => ({
+    set((state: TypoSyncStore) => ({
       sessionHistory: [...state.sessionHistory, currentSession],
       currentSession: null,
     }))

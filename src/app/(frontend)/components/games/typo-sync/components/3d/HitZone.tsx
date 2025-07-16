@@ -15,13 +15,7 @@ interface HitZoneProps {
   onKeystrokeUpdate?: (keystroke: Keystroke) => void
 }
 
-export function HitZone({
-  keystrokeMap,
-  gameTime,
-  beatTimestamps,
-  gameConfig = GAME_CONFIG,
-  onKeystrokeUpdate,
-}: HitZoneProps) {
+export function HitZone({ gameTime, beatTimestamps, gameConfig = GAME_CONFIG }: HitZoneProps) {
   const lineRef = useRef<THREE.Group>(null)
   const glowRef = useRef<THREE.Mesh>(null)
 

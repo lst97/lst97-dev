@@ -5,6 +5,7 @@ import type {
   Keystroke,
   HiddenNote,
   MelodyNote,
+  RawGameMapData,
 } from '../types'
 
 /**
@@ -134,9 +135,12 @@ export class MapImportExportService {
     if (!result.isValid) return result
 
     // Validate checksum
-    const checksum = (gameMapData as any).checksum
-    const { checksum: _, ...dataWithoutChecksum } = gameMapData as any
-    const calculatedChecksum = await this.calculateChecksum(dataWithoutChecksum)
+    const rawData = gameMapData as RawGameMapData
+    const checksum = rawData.checksum
+    const { checksum: _, ...dataWithoutChecksum } = rawData
+    const calculatedChecksum = await this.calculateChecksum(
+      dataWithoutChecksum as Omit<GameMapExport, 'checksum'>,
+    )
     if (checksum !== calculatedChecksum) {
       result.errors.push('Invalid checksum: data may be corrupted')
       result.isValid = false
@@ -145,7 +149,7 @@ export class MapImportExportService {
     // Validate music hash if music file is provided
     if (musicFile) {
       const currentMusicHash = await this.calculateFileHash(musicFile)
-      const expectedHash = (gameMapData as any).musicHash
+      const expectedHash = rawData.musicHash
       if (currentMusicHash !== expectedHash) {
         result.hashMatch = false
         result.warnings.push(
@@ -155,8 +159,8 @@ export class MapImportExportService {
     }
 
     // Validate data types and structure
-    const data = gameMapData as any
-    if (typeof data.bpm !== 'number' || data.bpm <= 0) {
+    const data = rawData
+    if (typeof data.bpm !== 'number' || (data.bpm as number) <= 0) {
       result.errors.push('Invalid BPM: must be a positive number')
       result.isValid = false
     }
@@ -171,21 +175,26 @@ export class MapImportExportService {
       result.isValid = false
     }
 
-    if (typeof data.analysis_info !== 'object') {
+    if (typeof data.analysis_info !== 'object' || data.analysis_info === null) {
       result.errors.push('Invalid analysis_info: must be an object')
       result.isValid = false
     }
 
     if (result.isValid) {
+      // Type assertions for validated data
+      const beatTimestamps = data.beat_timestamps as number[]
+      const melodyMap = data.melody_map as MelodyNote[]
+      const musicDuration = data.musicDuration as number
+
       // Validate timestamp constraints
       const maxTimestamp = Math.max(
-        ...data.beat_timestamps,
-        ...data.melody_map.map((note: MelodyNote) => note.start_time + note.duration),
+        ...beatTimestamps,
+        ...melodyMap.map((note) => note.start_time + note.duration),
       )
 
-      if (maxTimestamp > data.musicDuration) {
+      if (maxTimestamp > musicDuration) {
         result.timestampErrors.push(
-          `Timestamp exceeds music duration: ${maxTimestamp}s > ${data.musicDuration}s`,
+          `Timestamp exceeds music duration: ${maxTimestamp}s > ${musicDuration}s`,
         )
         result.isValid = false
       }
@@ -196,12 +205,11 @@ export class MapImportExportService {
           result.errors.push('Invalid keystroke_map: must be an array')
           result.isValid = false
         } else {
-          const keystrokeMaxTime = Math.max(
-            ...data.keystroke_map.map((ks: Keystroke) => ks.startTime + ks.duration),
-          )
-          if (keystrokeMaxTime > data.musicDuration) {
+          const keystrokeMap = data.keystroke_map as Keystroke[]
+          const keystrokeMaxTime = Math.max(...keystrokeMap.map((ks) => ks.startTime + ks.duration))
+          if (keystrokeMaxTime > musicDuration) {
             result.timestampErrors.push(
-              `Keystroke timestamp exceeds music duration: ${keystrokeMaxTime}s > ${data.musicDuration}s`,
+              `Keystroke timestamp exceeds music duration: ${keystrokeMaxTime}s > ${musicDuration}s`,
             )
             result.isValid = false
           }
@@ -214,12 +222,11 @@ export class MapImportExportService {
           result.errors.push('Invalid hidden_notes: must be an array')
           result.isValid = false
         } else {
-          const hiddenMaxTime = Math.max(
-            ...data.hidden_notes.map((hn: HiddenNote) => hn.startTime + hn.duration),
-          )
-          if (hiddenMaxTime > data.musicDuration) {
+          const hiddenNotes = data.hidden_notes as HiddenNote[]
+          const hiddenMaxTime = Math.max(...hiddenNotes.map((hn) => hn.startTime + hn.duration))
+          if (hiddenMaxTime > musicDuration) {
             result.timestampErrors.push(
-              `Hidden note timestamp exceeds music duration: ${hiddenMaxTime}s > ${data.musicDuration}s`,
+              `Hidden note timestamp exceeds music duration: ${hiddenMaxTime}s > ${musicDuration}s`,
             )
             result.isValid = false
           }

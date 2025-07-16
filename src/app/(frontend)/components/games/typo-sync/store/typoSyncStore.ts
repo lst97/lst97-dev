@@ -50,6 +50,7 @@ const initialAudioState: AudioState = {
   audioContext: null,
   audioSource: null,
   soundEffects: {
+    beat: null,
     base: null,
     hiHat: null,
     tambourine: null,

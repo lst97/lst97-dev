@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import type { Keystroke } from '../../types'
 import { PixelParticle } from './PixelParticle'
 import { GAME_CONFIG, CANVAS_HEIGHT, screenToGameSpace } from '../../config'
@@ -10,7 +10,7 @@ interface HiddenBurstProps {
   gameTime: number
 }
 
-export function HiddenNoteBurst({ note, gameTime }: HiddenBurstProps) {
+export function HiddenNoteBurst({ note }: HiddenBurstProps) {
   const [particles, setParticles] = useState(() => {
     const parts = []
     const num = 8 // Reduced from 12 to 8 for better performance

@@ -45,16 +45,17 @@ export function KeystrokeNote({
 
   const uniqueId = useMemo(() => {
     // Ensure startTime is valid before using toFixed
-    const timeStr = keystroke && Number.isFinite(keystroke.startTime) ? keystroke.startTime.toFixed(4) : '0.0000'
+    const timeStr =
+      keystroke && Number.isFinite(keystroke.startTime) ? keystroke.startTime.toFixed(4) : '0.0000'
     const key = keystroke?.key || ''
     const type = keystroke?.type || ''
 
-    return `${timeStr}-${key}-${type}-${Math.random().toString(36).substr(2, 9)}`
-  }, [keystroke?.startTime, keystroke?.key, keystroke?.type])
+    return `${timeStr}-${key}-${type}-${Math.random().toString(36).substring(2, 11)}`
+  }, [keystroke])
 
   const displayKey = useMemo(() => {
     if (!keystroke?.key) return ''
-    
+
     switch (keystroke.key) {
       case '[Space]':
         return '▭'
@@ -67,7 +68,7 @@ export function KeystrokeNote({
 
   const boxColor = useMemo(() => {
     if (!keystroke?.state) return 'rgb(252, 211, 77)'
-    
+
     switch (keystroke.state) {
       case 'hit':
         return gameConfig.COLORS.HIT
@@ -82,7 +83,7 @@ export function KeystrokeNote({
 
   const textColor = useMemo(() => {
     if (!keystroke?.state) return '#000000'
-    
+
     switch (keystroke.state) {
       case 'hit':
         return '#000000'
@@ -96,25 +97,27 @@ export function KeystrokeNote({
   }, [keystroke?.state])
 
   // Validation check - ensure all required props are valid
-  const isValidProps = keystroke &&
+  const isValidProps =
+    keystroke &&
     Number.isFinite(keystroke.startTime) &&
     keystroke.key &&
     keystroke.type &&
     Number.isFinite(gameTime)
 
-  if (!isValidProps) {
-    console.error('Invalid KeystrokeNote props detected:', {
-      keystroke,
-      gameTime,
-      hasValidStartTime: keystroke ? Number.isFinite(keystroke.startTime) : false,
-      hasValidKey: keystroke ? !!keystroke.key : false,
-      hasValidType: keystroke ? !!keystroke.type : false,
-      hasValidGameTime: Number.isFinite(gameTime),
-    })
-    return null // Don't render if props are invalid
-  }
-
+  // All hooks must be called unconditionally
   useEffect(() => {
+    if (!isValidProps) {
+      console.error('Invalid KeystrokeNote props detected:', {
+        keystroke,
+        gameTime,
+        hasValidStartTime: keystroke ? Number.isFinite(keystroke.startTime) : false,
+        hasValidKey: keystroke ? !!keystroke.key : false,
+        hasValidType: keystroke ? !!keystroke.type : false,
+        hasValidGameTime: Number.isFinite(gameTime),
+      })
+      return
+    }
+
     const prevState = prevStateRef.current
     const currentState = keystroke.state
 
@@ -226,15 +229,18 @@ export function KeystrokeNote({
     prevStateRef.current = currentState
   }, [
     keystroke,
-    keystroke.state,
-    keystroke.timingAccuracy,
+    keystroke?.state,
+    keystroke?.timingAccuracy,
     isBreaking,
     uniqueId,
     gameTime,
     onKeystrokeUpdate,
+    isValidProps,
   ])
 
   useEffect(() => {
+    if (!isValidProps) return
+
     const timeDifference = keystroke.startTime - gameTime
     const distance = timeDifference * gameConfig.NOTE_SPEED_PPS
     const screenX = gameConfig.HIT_ZONE_X + distance
@@ -247,7 +253,16 @@ export function KeystrokeNote({
         setBreakStartTime(0)
       }
     }
-  }, [gameTime, keystroke.startTime, uniqueId, isBreaking, breakStartTime])
+  }, [
+    gameTime,
+    keystroke?.startTime,
+    gameConfig.HIT_ZONE_X,
+    gameConfig.NOTE_SPEED_PPS,
+    uniqueId,
+    isBreaking,
+    breakStartTime,
+    isValidProps,
+  ])
 
   // Cleanup particles when component unmounts or after extended time
   useEffect(() => {
@@ -270,7 +285,7 @@ export function KeystrokeNote({
   }, [pixelParticles.length])
 
   useFrame(() => {
-    if (!groupRef.current) return
+    if (!groupRef.current || !isValidProps) return
 
     const { gameState } = useTypoSyncStore.getState()
 
@@ -344,6 +359,11 @@ export function KeystrokeNote({
       setFadeOpacity(1.0)
     }
   })
+
+  // Early return after all hooks have been called
+  if (!isValidProps) {
+    return null
+  }
 
   return (
     <>

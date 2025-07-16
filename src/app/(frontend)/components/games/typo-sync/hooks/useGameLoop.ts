@@ -302,6 +302,39 @@ export function useGameLoop(): GameLoopHook {
   }, [gameState.isActive, gameState.gameStartTime, currentKeystrokeMap, updateFeedback])
 
   /**
+   * Stop the game
+   */
+  const stopGame = useCallback(() => {
+    // Stop all audio sources
+    audioSourcesRef.current.forEach((source) => {
+      try {
+        source.stop()
+      } catch (error) {
+        console.error('Error stopping audio source:', error)
+      }
+    })
+    audioSourcesRef.current = []
+
+    // Clear feedback timeout
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current)
+      feedbackTimeoutRef.current = null
+    }
+
+    // Reset game state
+    setGameState((prev) => ({
+      ...prev,
+      isActive: false,
+      isLoading: false,
+      gameStartTime: null,
+      score: 0,
+      feedback: '',
+      feedbackColor: '#FFFFFF',
+      gameLoopActive: false,
+    }))
+  }, [])
+
+  /**
    * Start the game with audio and keystroke data
    */
   const startGame = useCallback(
@@ -361,41 +394,8 @@ export function useGameLoop(): GameLoopHook {
         setGameState((prev) => ({ ...prev, isLoading: false }))
       }
     },
-    [],
+    [stopGame],
   )
-
-  /**
-   * Stop the game
-   */
-  const stopGame = useCallback(() => {
-    // Stop all audio sources
-    audioSourcesRef.current.forEach((source) => {
-      try {
-        source.stop()
-      } catch (error) {
-        // Source may already be stopped
-      }
-    })
-    audioSourcesRef.current = []
-
-    // Clear feedback timeout
-    if (feedbackTimeoutRef.current) {
-      clearTimeout(feedbackTimeoutRef.current)
-      feedbackTimeoutRef.current = null
-    }
-
-    // Reset game state
-    setGameState((prev) => ({
-      ...prev,
-      isActive: false,
-      isLoading: false,
-      gameStartTime: null,
-      score: 0,
-      feedback: '',
-      feedbackColor: '#FFFFFF',
-      gameLoopActive: false,
-    }))
-  }, [])
 
   /**
    * Game loop for checking missed notes

@@ -41,13 +41,13 @@ export type * from './types'
 export const GAME_METADATA = {
   id: 'typo-sync',
   title: 'Typo-Sync',
-  description: 'Rhythm typing game with AI-powered beat detection',
+  description: 'Rhythm typing game with enhanced beat detection algorithm',
   version: '1.0.0',
   category: 'rhythm',
-  tags: ['typing', 'rhythm', 'music', 'ai', 'beat-detection', 'three.js'],
+  tags: ['typing', 'rhythm', 'music', 'beat-detection', 'three.js'],
   requiresBackend: true,
   features: [
-    'AI-powered audio analysis',
+    'Enhance audio analysis algorithm',
     'Real-time beat and melody detection',
     '3D pixel art visualization with Three.js',
     'Rhythm-based typing gameplay',

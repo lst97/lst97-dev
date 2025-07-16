@@ -1,9 +1,17 @@
 import { GAME_CONFIG } from '../config'
-import type { Keystroke } from '../types'
+import type {
+  Keystroke,
+  TypoSyncStore,
+  ZustandGetter,
+  ZustandSetter,
+} from '../types'
 
 export interface KeystrokeActions {
   handleKeyPress: (key: string, currentTime: number) => void
-  updateKeystrokeState: (keystroke: Keystroke, newState: Keystroke['state']) => void
+  updateKeystrokeState: (
+    keystroke: Keystroke,
+    newState: Keystroke['state'],
+  ) => void
   updateKeystrokeStateWithTiming: (
     keystroke: Keystroke,
     newState: Keystroke['state'],
@@ -17,25 +25,19 @@ export interface KeystrokeActions {
 
 let missDetectionInterval: NodeJS.Timeout | null = null
 
-export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => ({
+export const createKeystrokeActions = (
+  set: ZustandSetter<TypoSyncStore>,
+  get: ZustandGetter<TypoSyncStore>,
+): KeystrokeActions => ({
   handleKeyPress: (key: string, currentTime: number) => {
     const { gameState, audioState } = get()
     if (!gameState.isActive || gameState.isPaused) return
 
     // Calculate current game time (excluding pause time)
-    const totalGameTime = gameState.gameStartTime ? currentTime - gameState.gameStartTime / 1000 : 0
+    const totalGameTime = gameState.gameStartTime
+      ? currentTime - gameState.gameStartTime / 1000
+      : 0
     const gameTime = totalGameTime - gameState.totalPauseTime / 1000
-
-    // Find upcoming keystrokes that match the pressed key
-    const matchingKeystrokes = audioState.keystrokeMap.filter(
-      (k: any) => k.state === 'upcoming' && k.key === key,
-    )
-
-    // Debug info for [Enter] key specifically
-    if (key === '[Enter]') {
-      const allEnterKeystrokes = audioState.keystrokeMap.filter((k: any) => k.key === '[Enter]')
-      const upcomingEnterKeystrokes = allEnterKeystrokes.filter((k: any) => k.state === 'upcoming')
-    }
 
     // Check for hidden notes FIRST (space key pressed on pre-generated hidden notes in keystrokeMap)
     // Hidden notes have priority over regular keystrokes
@@ -43,15 +45,18 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
     if (key === '[Space]') {
       // Find upcoming hidden notes in the unified keystrokeMap
       const upcomingHiddenNotes = audioState.keystrokeMap.filter(
-        (k: any) => k.type === 'hidden' && k.state === 'upcoming' && k.key === '[Space]',
+        (k: Keystroke) =>
+          k.type === 'hidden' && k.state === 'upcoming' && k.key === '[Space]',
       )
 
       if (upcomingHiddenNotes.length > 0) {
-        const closestHiddenNote = upcomingHiddenNotes.reduce((closest: any, current: any) => {
-          const closestTiming = Math.abs(gameTime - closest.startTime)
-          const currentTiming = Math.abs(gameTime - current.startTime)
-          return currentTiming < closestTiming ? current : closest
-        })
+        const closestHiddenNote = upcomingHiddenNotes.reduce(
+          (closest: Keystroke, current: Keystroke) => {
+            const closestTiming = Math.abs(gameTime - closest.startTime)
+            const currentTiming = Math.abs(gameTime - current.startTime)
+            return currentTiming < closestTiming ? current : closest
+          },
+        )
 
         const hiddenNoteTiming = Math.abs(gameTime - closestHiddenNote.startTime)
 
@@ -66,7 +71,7 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
           get().updateKeystrokeState(closestHiddenNote, 'hit')
 
           // Update score for hidden note
-          set((state: any) => ({
+          set((state: TypoSyncStore) => ({
             gameState: {
               ...state.gameState,
               score: state.gameState.score + 25,
@@ -90,7 +95,7 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
 
     // Check for any upcoming keystrokes near the hit zone (regardless of key)
     const nearbyKeystrokes = audioState.keystrokeMap.filter(
-      (k: any) => k.state === 'upcoming' && k.type !== 'hidden',
+      (k: Keystroke) => k.state === 'upcoming' && k.type !== 'hidden',
     )
 
     if (nearbyKeystrokes.length === 0) {
@@ -98,11 +103,13 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
     }
 
     // Find the closest upcoming keystroke in time (regardless of key)
-    const closestKeystroke = nearbyKeystrokes.reduce((closest: any, current: any) => {
-      const closestTiming = Math.abs(gameTime - closest.startTime)
-      const currentTiming = Math.abs(gameTime - current.startTime)
-      return currentTiming < closestTiming ? current : closest
-    })
+    const closestKeystroke = nearbyKeystrokes.reduce(
+      (closest: Keystroke, current: Keystroke) => {
+        const closestTiming = Math.abs(gameTime - closest.startTime)
+        const currentTiming = Math.abs(gameTime - current.startTime)
+        return currentTiming < closestTiming ? current : closest
+      },
+    )
 
     // Calculate timing difference
     const timing = gameTime - closestKeystroke.startTime
@@ -118,8 +125,6 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
 
     // Determine hit result
     let isCorrect = false
-    let feedback = 'MISS'
-    let feedbackColor = GAME_CONFIG.COLORS.MISSED
     let points = -25
     let timingAccuracy: 'sync' | 'early' | 'late' | 'miss' = 'miss'
     let newState: 'hit' | 'missed' | 'typo' = 'missed'
@@ -130,15 +135,9 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
         isCorrect = true
         newState = 'hit'
         if (timingAbs <= 0.08) {
-          // Perfect hit - expanded window from 50ms to 80ms for better sync detection
-          feedback = 'PERFECT!'
-          feedbackColor = GAME_CONFIG.COLORS.HIT
           points = 100
           timingAccuracy = 'sync'
         } else {
-          // Good hit
-          feedback = timing < 0 ? 'EARLY' : 'LATE'
-          feedbackColor = timing < 0 ? GAME_CONFIG.COLORS.EARLY : GAME_CONFIG.COLORS.LATE
           points = 50
           timingAccuracy = timing < 0 ? 'early' : 'late'
         }
@@ -149,16 +148,12 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
         // Wrong key within typo window
         isCorrect = false
         newState = 'typo'
-        feedback = 'TYPO!'
-        feedbackColor = GAME_CONFIG.COLORS.TYPO
         points = -50
         timingAccuracy = 'miss'
       } else {
         // Correct key but outside hit window (late miss)
         isCorrect = false
         newState = 'missed'
-        feedback = 'MISS'
-        feedbackColor = GAME_CONFIG.COLORS.MISSED
         points = -25
         timingAccuracy = 'miss'
       }
@@ -166,14 +161,17 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
       // Too far from any keystroke
       isCorrect = false
       newState = 'missed'
-      feedback = 'MISS'
-      feedbackColor = GAME_CONFIG.COLORS.MISSED
       points = -25
       timingAccuracy = 'miss'
     }
 
     // Update keystroke state with timing information
-    get().updateKeystrokeStateWithTiming(closestKeystroke, newState, timingAccuracy, timing)
+    get().updateKeystrokeStateWithTiming(
+      closestKeystroke,
+      newState,
+      timingAccuracy,
+      timing,
+    )
 
     // Update metrics
     get().updateStreak(isCorrect)
@@ -182,7 +180,7 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
     get().calculateAccuracy()
 
     // Update score and metrics
-    set((state: any) => ({
+    set((state: TypoSyncStore) => ({
       gameState: {
         ...state.gameState,
         score: state.gameState.score + points,
@@ -197,11 +195,14 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
     }))
   },
 
-  updateKeystrokeState: (keystroke: Keystroke, newState: Keystroke['state']) => {
-    set((state: any) => ({
+  updateKeystrokeState: (
+    keystroke: Keystroke,
+    newState: Keystroke['state'],
+  ) => {
+    set((state: TypoSyncStore) => ({
       audioState: {
         ...state.audioState,
-        keystrokeMap: state.audioState.keystrokeMap.map((k: any) =>
+        keystrokeMap: state.audioState.keystrokeMap.map((k: Keystroke) =>
           k.startTime === keystroke.startTime && k.key === keystroke.key
             ? { ...k, state: newState }
             : k,
@@ -216,10 +217,10 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
     timingAccuracy: 'sync' | 'early' | 'late' | 'miss',
     hitTiming: number,
   ) => {
-    set((state: any) => ({
+    set((state: TypoSyncStore) => ({
       audioState: {
         ...state.audioState,
-        keystrokeMap: state.audioState.keystrokeMap.map((k: any) =>
+        keystrokeMap: state.audioState.keystrokeMap.map((k: Keystroke) =>
           k.startTime === keystroke.startTime && k.key === keystroke.key
             ? { ...k, state: newState, timingAccuracy, hitTiming }
             : k,
@@ -250,7 +251,8 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
 
   checkForMissedKeystrokes: () => {
     const { gameState, audioState } = get()
-    if (!gameState.isActive || !gameState.gameStartTime || gameState.isPaused) return
+    if (!gameState.isActive || !gameState.gameStartTime || gameState.isPaused)
+      return
 
     const currentTime = performance.now() / 1000
     const totalGameTime = currentTime - gameState.gameStartTime / 1000
@@ -258,27 +260,31 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
     const MISS_WINDOW = GAME_CONFIG.TIMING_WINDOWS.IGNORE
 
     // Find regular keystrokes that have passed the miss window and should be marked as missed
-    const regularKeystrokesToMiss = audioState.keystrokeMap.filter((keystroke: any) => {
-      if (keystroke.state !== 'upcoming') return false
-      if (keystroke.type === 'hidden') return false // Hidden notes handled separately
+    const regularKeystrokesToMiss = audioState.keystrokeMap.filter(
+      (keystroke: Keystroke) => {
+        if (keystroke.state !== 'upcoming') return false
+        if (keystroke.type === 'hidden') return false // Hidden notes handled separately
 
-      const timeDifference = gameTime - keystroke.startTime
-      // If game time has passed keystroke time by more than MISS_WINDOW, mark as missed
-      return timeDifference > MISS_WINDOW
-    })
+        const timeDifference = gameTime - keystroke.startTime
+        // If game time has passed keystroke time by more than MISS_WINDOW, mark as missed
+        return timeDifference > MISS_WINDOW
+      },
+    )
 
     // Find hidden notes that have passed the window (for cleanup only, no penalty)
-    const expiredHiddenNotes = audioState.keystrokeMap.filter((keystroke: any) => {
-      if (keystroke.state !== 'upcoming') return false
-      if (keystroke.type !== 'hidden') return false
+    const expiredHiddenNotes = audioState.keystrokeMap.filter(
+      (keystroke: Keystroke) => {
+        if (keystroke.state !== 'upcoming') return false
+        if (keystroke.type !== 'hidden') return false
 
-      const timeDifference = gameTime - keystroke.startTime
-      return timeDifference > MISS_WINDOW * 2 // Give hidden notes more time before cleanup
-    })
+        const timeDifference = gameTime - keystroke.startTime
+        return timeDifference > MISS_WINDOW * 2 // Give hidden notes more time before cleanup
+      },
+    )
 
     // Process regular keystroke misses (with penalty)
     if (regularKeystrokesToMiss.length > 0) {
-      regularKeystrokesToMiss.forEach((keystroke: any) => {
+      regularKeystrokesToMiss.forEach((keystroke: Keystroke) => {
         // Update keystroke state to missed with timing info
         get().updateKeystrokeStateWithTiming(keystroke, 'missed', 'miss', 0)
 
@@ -286,7 +292,7 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
         get().updateStreak(false)
 
         // Update metrics
-        set((state: any) => ({
+        set((state: TypoSyncStore) => ({
           gameState: {
             ...state.gameState,
             totalKeystrokes: state.gameState.totalKeystrokes + 1,
@@ -302,7 +308,7 @@ export const createKeystrokeActions = (set: any, get: any): KeystrokeActions => 
 
     // Process expired hidden notes (cleanup only, no penalty)
     if (expiredHiddenNotes.length > 0) {
-      expiredHiddenNotes.forEach((hiddenNote: any) => {
+      expiredHiddenNotes.forEach((hiddenNote: Keystroke) => {
         // Just mark as missed for cleanup, no score penalty
         get().updateKeystrokeState(hiddenNote, 'missed')
       })

@@ -1,12 +1,20 @@
 import { audioAnalysisService, safeServiceCall } from '../services/audioAnalysisService'
 import { generateCompleteKeystrokeMap } from '../utils/keystrokeGeneration'
-import type { AnalysisResult, Priority } from '../types'
+import type {
+  AnalysisResult,
+  Priority,
+  Keystroke,
+  HiddenNote,
+  TypoSyncStore,
+  ZustandSetter,
+  ZustandGetter,
+} from '../types'
 
 export interface AudioActions {
   setAnalyzing: (isAnalyzing: boolean) => void
   setAnalysisResult: (result: AnalysisResult | null) => void
-  setKeystrokeMap: (map: any[]) => void
-  setHiddenNotes: (notes: any[]) => void
+  setKeystrokeMap: (map: Keystroke[]) => void
+  setHiddenNotes: (notes: HiddenNote[]) => void
   setAudioBuffer: (buffer: AudioBuffer | null) => void
   setAudioContext: (context: AudioContext | null) => void
   analyzeAudio: (audioFile: File, priority?: Priority) => Promise<void>
@@ -19,39 +27,42 @@ export interface AudioActions {
 
 let currentStreamCloseFunction: (() => void) | null = null
 
-export const createAudioActions = (set: any, get: any): AudioActions => ({
+export const createAudioActions = (
+  set: ZustandSetter<TypoSyncStore>,
+  get: ZustandGetter<TypoSyncStore>,
+): AudioActions => ({
   setAnalyzing: (isAnalyzing: boolean) => {
-    set((state: any) => ({
+    set((state) => ({
       audioState: { ...state.audioState, isAnalyzing },
     }))
   },
 
   setAnalysisResult: (result: AnalysisResult | null) => {
-    set((state: any) => ({
+    set((state) => ({
       audioState: { ...state.audioState, analysisResult: result },
     }))
   },
 
-  setKeystrokeMap: (map: any[]) => {
-    set((state: any) => ({
+  setKeystrokeMap: (map: Keystroke[]) => {
+    set((state) => ({
       audioState: { ...state.audioState, keystrokeMap: map },
     }))
   },
 
-  setHiddenNotes: (notes: any[]) => {
-    set((state: any) => ({
+  setHiddenNotes: (notes: HiddenNote[]) => {
+    set((state) => ({
       audioState: { ...state.audioState, hiddenNotes: notes },
     }))
   },
 
   setAudioBuffer: (buffer: AudioBuffer | null) => {
-    set((state: any) => ({
+    set((state) => ({
       audioState: { ...state.audioState, audioBuffer: buffer },
     }))
   },
 
   setAudioContext: (context: AudioContext | null) => {
-    set((state: any) => ({
+    set((state) => ({
       audioState: { ...state.audioState, audioContext: context },
     }))
 
@@ -69,7 +80,10 @@ export const createAudioActions = (set: any, get: any): AudioActions => ({
       get().setError(null)
 
       // Set up audio context and buffer first
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const audioContext = new (window.AudioContext ||
+        // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+        (window as any & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext ||
+        AudioContext)()
       get().setAudioContext(audioContext)
 
       const arrayBuffer = await audioFile.arrayBuffer()
@@ -258,7 +272,7 @@ export const createAudioActions = (set: any, get: any): AudioActions => ({
     try {
       const soundEffects = await audioAnalysisService.loadSoundEffects(audioState.audioContext)
 
-      set((state: any) => ({
+      set((state) => ({
         audioState: {
           ...state.audioState,
           soundEffects,

@@ -128,12 +128,6 @@ export default function AnimatedGrid() {
     }
 
     mesh.instanceMatrix.needsUpdate = true
-
-    // Calculate center position
-    const centerX = GRID_SIZE_X - 3
-    const centerY = GRID_SIZE_Y - 3
-    const centerPosX = CAMERA_LEFT + centerX * GRID_SPACING_X + GRID_SPACING_X / 2
-    const centerPosY = CAMERA_TOP - centerY * GRID_SPACING_Y - GRID_SPACING_Y / 2
   }, [tempMatrix])
 
   // Initialize grid and matrices
@@ -143,10 +137,7 @@ export default function AnimatedGrid() {
 
   // Animation logic
   const triggerAnimations = useCallback((currentTime: number) => {
-    let newSquares = 0
-    let bottomRightActivity = 0
-
-    squareStates.current.forEach((square, index) => {
+    squareStates.current.forEach((square) => {
       // Skip if currently animating (either fading or rotating)
       if (square.fadeDirection !== 'idle' || square.isRotating) return
 
@@ -171,27 +162,9 @@ export default function AnimatedGrid() {
           square.rotation = 0 // Reset rotation for new squares
           square.targetRotation = 0 // Reset target rotation
           square.isRotating = false // Not rotating
-          newSquares++
-
-          // Track center activity (distance <= 2 from center)
-          const centerX = GRID_SIZE_X - 3
-          const centerY = GRID_SIZE_Y - 3
-          const distance = Math.sqrt(
-            Math.pow(square.x - centerX, 2) + Math.pow(square.y - centerY, 2),
-          )
-          if (distance <= 2) {
-            bottomRightActivity++
-          }
         }
       }
     })
-
-    // Debug probability distribution
-    const percentage = newSquares > 0 ? Math.round((bottomRightActivity / newSquares) * 100) : 0
-    // Find the center square
-    const centerX = GRID_SIZE_X - 3
-    const centerY = GRID_SIZE_Y - 3
-    const centerSquare = squareStates.current.find((s) => s.x === centerX && s.y === centerY)
   }, [])
 
   // Main animation frame loop

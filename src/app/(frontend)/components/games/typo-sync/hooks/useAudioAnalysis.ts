@@ -17,6 +17,7 @@ export function useAudioAnalysis(): AudioAnalysisHook {
     audioContext: null,
     audioSource: null,
     soundEffects: {
+      beat: null,
       base: null,
       hiHat: null,
       tambourine: null,
@@ -152,6 +153,7 @@ export function useAudioAnalysis(): AudioAnalysisHook {
       audioContext: audioContextRef.current,
       audioSource: null,
       soundEffects: {
+        beat: null,
         base: null,
         hiHat: null,
         tambourine: null,

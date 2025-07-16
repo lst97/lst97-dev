@@ -1,4 +1,4 @@
-import { generate } from 'random-words'
+import { generate, type GenerateOptions } from 'random-words'
 
 /**
  * Enhanced word generation using random-words library
@@ -26,7 +26,7 @@ const DIFFICULTY_LENGTHS = {
  * Generate words based on specified criteria
  */
 export function generateWords(options: WordGenerationOptions = {}): string[] {
-  const { maxLength, minLength, count = 1, difficulty, seed } = options
+  const { maxLength, minLength, count = 1, difficulty } = options
 
   // Determine length constraints
   let lengthConstraints: { min?: number; max?: number } = {}
@@ -42,12 +42,14 @@ export function generateWords(options: WordGenerationOptions = {}): string[] {
   const words: string[] = []
   for (let i = 0; i < count; i++) {
     try {
-      const wordOptions: any = {}
+      const wordOptions: GenerateOptions = {}
 
       if (lengthConstraints.min && lengthConstraints.max) {
         // Try to get a word within the range
         const targetLength =
-          Math.floor(Math.random() * (lengthConstraints.max - lengthConstraints.min + 1)) +
+          Math.floor(
+            Math.random() * (lengthConstraints.max - lengthConstraints.min + 1),
+          ) +
           lengthConstraints.min
         wordOptions.minLength = targetLength
         wordOptions.maxLength = targetLength
@@ -63,10 +65,11 @@ export function generateWords(options: WordGenerationOptions = {}): string[] {
       if (word && typeof word === 'string') {
         words.push(word.toLowerCase())
       }
-    } catch (error) {
+    } catch {
       // Fallback to simple word generation if constraints fail
       const fallbackResult = generate(1)
-      const fallbackWord = Array.isArray(fallbackResult) ? fallbackResult[0] : fallbackResult
+      const fallbackWord =
+        Array.isArray(fallbackResult) ? fallbackResult[0] : fallbackResult
       if (fallbackWord && typeof fallbackWord === 'string') {
         words.push(fallbackWord.toLowerCase())
       }

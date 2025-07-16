@@ -1,14 +1,28 @@
-import type { GameState } from '../types'
+import type {
+  GameState,
+  HiddenNote,
+  Keystroke,
+  TypoSyncStore,
+  ZustandGetter,
+  ZustandSetter,
+} from '../types'
 
 export interface GameControlActions {
-  startGame: (audioBuffer: AudioBuffer, keystrokeMap: any[], hiddenNotes: any[]) => Promise<void>
+  startGame: (
+    audioBuffer: AudioBuffer,
+    keystrokeMap: Keystroke[],
+    hiddenNotes: HiddenNote[],
+  ) => Promise<void>
   stopGame: () => void
   pauseGame: () => void
   resumeGame: () => void
   resetGame: () => void
 }
 
-export const createGameControlActions = (set: any, get: any): GameControlActions => ({
+export const createGameControlActions = (
+  set: ZustandSetter<TypoSyncStore>,
+  get: ZustandGetter<TypoSyncStore>,
+): GameControlActions => ({
   startGame: async (audioBuffer, keystrokeMap, hiddenNotes) => {
     const now = performance.now()
     const { audioState } = get()
@@ -62,7 +76,7 @@ export const createGameControlActions = (set: any, get: any): GameControlActions
           audioSource.start(0)
 
           // Store audio source for stopping later
-          set((state: any) => ({
+          set((state: TypoSyncStore) => ({
             audioState: {
               ...state.audioState,
               audioSource,
@@ -76,7 +90,7 @@ export const createGameControlActions = (set: any, get: any): GameControlActions
         console.warn('🔇 No audio context or buffer available - running in silent mode')
       }
 
-      set((state: any) => ({
+      set((state: TypoSyncStore) => ({
         gameState: {
           ...state.gameState,
           isActive: true,
@@ -131,14 +145,14 @@ export const createGameControlActions = (set: any, get: any): GameControlActions
     if (audioState.audioSource) {
       try {
         audioState.audioSource.stop()
-      } catch (error) {
+      } catch {
         console.warn('Audio source already stopped or invalid')
       }
     }
 
     const endTime = Date.now()
 
-    set((state: any) => ({
+    set((state: TypoSyncStore) => ({
       gameState: {
         ...state.gameState,
         isActive: false,
@@ -167,7 +181,7 @@ export const createGameControlActions = (set: any, get: any): GameControlActions
       audioState.audioContext.suspend()
     }
 
-    set((state: any) => ({
+    set((state: TypoSyncStore) => ({
       gameState: {
         ...state.gameState,
         isPaused: true,
@@ -188,7 +202,7 @@ export const createGameControlActions = (set: any, get: any): GameControlActions
 
     const pauseDuration = gameState.pauseStartTime ? resumeTime - gameState.pauseStartTime : 0
 
-    set((state: any) => ({
+    set((state: TypoSyncStore) => ({
       gameState: {
         ...state.gameState,
         isPaused: false,
@@ -232,7 +246,7 @@ export const createGameControlActions = (set: any, get: any): GameControlActions
       sessionDuration: 0,
     }
 
-    set((state: any) => ({
+    set((state: TypoSyncStore) => ({
       gameState: initialGameState,
       audioState: {
         ...state.audioState,

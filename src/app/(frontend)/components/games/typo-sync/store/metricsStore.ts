@@ -1,3 +1,5 @@
+import type { TypoSyncStore, ZustandGetter, ZustandSetter } from '../types'
+
 export interface MetricsActions {
   updateScore: (change: number, feedback?: string, color?: string) => void
   calculateWPM: () => void
@@ -6,9 +8,12 @@ export interface MetricsActions {
   addHitTiming: (timing: number) => void
 }
 
-export const createMetricsActions = (set: any, get: any): MetricsActions => ({
+export const createMetricsActions = (
+  set: ZustandSetter<TypoSyncStore>,
+  get: ZustandGetter<TypoSyncStore>,
+): MetricsActions => ({
   updateScore: (change: number, feedback = '', color = '#ffffff') => {
-    set((state: any) => ({
+    set((state: TypoSyncStore) => ({
       gameState: {
         ...state.gameState,
         score: state.gameState.score + change, // Allow negative scores
@@ -26,8 +31,11 @@ export const createMetricsActions = (set: any, get: any): MetricsActions => ({
     const currentTime = performance.now()
     const totalGameTime = currentTime - gameState.gameStartTime
     const pauseTime =
-      gameState.isPaused && gameState.pauseStartTime ? currentTime - gameState.pauseStartTime : 0
-    const effectiveGameTime = totalGameTime - gameState.totalPauseTime - pauseTime
+      gameState.isPaused && gameState.pauseStartTime
+        ? currentTime - gameState.pauseStartTime
+        : 0
+    const effectiveGameTime =
+      totalGameTime - gameState.totalPauseTime - pauseTime
 
     const timeElapsed = effectiveGameTime / 1000 / 60 // minutes
     const wordsTyped = gameState.correctKeystrokes / 5 // Standard: 5 characters = 1 word
@@ -39,7 +47,7 @@ export const createMetricsActions = (set: any, get: any): MetricsActions => ({
       wpm = Math.round(wordsTyped / timeElapsed)
     }
 
-    set((state: any) => ({
+    set((state: TypoSyncStore) => ({
       gameState: {
         ...state.gameState,
         wpm,
@@ -51,7 +59,7 @@ export const createMetricsActions = (set: any, get: any): MetricsActions => ({
     const { gameState } = get()
 
     if (gameState.totalKeystrokes === 0) {
-      set((state: any) => ({
+      set((state: TypoSyncStore) => ({
         gameState: {
           ...state.gameState,
           accuracy: 0,
@@ -60,9 +68,11 @@ export const createMetricsActions = (set: any, get: any): MetricsActions => ({
       return
     }
 
-    const accuracy = Math.round((gameState.correctKeystrokes / gameState.totalKeystrokes) * 100)
+    const accuracy = Math.round(
+      (gameState.correctKeystrokes / gameState.totalKeystrokes) * 100,
+    )
 
-    set((state: any) => ({
+    set((state: TypoSyncStore) => ({
       gameState: {
         ...state.gameState,
         accuracy: Math.max(0, Math.min(100, accuracy)),
@@ -71,7 +81,7 @@ export const createMetricsActions = (set: any, get: any): MetricsActions => ({
   },
 
   updateStreak: (wasCorrect: boolean) => {
-    set((state: any) => {
+    set((state: TypoSyncStore) => {
       const newStreak = wasCorrect ? state.gameState.streak + 1 : 0
       const newMaxStreak = Math.max(state.gameState.maxStreak, newStreak)
       const newCorrectKeystrokes = wasCorrect
@@ -95,10 +105,11 @@ export const createMetricsActions = (set: any, get: any): MetricsActions => ({
   },
 
   addHitTiming: (timing: number) => {
-    set((state: any) => {
+    set((state: TypoSyncStore) => {
       const newHitTimings = [...state.gameState.hitTimings, timing]
       const averageReactionTime =
-        newHitTimings.reduce((a, b) => a + Math.abs(b), 0) / newHitTimings.length
+        newHitTimings.reduce((a, b) => a + Math.abs(b), 0) /
+        newHitTimings.length
 
       return {
         gameState: {

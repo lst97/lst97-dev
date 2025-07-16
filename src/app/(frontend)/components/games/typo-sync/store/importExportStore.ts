@@ -1,66 +1,119 @@
-import type { GameMapExport, GameMapValidationResult } from '../types'
+import type {
+  GameMapExport,
+  GameMapValidationResult,
+  Keystroke,
+  RawGameMapData,
+  TypoSyncStore,
+  ZustandGetter,
+  ZustandSetter,
+  AnalysisResult,
+  AnalysisInfo,
+  MelodyNote,
+} from '../types'
 
 export interface ImportExportActions {
-  importBeatMap: (beatMapData: any) => void
-  importKeystrokeMap: (keystrokeMapData: any) => void
+  importBeatMap: (beatMapData: unknown) => void
+  importKeystrokeMap: (keystrokeMapData: unknown) => void
   exportGameMap: () => GameMapExport | null
-  importGameMap: (gameMapData: GameMapExport, currentMusicFile?: File) => Promise<GameMapValidationResult>
+  importGameMap: (
+    gameMapData: GameMapExport,
+    currentMusicFile?: File,
+  ) => Promise<GameMapValidationResult>
   setError: (error: string | null) => void
 }
 
-export const createImportExportActions = (set: any, get: any): ImportExportActions => ({
-  importBeatMap: (beatMapData: any) => {
+export const createImportExportActions = (
+  set: ZustandSetter<TypoSyncStore>,
+  get: ZustandGetter<TypoSyncStore>,
+): ImportExportActions => ({
+  importBeatMap: (beatMapData: unknown) => {
     try {
-      const beatMap = beatMapData.beatMap || beatMapData
-      
-      if (beatMap && Array.isArray(beatMap.beat_timestamps)) {
-        const beatTimestamps = beatMap.beat_timestamps
-        const melodyMap = beatMap.melody_map || beatMap.melody_notes || []
-        const analysisInfo = beatMap.analysis_info || {}
-        const bpm = beatMap.bpm || analysisInfo.tempo || 120
+      // Type validation and casting
+      if (!beatMapData || typeof beatMapData !== 'object') {
+        throw new Error('Invalid beat map data: not an object')
+      }
 
-        set((state: any) => ({
+      const rawData = beatMapData as RawGameMapData
+      const beatMap = (rawData.beatMap || rawData) as RawGameMapData
+
+      if (beatMap && Array.isArray(beatMap.beat_timestamps)) {
+        const beatTimestamps = beatMap.beat_timestamps as number[]
+        const melodyMap = (beatMap.melody_map || beatMap.melody_notes || []) as MelodyNote[]
+        const rawAnalysisInfo = beatMap.analysis_info || {}
+        const bpm = (beatMap.bpm || (rawAnalysisInfo as { tempo?: number }).tempo || 120) as number
+
+        // Create a proper AnalysisInfo object with default values
+        const analysisInfo: AnalysisInfo = {
+          total_beats:
+            (rawAnalysisInfo as Partial<AnalysisInfo>).total_beats || beatTimestamps.length,
+          total_subdivisions:
+            (rawAnalysisInfo as Partial<AnalysisInfo>).total_subdivisions ||
+            beatTimestamps.length * 4,
+          consolidated_notes:
+            (rawAnalysisInfo as Partial<AnalysisInfo>).consolidated_notes || melodyMap.length,
+          filtered_notes:
+            (rawAnalysisInfo as Partial<AnalysisInfo>).filtered_notes || melodyMap.length,
+          min_note_duration: (rawAnalysisInfo as Partial<AnalysisInfo>).min_note_duration || 0.1,
+          subdivision_factor: (rawAnalysisInfo as Partial<AnalysisInfo>).subdivision_factor || 4,
+        }
+
+        const analysisResult: AnalysisResult = {
+          beat_timestamps: beatTimestamps,
+          melody_map: melodyMap,
+          lyrics: '',
+          analysis_info: analysisInfo,
+          bpm: bpm,
+        }
+
+        set((state) => ({
           audioState: {
             ...state.audioState,
-            analysisResult: {
-              beat_timestamps: beatTimestamps,
-              melody_map: melodyMap,
-              lyrics: '',
-              analysis_info: analysisInfo,
-              bpm: bpm,
-            },
+            analysisResult,
           },
         }))
       } else {
         throw new Error('Invalid beat map format')
       }
-    } catch (error) {
+    } catch {
       get().setError('Failed to import beat map')
     }
   },
 
-  importKeystrokeMap: (keystrokeMapData: any) => {
+  importKeystrokeMap: (keystrokeMapData: unknown) => {
     try {
-      const keystrokeMap = keystrokeMapData.keystrokeMap || keystrokeMapData
+      // Type validation and casting
+      if (!keystrokeMapData) {
+        throw new Error('Invalid keystroke map data: null or undefined')
+      }
+
+      let keystrokeMap: unknown
+
+      // Handle different input formats
+      if (typeof keystrokeMapData === 'object' && keystrokeMapData !== null) {
+        const dataObj = keystrokeMapData as { keystrokeMap?: unknown }
+        keystrokeMap = dataObj.keystrokeMap || keystrokeMapData
+      } else {
+        keystrokeMap = keystrokeMapData
+      }
 
       if (Array.isArray(keystrokeMap)) {
-        const resetKeystrokeMap = keystrokeMap.map((k: any) => ({
+        const resetKeystrokeMap = keystrokeMap.map((k: Keystroke) => ({
           ...k,
           state: 'upcoming' as const,
           timingAccuracy: undefined,
           hitTiming: undefined,
         }))
 
-        set((state: any) => ({
+        set((state) => ({
           audioState: {
             ...state.audioState,
             keystrokeMap: resetKeystrokeMap,
           },
         }))
       } else {
-        throw new Error('Invalid keystroke map format')
+        throw new Error('Invalid keystroke map format: not an array')
       }
-    } catch (error) {
+    } catch {
       get().setError('Failed to import keystroke map')
     }
   },
@@ -69,7 +122,7 @@ export const createImportExportActions = (set: any, get: any): ImportExportActio
     try {
       const state = get()
       const { audioState } = state
-      
+
       if (!audioState.analysisResult) {
         throw new Error('No analysis result available for export')
       }
@@ -128,24 +181,24 @@ export const createImportExportActions = (set: any, get: any): ImportExportActio
           const mapImportService = await import('../services/mapImportExportService')
           const service = mapImportService.mapImportExportService
           const currentMusicHash = await service.calculateFileHash(currentMusicFile)
-          
+
           if (currentMusicHash !== gameMapData.musicHash) {
             validationResult.hashMatch = false
-            
+
             // Get current music duration
             const currentMusicDuration = await service.getAudioDuration(currentMusicFile)
             const expectedDuration = gameMapData.musicDuration
-            
+
             validationResult.warnings.push(
-              `⚠️ Music hash mismatch detected! The current music file may not match the exported map.`
+              `⚠️ Music hash mismatch detected! The current music file may not match the exported map.`,
             )
             validationResult.warnings.push(
-              `Expected music duration: ${expectedDuration.toFixed(2)}s | Current music duration: ${currentMusicDuration.toFixed(2)}s`
+              `Expected music duration: ${expectedDuration.toFixed(2)}s | Current music duration: ${currentMusicDuration.toFixed(2)}s`,
             )
-            
+
             if (Math.abs(currentMusicDuration - expectedDuration) > 2) {
               validationResult.warnings.push(
-                `⏱️ Duration difference is significant (${Math.abs(currentMusicDuration - expectedDuration).toFixed(2)}s). This may cause timing issues.`
+                `⏱️ Duration difference is significant (${Math.abs(currentMusicDuration - expectedDuration).toFixed(2)}s). This may cause timing issues.`,
               )
             }
           }
@@ -165,17 +218,18 @@ export const createImportExportActions = (set: any, get: any): ImportExportActio
       }
 
       // Import the data into store
-      set((state: any) => ({
+      set((state) => ({
         audioState: {
           ...state.audioState,
           analysisResult,
-          keystrokeMap: gameMapData.keystroke_map ? 
-            gameMapData.keystroke_map.map((k: any) => ({
-              ...k,
-              state: 'upcoming' as const,
-              timingAccuracy: undefined,
-              hitTiming: undefined,
-            })) : [],
+          keystrokeMap: gameMapData.keystroke_map
+            ? gameMapData.keystroke_map.map((k: Keystroke) => ({
+                ...k,
+                state: 'upcoming' as const,
+                timingAccuracy: undefined,
+                hitTiming: undefined,
+              }))
+            : [],
           hiddenNotes: gameMapData.hidden_notes || [],
         },
       }))
@@ -202,7 +256,7 @@ export const createImportExportActions = (set: any, get: any): ImportExportActio
   },
 
   setError: (error: string | null) => {
-    set((state: any) => ({
+    set(() => ({
       error,
     }))
   },

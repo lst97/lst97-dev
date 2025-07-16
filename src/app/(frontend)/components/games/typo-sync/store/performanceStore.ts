@@ -1,4 +1,11 @@
-import type { PerformanceMetrics, TimingHistogram } from '../types'
+import type {
+  PerformanceMetrics,
+  SessionStats,
+  TimingHistogram,
+  TypoSyncStore,
+  ZustandGetter,
+  ZustandSetter,
+} from '../types'
 
 export interface PerformanceActions {
   updatePerformanceMetrics: () => void
@@ -6,7 +13,10 @@ export interface PerformanceActions {
   getTimingHistogram: () => TimingHistogram
 }
 
-export const createPerformanceActions = (set: any, get: any): PerformanceActions => ({
+export const createPerformanceActions = (
+  set: ZustandSetter<TypoSyncStore>,
+  get: ZustandGetter<TypoSyncStore>,
+): PerformanceActions => ({
   updatePerformanceMetrics: () => {
     const { sessionHistory } = get()
 
@@ -14,18 +24,23 @@ export const createPerformanceActions = (set: any, get: any): PerformanceActions
 
     const recentSessions = sessionHistory.slice(-10)
 
-    const totalWPM = recentSessions.reduce((sum: number, session: any) => sum + session.wpm, 0)
-    const totalAccuracy = recentSessions.reduce(
-      (sum: number, session: any) => sum + session.accuracy,
+    const totalWPM = recentSessions.reduce(
+      (sum: number, session: SessionStats) => sum + session.wpm,
       0,
     )
-    const bestStreak = Math.max(...sessionHistory.map((session: any) => session.maxStreak))
+    const totalAccuracy = recentSessions.reduce(
+      (sum: number, session: SessionStats) => sum + session.accuracy,
+      0,
+    )
+    const bestStreak = Math.max(
+      ...sessionHistory.map((session: SessionStats) => session.maxStreak),
+    )
 
     const averageWPM = totalWPM / recentSessions.length
     const averageAccuracy = totalAccuracy / recentSessions.length
 
     const totalPlayTime = sessionHistory.reduce(
-      (sum: number, session: any) => sum + session.duration,
+      (sum: number, session: SessionStats) => sum + session.duration,
       0,
     )
 
@@ -35,9 +50,11 @@ export const createPerformanceActions = (set: any, get: any): PerformanceActions
       const newSessions = sessionHistory.slice(-5)
 
       const oldAvgWPM =
-        oldSessions.reduce((sum: number, s: any) => sum + s.wpm, 0) / oldSessions.length
+        oldSessions.reduce((sum: number, s: SessionStats) => sum + s.wpm, 0) /
+        oldSessions.length
       const newAvgWPM =
-        newSessions.reduce((sum: number, s: any) => sum + s.wpm, 0) / newSessions.length
+        newSessions.reduce((sum: number, s: SessionStats) => sum + s.wpm, 0) /
+        newSessions.length
 
       improvementRate = ((newAvgWPM - oldAvgWPM) / oldAvgWPM) * 100
     }
@@ -45,7 +62,6 @@ export const createPerformanceActions = (set: any, get: any): PerformanceActions
     const confidenceLevel = get().calculateConfidenceLevel()
 
     // Analyze keystroke patterns for weak/strong keys
-    const allTimings = sessionHistory.flatMap((session: any) => session.hitTimings || [])
     const weakKeys: string[] = []
     const strongKeys: string[] = []
 
@@ -74,25 +90,29 @@ export const createPerformanceActions = (set: any, get: any): PerformanceActions
     const recentSessions = sessionHistory.slice(-5)
 
     const avgAccuracy =
-      recentSessions.reduce((sum: number, session: any) => sum + session.accuracy, 0) /
+      recentSessions.reduce(
+        (sum: number, session: SessionStats) => sum + session.accuracy,
+        0,
+      ) /
       recentSessions.length
     const avgWPM =
-      recentSessions.reduce((sum: number, session: any) => sum + session.wpm, 0) /
+      recentSessions.reduce((sum: number, session: SessionStats) => sum + session.wpm, 0) /
       recentSessions.length
 
     const accuracyVariance =
-      recentSessions.reduce((sum: number, session: any) => {
+      recentSessions.reduce((sum: number, session: SessionStats) => {
         const diff = session.accuracy - avgAccuracy
         return sum + diff * diff
       }, 0) / recentSessions.length
 
     const wpmVariance =
-      recentSessions.reduce((sum: number, session: any) => {
+      recentSessions.reduce((sum: number, session: SessionStats) => {
         const diff = session.wpm - avgWPM
         return sum + diff * diff
       }, 0) / recentSessions.length
 
-    const consistencyScore = Math.max(0, 100 - Math.sqrt(accuracyVariance) - Math.sqrt(wpmVariance))
+    const consistencyScore =
+      Math.max(0, 100 - Math.sqrt(accuracyVariance) - Math.sqrt(wpmVariance))
     const performanceScore = (avgAccuracy + Math.min(avgWPM, 100)) / 2
 
     const confidenceLevel = consistencyScore * 0.4 + performanceScore * 0.6
@@ -103,7 +123,9 @@ export const createPerformanceActions = (set: any, get: any): PerformanceActions
   getTimingHistogram: () => {
     const { sessionHistory } = get()
 
-    const allTimings = sessionHistory.flatMap((session: any) => session.hitTimings || [])
+    const allTimings = sessionHistory.flatMap(
+      (session: SessionStats) => session.hitTimings || [],
+    )
 
     if (allTimings.length === 0) {
       return {
@@ -117,11 +139,14 @@ export const createPerformanceActions = (set: any, get: any): PerformanceActions
     }
 
     const earlyHits = allTimings.filter((timing: number) => timing < -0.05).length
-    const syncHits = allTimings.filter((timing: number) => Math.abs(timing) <= 0.05).length
+    const syncHits = allTimings.filter(
+      (timing: number) => Math.abs(timing) <= 0.05,
+    ).length
     const lateHits = allTimings.filter((timing: number) => timing > 0.05).length
 
     const averageTiming =
-      allTimings.reduce((sum: number, timing: number) => sum + timing, 0) / allTimings.length
+      allTimings.reduce((sum: number, timing: number) => sum + timing, 0) /
+      allTimings.length
 
     const variance =
       allTimings.reduce((sum: number, timing: number) => {

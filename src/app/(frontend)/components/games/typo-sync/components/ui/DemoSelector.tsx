@@ -1,16 +1,17 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { mapImportExportService } from '../../services/mapImportExportService'
+import type { AnalysisResult, Keystroke, HiddenNote } from '../../types'
 
 interface DemoSelectorProps {
   onDemoSelect: (demoLevel: string) => void
   onDemoLoadingSet: (loading: boolean) => void
   onAudioContextSet: (context: AudioContext) => void
   onAudioBufferSet: (buffer: AudioBuffer) => void
-  onAnalysisResultSet: (result: any) => void
-  onKeystrokeMapSet: (map: any[]) => void
-  onHiddenNotesSet: (notes: any[]) => void
+  onAnalysisResultSet: (result: AnalysisResult) => void
+  onKeystrokeMapSet: (map: Keystroke[]) => void
+  onHiddenNotesSet: (notes: HiddenNote[]) => void
   onCurrentAudioFileSet: (file: File) => void
   onUploadedFileNameSet: (name: string) => void
   onIsAudioLoadedForPreAnalyzedSet: (loaded: boolean) => void
@@ -134,7 +135,10 @@ export default function DemoSelector({
       }
 
       // Load audio buffer
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const audioContext = new (window.AudioContext ||
+        (window as typeof window & { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext ||
+        AudioContext)()
       const arrayBuffer = await audioFile.arrayBuffer()
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
 

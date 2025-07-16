@@ -154,11 +154,7 @@ export interface AudioState {
   audioBuffer: AudioBuffer | null
   audioContext: AudioContext | null
   audioSource: AudioBufferSourceNode | null
-  soundEffects: {
-    base: AudioBuffer | null
-    hiHat: AudioBuffer | null
-    tambourine: AudioBuffer | null
-  }
+  soundEffects: SoundEffects
 }
 
 // Hit result types
@@ -300,6 +296,21 @@ export interface TimingHistogram {
   standardDeviation: number
 }
 
+// Import Zustand types for proper typing
+import type { StateCreator } from 'zustand'
+
+// Zustand store state setter and getter types
+export type ZustandSetter<T> = Parameters<StateCreator<T>>[0]
+export type ZustandGetter<T> = Parameters<StateCreator<T>>[1]
+
+// Sound effects interface
+export interface SoundEffects {
+  base: AudioBuffer | null
+  hiHat: AudioBuffer | null
+  tambourine: AudioBuffer | null
+  beat: AudioBuffer | null
+}
+
 // Zustand store types
 export interface TypoSyncStore {
   // Game state
@@ -366,6 +377,7 @@ export interface TypoSyncStore {
   // Sound effects
   playKeystrokeSound: (key: string) => void
   playHiddenNoteSound: () => void
+  loadSoundEffects: () => Promise<void>
 
   // Miss detection
   startMissDetection: () => void
@@ -373,8 +385,8 @@ export interface TypoSyncStore {
   checkForMissedKeystrokes: () => void
 
   // Import/Export functionality
-  importBeatMap: (beatMapData: any) => void
-  importKeystrokeMap: (keystrokeMapData: any) => void
+  importBeatMap: (beatMapData: unknown) => void
+  importKeystrokeMap: (keystrokeMapData: unknown) => void
   exportGameMap: () => GameMapExport | null
   importGameMap: (
     gameMapData: GameMapExport,
@@ -401,6 +413,24 @@ export interface GameMapExport {
   analysis_info: AnalysisInfo
   lyrics?: string
   checksum: string
+}
+
+// Raw imported game map data (before validation)
+export interface RawGameMapData {
+  version?: unknown
+  exportedAt?: unknown
+  musicHash?: unknown
+  musicName?: unknown
+  musicDuration?: unknown
+  bpm?: unknown
+  beat_timestamps?: unknown
+  melody_map?: unknown
+  keystroke_map?: unknown
+  hidden_notes?: unknown
+  analysis_info?: unknown
+  lyrics?: unknown
+  checksum?: unknown
+  [key: string]: unknown
 }
 
 export interface GameMapValidationResult {
