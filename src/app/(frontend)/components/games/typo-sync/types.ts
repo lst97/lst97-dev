@@ -186,7 +186,7 @@ export interface GameRendererProps {
 
 // Game controls props
 export interface GameControlsProps {
-  onFileUpload: (file: File) => void
+  onFileUpload: (file: File, turnstileToken?: string) => void
   onRegenerateKeystrokeMap: () => void
   onStartGame: () => void
   onPauseGame: () => void

@@ -1,4 +1,4 @@
-import { generate, type GenerateOptions } from 'random-words'
+import { generate } from 'random-words'
 
 /**
  * Enhanced word generation using random-words library
@@ -42,14 +42,12 @@ export function generateWords(options: WordGenerationOptions = {}): string[] {
   const words: string[] = []
   for (let i = 0; i < count; i++) {
     try {
-      const wordOptions: GenerateOptions = {}
+      const wordOptions: { minLength?: number; maxLength?: number } = {}
 
       if (lengthConstraints.min && lengthConstraints.max) {
         // Try to get a word within the range
         const targetLength =
-          Math.floor(
-            Math.random() * (lengthConstraints.max - lengthConstraints.min + 1),
-          ) +
+          Math.floor(Math.random() * (lengthConstraints.max - lengthConstraints.min + 1)) +
           lengthConstraints.min
         wordOptions.minLength = targetLength
         wordOptions.maxLength = targetLength
@@ -68,8 +66,7 @@ export function generateWords(options: WordGenerationOptions = {}): string[] {
     } catch {
       // Fallback to simple word generation if constraints fail
       const fallbackResult = generate(1)
-      const fallbackWord =
-        Array.isArray(fallbackResult) ? fallbackResult[0] : fallbackResult
+      const fallbackWord = Array.isArray(fallbackResult) ? fallbackResult[0] : fallbackResult
       if (fallbackWord && typeof fallbackWord === 'string') {
         words.push(fallbackWord.toLowerCase())
       }

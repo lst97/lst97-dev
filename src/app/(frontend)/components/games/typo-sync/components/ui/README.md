@@ -16,6 +16,9 @@ This folder contains all React UI components for the TypoSync game that are rend
 - **KeyboardLayout.tsx**  
   Shows a visual keyboard layout for finger positioning and a heatmap of key usage, adapting to the current game state.
 
+- **DemoSelector.tsx**  
+  Lets users select and load pre-made demo levels (Medium, Hard, Expert) for TypoSync. Handles demo map/audio loading, state updates, and error handling. Useful for quickly experiencing the game without uploading custom files.  
+
 - **overlay/**  
   Contains overlay UI components rendered above the main game, such as:
   - **PauseOverlay.tsx**: Displays a modal overlay when the game is paused, with options to resume or stop the game.

@@ -156,13 +156,13 @@ export default function TypoSyncClient() {
    * File upload handler with auto-generation
    */
   const handleFileUpload = useCallback(
-    async (file: File) => {
+    async (file: File, turnstileToken?: string) => {
       setUploadedFileName(file.name)
       setCurrentAudioFile(file)
 
       if (cloudProcessingEnabled) {
         // Cloud processing: send to server for analysis
-        await analyzeAudio(file, priority)
+        await analyzeAudio(file, priority, turnstileToken)
         // Auto-generation happens in the store after analysis completes
       } else {
         // Pre-analyzed data mode: load audio buffer for playback only

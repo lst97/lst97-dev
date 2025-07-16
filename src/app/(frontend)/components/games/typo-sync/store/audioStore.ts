@@ -17,7 +17,7 @@ export interface AudioActions {
   setHiddenNotes: (notes: HiddenNote[]) => void
   setAudioBuffer: (buffer: AudioBuffer | null) => void
   setAudioContext: (context: AudioContext | null) => void
-  analyzeAudio: (audioFile: File, priority?: Priority) => Promise<void>
+  analyzeAudio: (audioFile: File, priority?: Priority, turnstileToken?: string) => Promise<void>
   cancelAnalysis: () => void
   generateKeystrokeMap: () => void
   playKeystrokeSound: (key: string, type?: string) => void
@@ -74,7 +74,7 @@ export const createAudioActions = (
     }
   },
 
-  analyzeAudio: async (audioFile: File, priority: 'high' | 'normal' | 'batch' = 'normal') => {
+  analyzeAudio: async (audioFile: File, priority: 'high' | 'normal' | 'batch' = 'normal', turnstileToken?: string) => {
     try {
       get().setAnalyzing(true)
       get().setError(null)
@@ -92,7 +92,7 @@ export const createAudioActions = (
 
       // Step 1: Upload file for analysis to get task ID
       const uploadResult = await safeServiceCall(() =>
-        audioAnalysisService.uploadForAnalysis(audioFile, priority),
+        audioAnalysisService.uploadForAnalysis(audioFile, priority, turnstileToken),
       )
 
       if (!uploadResult.success || !uploadResult.data) {

@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import type { ExtendedGameControlsProps, Priority } from '../../types'
 import { FaUpload, FaPlay, FaPause, FaStop, FaRedo, FaDownload, FaFileImport } from 'react-icons/fa'
-import { MdAnalytics, MdCloud, MdCloudOff } from 'react-icons/md'
+import { MdAnalytics, MdCloud, MdCloudOff, MdSecurity } from 'react-icons/md'
 import { PixelCheckbox } from '@/app/(frontend)/components/ui'
+import Turnstile from '@/app/(frontend)/components/security/Turnstile'
 
 export default function GameControls({
   onFileUpload,
@@ -30,16 +31,48 @@ export default function GameControls({
 }: ExtendedGameControlsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const mapImportInputRef = useRef<HTMLInputElement>(null)
+  const [turnstileToken, setTurnstileToken] = useState<string>('')
+  const [showTurnstile, setShowTurnstile] = useState(false)
+  const [showVerificationText, setShowVerificationText] = useState(false)
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      onFileUpload(file)
+      onFileUpload(file, turnstileToken)
+      // Clean up turnstile token after upload to require re-verification for next upload
+      setTurnstileToken('')
+      setShowVerificationText(false)
     }
   }
 
   const handleFileClick = () => {
+    if (cloudProcessingEnabled && !turnstileToken) {
+      setShowTurnstile(true)
+      return
+    }
     fileInputRef.current?.click()
+  }
+
+  const handleTurnstileVerify = (token: string) => {
+    setTurnstileToken(token)
+    setShowTurnstile(false)
+    setShowVerificationText(true)
+    
+    // Hide verification text after 3 seconds
+    setTimeout(() => {
+      setShowVerificationText(false)
+    }, 3000)
+    
+    // Automatically trigger file upload after verification
+    setTimeout(() => {
+      fileInputRef.current?.click()
+    }, 100)
+  }
+
+  const handleTurnstileExpired = () => {
+    setTurnstileToken('')
+    setShowTurnstile(false)
+    setShowVerificationText(false)
   }
 
   const handleMapImportChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +85,15 @@ export default function GameControls({
   const handleMapImportClick = () => {
     mapImportInputRef.current?.click()
   }
+
+  // Reset turnstile token when cloud processing is disabled
+  React.useEffect(() => {
+    if (!cloudProcessingEnabled) {
+      setTurnstileToken('')
+      setShowTurnstile(false)
+      setShowVerificationText(false)
+    }
+  }, [cloudProcessingEnabled])
 
   return (
     <div className="bg-card border-2 border-border shadow-[4px_4px_0px_#000] pixel-border p-6">
@@ -78,6 +120,7 @@ export default function GameControls({
             )}
           </div>
         </div>
+
 
         {/* Priority Selector - Only show when cloud processing is enabled */}
         {cloudProcessingEnabled && (
@@ -129,6 +172,11 @@ export default function GameControls({
                   <MdAnalytics className="animate-spin" />
                   {isDemoLoading ? 'LOADING DEMO...' : cloudProcessingEnabled ? 'ANALYZING...' : 'LOADING...'}
                 </>
+              ) : cloudProcessingEnabled && !turnstileToken ? (
+                <>
+                  <MdSecurity />
+                  VERIFY TO UPLOAD
+                </>
               ) : (
                 <>
                   <FaUpload />
@@ -136,6 +184,26 @@ export default function GameControls({
                 </>
               )}
             </button>
+            
+            {/* Turnstile component shown under analyze button when cloud processing is enabled */}
+            {cloudProcessingEnabled && showTurnstile && (
+              <div className="w-full mt-4">
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+                  onVerify={handleTurnstileVerify}
+                  onExpired={handleTurnstileExpired}
+                  action="typo-sync-analysis"
+                />
+              </div>
+            )}
+            
+            {/* Verification status shown under analyze button */}
+            {cloudProcessingEnabled && turnstileToken && showVerificationText && (
+              <div className="flex items-center gap-2 text-xs text-accent font-['Press_Start_2P'] mt-2">
+                <MdSecurity />
+                <span>Verified ✓</span>
+              </div>
+            )}
           </div>
 
           {/* Local Processing Mode: Map Import */}

@@ -6,6 +6,7 @@ import type {
   FailureResponse,
   Priority,
 } from '../types'
+import { audioAnalysisQueryService } from './audioAnalysisQueryService'
 
 // Cache response type - matches the AnalysisResult interface
 interface CacheResponse {
@@ -26,13 +27,6 @@ interface CacheResponse {
   }
 }
 
-// Cache endpoint response wrapper
-interface CacheEndpointResponse {
-  audio_hash: string
-  result: CacheResponse
-  cached_at: string
-}
-
 // Enhanced analyze response that includes cache data when cache hit occurs
 interface EnhancedAnalyzeResponse extends Omit<AnalyzeResponse, 'cache_hit'> {
   cache_hit?: boolean
@@ -47,14 +41,6 @@ interface EnhancedAnalyzeResponse extends Omit<AnalyzeResponse, 'cache_hit'> {
 export class AudioAnalysisService {
   private readonly baseUrl: string
   private eventSource: EventSource | null = null
-  private readonly maxFileSize: number = 50 * 1024 * 1024 // 50MB
-  private readonly supportedTypes: string[] = [
-    'audio/wav',
-    'audio/mp3',
-    'audio/mpeg',
-    'audio/ogg',
-    'audio/flac',
-  ]
 
   constructor(baseUrl = 'http://127.0.0.1:8000') {
     this.baseUrl = baseUrl
@@ -66,17 +52,7 @@ export class AudioAnalysisService {
    * @throws Error if validation fails
    */
   validateFile(file: File): void {
-    // File size validation
-    if (file.size > this.maxFileSize) {
-      throw new Error(`File too large. Maximum size: ${this.maxFileSize / 1024 / 1024}MB`)
-    }
-
-    // File type validation
-    if (!this.supportedTypes.includes(file.type)) {
-      throw new Error(
-        `Unsupported file type: ${file.type}. Supported types: ${this.supportedTypes.join(', ')}`,
-      )
-    }
+    return audioAnalysisQueryService.validateFile(file)
   }
 
   /**
@@ -84,18 +60,8 @@ export class AudioAnalysisService {
    * @param file - Audio file to generate hash for
    * @returns Promise with audio hash string
    */
-  private async generateAudioHash(file: File): Promise<string> {
-    try {
-      const arrayBuffer = await file.arrayBuffer()
-      const audioBuffer = new Uint8Array(arrayBuffer)
-      const hashBuffer = await crypto.subtle.digest('SHA-256', audioBuffer)
-      const hashArray = Array.from(new Uint8Array(hashBuffer))
-      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
-
-      return hashHex
-    } catch (_error) {
-      throw new Error('Content hash generation failed')
-    }
+  async generateAudioHash(file: File): Promise<string> {
+    return audioAnalysisQueryService.generateAudioHash(file)
   }
 
   /**
@@ -104,81 +70,22 @@ export class AudioAnalysisService {
    * @returns Promise with cached analysis or null if not found
    */
   async checkCache(audioHash: string): Promise<CacheResponse | null> {
-    try {
-      const response = await fetch(`${this.baseUrl}/cache/${audioHash}`)
-
-      if (response.ok) {
-        const cacheData: CacheEndpointResponse = await response.json()
-        return cacheData.result
-      }
-
-      // 404 means not in cache, other errors should be handled
-      if (response.status === 404) {
-        return null
-      }
-
-      throw new Error(`Cache check failed: ${response.status}`)
-    } catch (error) {
-      console.warn('Cache check failed:', error)
-      return null
-    }
+    return audioAnalysisQueryService.checkCacheQuery(audioHash)
   }
 
   /**
    * Upload audio file for analysis with cache optimization
    * @param file - Audio file to analyze
    * @param priority - Processing priority (high, normal, batch)
+   * @param turnstileToken - Turnstile security token (required for cloud processing)
    * @returns Promise with enhanced response including queue info or cached data
    */
   async uploadForAnalysis(
     file: File,
     priority: Priority = 'normal',
-  ): Promise<EnhancedAnalyzeResponse> {
-    this.validateFile(file)
-
-    // Generate audio hash and check cache first
-    const audioHash = await this.generateAudioHash(file)
-    const cachedResult = await this.checkCache(audioHash)
-
-    if (cachedResult) {
-      // Return cached data in the same format as analyze response
-      return {
-        task_id: '', // Not needed for cached results
-        backend: 'in-memory',
-        cache_hit: true,
-        queue_position: 0,
-        estimated_wait_time_minutes: 0,
-        result: cachedResult,
-      }
-    }
-
-    // Cache miss - proceed with analysis
-    const formData = new FormData()
-    formData.append('audio', file)
-    formData.append('priority', priority)
-
-    const response = await fetch(`${this.baseUrl}/v2/analyze`, {
-      method: 'POST',
-      body: formData,
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
-    }
-
-    const result = (await response.json()) as EnhancedAnalyzeResponse
-
-    // If the response includes cached data (cache hit on server side)
-    if (result.cache_hit) {
-      return result
-    }
-
-    // Normal analysis response
-    return {
-      ...result,
-      cache_hit: false,
-    }
+    turnstileToken?: string,
+  ): Promise<EnhancedAnalyzeResponse & { audioHash?: string }> {
+    return audioAnalysisQueryService.uploadForAnalysisMutation({ file, priority, turnstileToken })
   }
 
   /**
@@ -187,23 +94,22 @@ export class AudioAnalysisService {
    * @returns Promise with task result
    */
   async getAnalysisResult(taskId: string): Promise<TaskResultResponse> {
-    const response = await fetch(`${this.baseUrl}/v2/results/${taskId}`)
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    return response.json()
+    return audioAnalysisQueryService.getAnalysisResultQuery(taskId)
   }
 
   /**
    * Analyze audio file with optimized caching workflow
    * @param file - Audio file to analyze
    * @param priority - Processing priority (high, normal, batch)
+   * @param turnstileToken - Turnstile security token (required for cloud processing)
    * @returns Promise with analysis result (either cached or processed)
    */
-  async analyzeAudioFile(file: File, priority: Priority = 'normal'): Promise<CacheResponse> {
-    const uploadResult = await this.uploadForAnalysis(file, priority)
+  async analyzeAudioFile(
+    file: File,
+    priority: Priority = 'normal',
+    turnstileToken?: string,
+  ): Promise<CacheResponse> {
+    const uploadResult = await this.uploadForAnalysis(file, priority, turnstileToken)
 
     // If we got cached data (either from client-side cache or server-side cache hit), return it immediately
     if (uploadResult.cache_hit && uploadResult.result) {
@@ -337,8 +243,7 @@ export class AudioAnalysisService {
    * @returns Promise with decoded audio buffer
    */
   async loadAudioBuffer(file: File, audioContext: AudioContext): Promise<AudioBuffer> {
-    const arrayBuffer = await file.arrayBuffer()
-    return audioContext.decodeAudioData(arrayBuffer)
+    return audioAnalysisQueryService.loadAudioBuffer(file, audioContext)
   }
 
   /**
@@ -356,46 +261,7 @@ export class AudioAnalysisService {
     tambourine: AudioBuffer | null
     beat: AudioBuffer | null
   }> {
-    const soundEffects = {
-      base: null as AudioBuffer | null,
-      hiHat: null as AudioBuffer | null,
-      tambourine: null as AudioBuffer | null,
-      beat: null as AudioBuffer | null,
-    }
-
-    try {
-      const [baseResponse, hiHatResponse, tambourineResponse, beatResponse] =
-        await Promise.allSettled([
-          fetch(`${baseUrl}base.mp3`).then((res) => res.arrayBuffer()),
-          fetch(`${baseUrl}hi-hat.mp3`).then((res) => res.arrayBuffer()),
-          fetch(`${baseUrl}tambourine.mp3`).then((res) => res.arrayBuffer()),
-          fetch(`${baseUrl}beat.wav`).then((res) => res.arrayBuffer()),
-        ])
-
-      if (baseResponse.status === 'fulfilled') {
-        soundEffects.base = await audioContext.decodeAudioData(baseResponse.value)
-      }
-
-      if (hiHatResponse.status === 'fulfilled') {
-        soundEffects.hiHat = await audioContext.decodeAudioData(hiHatResponse.value)
-      }
-
-      if (tambourineResponse.status === 'fulfilled') {
-        soundEffects.tambourine = await audioContext.decodeAudioData(tambourineResponse.value)
-      } else {
-        console.error('Failed to load tambourine.mp3:', tambourineResponse.reason)
-      }
-
-      if (beatResponse.status === 'fulfilled') {
-        soundEffects.beat = await audioContext.decodeAudioData(beatResponse.value)
-      } else {
-        console.error('Failed to load beat.wav:', beatResponse.reason)
-      }
-    } catch (error) {
-      console.warn('Error loading some sound effects:', error)
-    }
-
-    return soundEffects
+    return audioAnalysisQueryService.loadSoundEffects(audioContext, baseUrl)
   }
 
   /**
@@ -408,14 +274,7 @@ export class AudioAnalysisService {
     audioContext: AudioContext,
     baseUrl = '/typo-sync/',
   ): Promise<AudioBuffer | null> {
-    try {
-      const response = await fetch(`${baseUrl}melody_note.wav`)
-      const arrayBuffer = await response.arrayBuffer()
-      return audioContext.decodeAudioData(arrayBuffer)
-    } catch (error) {
-      console.error('Error loading melody sound:', error)
-      return null
-    }
+    return audioAnalysisQueryService.loadMelodySound(audioContext, baseUrl)
   }
 
   /**
@@ -434,17 +293,13 @@ export class AudioAnalysisService {
     offset = 0,
     duration?: number,
   ): AudioBufferSourceNode {
-    const source = audioContext.createBufferSource()
-    source.buffer = audioBuffer
-    source.connect(audioContext.destination)
-
-    if (duration !== undefined) {
-      source.start(when, offset, duration)
-    } else {
-      source.start(when, offset)
-    }
-
-    return source
+    return audioAnalysisQueryService.playAudioBuffer(
+      audioBuffer,
+      audioContext,
+      when,
+      offset,
+      duration,
+    )
   }
 
   /**
@@ -452,14 +307,7 @@ export class AudioAnalysisService {
    * @returns Promise with audio context (handles user gesture requirements)
    */
   async createAudioContext(): Promise<AudioContext> {
-    const audioContext = new AudioContext()
-
-    // Resume context if it's suspended (due to autoplay policy)
-    if (audioContext.state === 'suspended') {
-      await audioContext.resume()
-    }
-
-    return audioContext
+    return audioAnalysisQueryService.createAudioContext()
   }
 }
 

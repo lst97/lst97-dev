@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import type { AudioAnalysisHook, AudioState } from '../types'
-import { audioAnalysisService, safeServiceCall } from '../services/audioAnalysisService'
+import { audioAnalysisService, safeServiceCall } from '../services'
 import { generateCompleteKeystrokeMap } from '../utils/keystrokeGeneration'
 
 /**
