@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "npx depcheck --skip-missing=true --ignores='pg,magika,zustand,@tailwindcss/postcss,dependency-cruiser,path-browserify,tailwindcss,typescript,prettier,eslint,eslint-config-next,@aws-sdk/client-s3,ts-node,tsconfig-paths' && npx depcruise -v -T dot src | dot -T svg | npx depcruise-wrap-stream-in-html > dependency-graph.html && cross-env NODE_OPTIONS=--no-deprecation next build",
+    "build": "npx depcheck --skip-missing=true --ignores='pg,magika,zustand,@tailwindcss/postcss,dependency-cruiser,path-browserify,tailwindcss,typescript,prettier,eslint,eslint-config-next,@aws-sdk/client-s3,ts-node,tsconfig-paths' && npx depcruise -v -T dot src | dot -T svg | npx depcruise-wrap-stream-in-html > dependency-graph.html && cross-env NODE_OPTIONS='--no-deprecation --max-old-space-size=4096' next build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --turbopack",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
