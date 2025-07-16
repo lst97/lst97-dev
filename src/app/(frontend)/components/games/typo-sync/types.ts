@@ -26,6 +26,9 @@ export interface AnalysisResult {
 export interface AnalyzeResponse {
   task_id: string
   backend: 'celery' | 'in-memory'
+  cache_hit: boolean
+  queue_position?: number
+  estimated_wait_time_minutes?: number
 }
 
 export interface SuccessResponse {
@@ -36,14 +39,19 @@ export interface SuccessResponse {
 export interface StatusResponse {
   state: 'PENDING' | 'PROCESSING'
   status: string
+  queue_position?: number
+  estimated_wait_time_minutes?: number
 }
 
 export interface FailureResponse {
-  state: 'FAILURE'
+  state: 'FAILURE' | 'ERROR' | 'NOT_FOUND'
   status: string
 }
 
 export type TaskResultResponse = SuccessResponse | StatusResponse | FailureResponse
+
+// Priority levels for audio analysis
+export type Priority = 'high' | 'normal' | 'batch'
 
 // Game keystroke types
 export interface Keystroke {
@@ -416,4 +424,7 @@ export interface ExtendedGameControlsProps extends GameControlsProps {
   onCloudProcessingToggle: (enabled: boolean) => void
   isAudioLoadedForPreAnalyzed: boolean
   mapFileName?: string
+  isDemoLoading?: boolean
+  priority?: Priority
+  onPriorityChange?: (priority: Priority) => void
 }

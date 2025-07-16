@@ -9,7 +9,7 @@ import { GAME_CONFIG } from '../config'
 import Image from 'next/image'
 
 import { mapImportExportService } from '../services/mapImportExportService'
-import { GameControls, KeyboardLayout } from './ui'
+import { DemoSelector, GameControls, KeyboardLayout } from './ui'
 import { NotificationOverlay } from './ui/overlay'
 // Types for import/export functionality (used by the handlers)
 
@@ -53,9 +53,16 @@ export default function TypoSyncClient() {
   // Track if audio is loaded in pre-analyzed mode
   const [isAudioLoadedForPreAnalyzed, setIsAudioLoadedForPreAnalyzed] = useState(false)
 
+  // Priority state for cloud processing
+  const [priority, setPriority] = useState<'high' | 'normal' | 'batch'>('normal')
+
   // Validation warnings state
   const [validationWarnings, setValidationWarnings] = useState<string[]>([])
   const [showWarnings, setShowWarnings] = useState(false)
+
+  // Demo selection state
+  const [selectedDemo, setSelectedDemo] = useState<string | null>(null)
+  const [isDemoLoading, setIsDemoLoading] = useState(false)
 
   useEffect(() => {
     const userAgent = typeof window.navigator === 'undefined' ? '' : navigator.userAgent
@@ -156,7 +163,7 @@ export default function TypoSyncClient() {
 
       if (cloudProcessingEnabled) {
         // Cloud processing: send to server for analysis
-        await analyzeAudio(file)
+        await analyzeAudio(file, priority)
         // Auto-generation happens in the store after analysis completes
       } else {
         // Pre-analyzed data mode: load audio buffer for playback only
@@ -178,7 +185,7 @@ export default function TypoSyncClient() {
         }
       }
     },
-    [analyzeAudio, cloudProcessingEnabled, setError, setAudioBuffer, setAudioContext],
+    [analyzeAudio, cloudProcessingEnabled, priority, setError, setAudioBuffer, setAudioContext],
   )
 
   /**
@@ -333,6 +340,26 @@ export default function TypoSyncClient() {
   )
 
   /**
+   * Demo selection handler
+   */
+  const handleDemoSelection = useCallback(
+    (demoLevel: string) => {
+      setSelectedDemo(demoLevel)
+    },
+    [],
+  )
+
+  /**
+   * Demo loading state handler
+   */
+  const handleDemoLoadingSet = useCallback(
+    (loading: boolean) => {
+      setIsDemoLoading(loading)
+    },
+    [],
+  )
+
+  /**
    * Cloud processing toggle handler
    */
   const handleCloudProcessingToggle = useCallback(
@@ -345,6 +372,8 @@ export default function TypoSyncClient() {
       // Clear current file reference when switching modes
       setCurrentAudioFile(null)
       setUploadedFileName('')
+      setSelectedDemo(null)
+      setIsDemoLoading(false)
 
       // Clear audio state when switching modes to ensure clean state
       setAudioContext(null)
@@ -500,6 +529,30 @@ export default function TypoSyncClient() {
           </div>
         </section>
 
+        {/* Demo Selection Section */}
+        <DemoSelector
+          onDemoSelect={handleDemoSelection}
+          onDemoLoadingSet={handleDemoLoadingSet}
+          onAudioContextSet={setAudioContext}
+          onAudioBufferSet={setAudioBuffer}
+          onAnalysisResultSet={setAnalysisResult}
+          onKeystrokeMapSet={setKeystrokeMap}
+          onHiddenNotesSet={setHiddenNotes}
+          onCurrentAudioFileSet={setCurrentAudioFile}
+          onUploadedFileNameSet={setUploadedFileName}
+          onIsAudioLoadedForPreAnalyzedSet={setIsAudioLoadedForPreAnalyzed}
+          onCloudProcessingEnabledSet={setCloudProcessingEnabled}
+          onError={setError}
+          onStopGame={handleStopGame}
+          generateKeystrokeMap={generateKeystrokeMap}
+          selectedDemo={selectedDemo}
+          isDemoLoading={isDemoLoading}
+          gameState={{
+            isActive: gameState.isActive,
+            isPaused: gameState.isPaused,
+          }}
+        />
+
         {/* Game Controls */}
         <div className="mb-8">
           <GameControls
@@ -523,6 +576,9 @@ export default function TypoSyncClient() {
             onCloudProcessingToggle={handleCloudProcessingToggle}
             mapFileName={mapFileName}
             isAudioLoadedForPreAnalyzed={isAudioLoadedForPreAnalyzed}
+            isDemoLoading={isDemoLoading}
+            priority={priority}
+            onPriorityChange={setPriority}
           />
         </div>
 

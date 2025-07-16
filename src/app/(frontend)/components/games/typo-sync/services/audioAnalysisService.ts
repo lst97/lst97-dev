@@ -4,7 +4,41 @@ import type {
   SuccessResponse,
   StatusResponse,
   FailureResponse,
+  Priority,
 } from '../types'
+
+// Cache response type - matches the AnalysisResult interface
+interface CacheResponse {
+  bpm: number
+  beat_timestamps: number[]
+  melody_map: {
+    pitch: string
+    start_time: number
+    duration: number
+  }[]
+  analysis_info: {
+    total_beats: number
+    total_subdivisions: number
+    consolidated_notes: number
+    filtered_notes: number
+    min_note_duration: number
+    subdivision_factor: number
+  }
+}
+
+// Cache endpoint response wrapper
+interface CacheEndpointResponse {
+  audio_hash: string
+  result: CacheResponse
+  cached_at: string
+}
+
+// Enhanced analyze response that includes cache data when cache hit occurs
+interface EnhancedAnalyzeResponse extends Omit<AnalyzeResponse, 'cache_hit'> {
+  cache_hit?: boolean
+  // When cache_hit is true, the full result data is included
+  result?: CacheResponse
+}
 
 /**
  * Audio Analysis Service
@@ -13,30 +47,138 @@ import type {
 export class AudioAnalysisService {
   private readonly baseUrl: string
   private eventSource: EventSource | null = null
+  private readonly maxFileSize: number = 50 * 1024 * 1024 // 50MB
+  private readonly supportedTypes: string[] = [
+    'audio/wav',
+    'audio/mp3',
+    'audio/mpeg',
+    'audio/ogg',
+    'audio/flac',
+  ]
 
   constructor(baseUrl = 'http://127.0.0.1:8000') {
     this.baseUrl = baseUrl
   }
 
   /**
-   * Upload audio file for analysis
-   * @param file - Audio file to analyze
-   * @returns Promise with task ID and backend type
+   * Validate audio file before upload
+   * @param file - Audio file to validate
+   * @throws Error if validation fails
    */
-  async uploadForAnalysis(file: File): Promise<AnalyzeResponse> {
-    const formData = new FormData()
-    formData.append('file', file)
+  validateFile(file: File): void {
+    // File size validation
+    if (file.size > this.maxFileSize) {
+      throw new Error(`File too large. Maximum size: ${this.maxFileSize / 1024 / 1024}MB`)
+    }
 
-    const response = await fetch(`${this.baseUrl}/analyze`, {
+    // File type validation
+    if (!this.supportedTypes.includes(file.type)) {
+      throw new Error(
+        `Unsupported file type: ${file.type}. Supported types: ${this.supportedTypes.join(', ')}`,
+      )
+    }
+  }
+
+  /**
+   * Generate audio hash for cache lookup (matches backend format exactly)
+   * @param file - Audio file to generate hash for
+   * @returns Promise with audio hash string
+   */
+  private async generateAudioHash(file: File): Promise<string> {
+    try {
+      const arrayBuffer = await file.arrayBuffer()
+      const audioBuffer = new Uint8Array(arrayBuffer)
+      const hashBuffer = await crypto.subtle.digest('SHA-256', audioBuffer)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+
+      return hashHex
+    } catch (_error) {
+      throw new Error('Content hash generation failed')
+    }
+  }
+
+  /**
+   * Check cache for existing analysis
+   * @param audioHash - Audio file hash
+   * @returns Promise with cached analysis or null if not found
+   */
+  async checkCache(audioHash: string): Promise<CacheResponse | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/cache/${audioHash}`)
+
+      if (response.ok) {
+        const cacheData: CacheEndpointResponse = await response.json()
+        return cacheData.result
+      }
+
+      // 404 means not in cache, other errors should be handled
+      if (response.status === 404) {
+        return null
+      }
+
+      throw new Error(`Cache check failed: ${response.status}`)
+    } catch (error) {
+      console.warn('Cache check failed:', error)
+      return null
+    }
+  }
+
+  /**
+   * Upload audio file for analysis with cache optimization
+   * @param file - Audio file to analyze
+   * @param priority - Processing priority (high, normal, batch)
+   * @returns Promise with enhanced response including queue info or cached data
+   */
+  async uploadForAnalysis(
+    file: File,
+    priority: Priority = 'normal',
+  ): Promise<EnhancedAnalyzeResponse> {
+    this.validateFile(file)
+
+    // Generate audio hash and check cache first
+    const audioHash = await this.generateAudioHash(file)
+    const cachedResult = await this.checkCache(audioHash)
+
+    if (cachedResult) {
+      // Return cached data in the same format as analyze response
+      return {
+        task_id: '', // Not needed for cached results
+        backend: 'in-memory',
+        cache_hit: true,
+        queue_position: 0,
+        estimated_wait_time_minutes: 0,
+        result: cachedResult,
+      }
+    }
+
+    // Cache miss - proceed with analysis
+    const formData = new FormData()
+    formData.append('audio', file)
+    formData.append('priority', priority)
+
+    const response = await fetch(`${this.baseUrl}/v2/analyze`, {
       method: 'POST',
       body: formData,
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
     }
 
-    return response.json()
+    const result = (await response.json()) as EnhancedAnalyzeResponse
+
+    // If the response includes cached data (cache hit on server side)
+    if (result.cache_hit) {
+      return result
+    }
+
+    // Normal analysis response
+    return {
+      ...result,
+      cache_hit: false,
+    }
   }
 
   /**
@@ -45,13 +187,66 @@ export class AudioAnalysisService {
    * @returns Promise with task result
    */
   async getAnalysisResult(taskId: string): Promise<TaskResultResponse> {
-    const response = await fetch(`${this.baseUrl}/results/${taskId}`)
+    const response = await fetch(`${this.baseUrl}/v2/results/${taskId}`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
     return response.json()
+  }
+
+  /**
+   * Analyze audio file with optimized caching workflow
+   * @param file - Audio file to analyze
+   * @param priority - Processing priority (high, normal, batch)
+   * @returns Promise with analysis result (either cached or processed)
+   */
+  async analyzeAudioFile(file: File, priority: Priority = 'normal'): Promise<CacheResponse> {
+    const uploadResult = await this.uploadForAnalysis(file, priority)
+
+    // If we got cached data (either from client-side cache or server-side cache hit), return it immediately
+    if (uploadResult.cache_hit && uploadResult.result) {
+      return uploadResult.result
+    }
+
+    // Otherwise, we need to poll for results using the task_id (cache_hit=false)
+    if (!uploadResult.task_id) {
+      throw new Error('No task_id provided for analysis')
+    }
+
+    // Poll for results
+    return this.pollForResults(uploadResult.task_id)
+  }
+
+  /**
+   * Poll for analysis results until completion
+   * @param taskId - Task ID to poll for
+   * @param maxAttempts - Maximum polling attempts (default: 60)
+   * @param intervalMs - Polling interval in milliseconds (default: 2000)
+   * @returns Promise with analysis result
+   */
+  private async pollForResults(
+    taskId: string,
+    maxAttempts = 60,
+    intervalMs = 2000,
+  ): Promise<CacheResponse> {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const result = await this.getAnalysisResult(taskId)
+
+      if (result.state === 'SUCCESS') {
+        return result.result as CacheResponse
+      }
+
+      if (result.state === 'FAILURE' || result.state === 'ERROR' || result.state === 'NOT_FOUND') {
+        throw new Error(`Analysis failed: ${result.status || 'Unknown error'}`)
+      }
+
+      // Wait before next poll
+      await new Promise((resolve) => setTimeout(resolve, intervalMs))
+    }
+
+    throw new Error('Analysis timeout - maximum polling attempts exceeded')
   }
 
   /**
@@ -74,7 +269,7 @@ export class AudioAnalysisService {
     }
 
     // Create new EventSource connection to SSE endpoint
-    this.eventSource = new EventSource(`${this.baseUrl}/stream/${taskId}`)
+    this.eventSource = new EventSource(`${this.baseUrl}/v2/stream/${taskId}`)
 
     this.eventSource.onmessage = (event) => {
       try {
@@ -88,6 +283,8 @@ export class AudioAnalysisService {
             break
 
           case 'FAILURE':
+          case 'ERROR':
+          case 'NOT_FOUND':
             this.eventSource?.close()
             this.eventSource = null
             onError(data)
@@ -167,12 +364,13 @@ export class AudioAnalysisService {
     }
 
     try {
-      const [baseResponse, hiHatResponse, tambourineResponse, beatResponse] = await Promise.allSettled([
-        fetch(`${baseUrl}base.mp3`).then((res) => res.arrayBuffer()),
-        fetch(`${baseUrl}hi-hat.mp3`).then((res) => res.arrayBuffer()),
-        fetch(`${baseUrl}tambourine.mp3`).then((res) => res.arrayBuffer()),
-        fetch(`${baseUrl}beat.wav`).then((res) => res.arrayBuffer()),
-      ])
+      const [baseResponse, hiHatResponse, tambourineResponse, beatResponse] =
+        await Promise.allSettled([
+          fetch(`${baseUrl}base.mp3`).then((res) => res.arrayBuffer()),
+          fetch(`${baseUrl}hi-hat.mp3`).then((res) => res.arrayBuffer()),
+          fetch(`${baseUrl}tambourine.mp3`).then((res) => res.arrayBuffer()),
+          fetch(`${baseUrl}beat.wav`).then((res) => res.arrayBuffer()),
+        ])
 
       if (baseResponse.status === 'fulfilled') {
         soundEffects.base = await audioContext.decodeAudioData(baseResponse.value)

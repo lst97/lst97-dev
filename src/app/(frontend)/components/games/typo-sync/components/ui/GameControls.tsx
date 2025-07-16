@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef } from 'react'
-import type { ExtendedGameControlsProps } from '../../types'
+import type { ExtendedGameControlsProps, Priority } from '../../types'
 import { FaUpload, FaPlay, FaPause, FaStop, FaRedo, FaDownload, FaFileImport } from 'react-icons/fa'
 import { MdAnalytics, MdCloud, MdCloudOff } from 'react-icons/md'
 import { PixelCheckbox } from '@/app/(frontend)/components/ui'
@@ -24,6 +24,9 @@ export default function GameControls({
   onCloudProcessingToggle,
   mapFileName,
   isAudioLoadedForPreAnalyzed,
+  isDemoLoading = false,
+  priority = 'normal',
+  onPriorityChange,
 }: ExtendedGameControlsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const mapImportInputRef = useRef<HTMLInputElement>(null)
@@ -59,7 +62,7 @@ export default function GameControls({
             checked={cloudProcessingEnabled}
             onCheckedChange={onCloudProcessingToggle}
             label="Cloud Processing"
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || isDemoLoading}
           />
           <div className="flex items-center gap-2 text-sm text-text font-['Press_Start_2P']">
             {cloudProcessingEnabled ? (
@@ -76,6 +79,25 @@ export default function GameControls({
           </div>
         </div>
 
+        {/* Priority Selector - Only show when cloud processing is enabled */}
+        {cloudProcessingEnabled && (
+          <div className="flex items-center gap-4 p-4 bg-hover border-2 border-border rounded">
+            <label className="text-sm text-text font-['Press_Start_2P']">
+              Priority:
+            </label>
+            <select
+              value={priority}
+              onChange={(e) => onPriorityChange?.(e.target.value as Priority)}
+              disabled={isAnalyzing || isDemoLoading}
+              className="bg-card border-2 border-border text-sm text-text font-['Press_Start_2P'] px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50"
+            >
+              <option value="batch">Batch (slower)</option>
+              <option value="normal">Normal</option>
+              <option value="high">High Priority</option>
+            </select>
+          </div>
+        )}
+
         {/* Control Buttons Row */}
         <div className="flex flex-wrap items-center justify-center gap-4">
           {/* Audio File Upload - Always available */}
@@ -90,22 +112,22 @@ export default function GameControls({
             />
             <button
               onClick={handleFileClick}
-              disabled={isAnalyzing}
+              disabled={isAnalyzing || isDemoLoading}
               className={`
                 bg-primary text-white font-['Press_Start_2P'] text-sm border-2 border-primary 
                 px-6 py-3 shadow-[4px_4px_0px_#000] pixel-border cursor-pointer
                 flex items-center gap-2 min-w-[200px] justify-center
                 ${
-                  isAnalyzing
+                  isAnalyzing || isDemoLoading
                     ? 'opacity-50 cursor-not-allowed'
                     : 'hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200'
                 }
               `}
             >
-              {isAnalyzing ? (
+              {isAnalyzing || isDemoLoading ? (
                 <>
                   <MdAnalytics className="animate-spin" />
-                  {cloudProcessingEnabled ? 'ANALYZING...' : 'LOADING...'}
+                  {isDemoLoading ? 'LOADING DEMO...' : cloudProcessingEnabled ? 'ANALYZING...' : 'LOADING...'}
                 </>
               ) : (
                 <>
@@ -125,13 +147,13 @@ export default function GameControls({
                 accept=".json"
                 onChange={handleMapImportChange}
                 className="hidden"
-                disabled={isAnalyzing || !isAudioLoadedForPreAnalyzed}
+                disabled={isAnalyzing || isDemoLoading || !isAudioLoadedForPreAnalyzed}
               />
               <button
                 onClick={handleMapImportClick}
-                disabled={isAnalyzing || !isAudioLoadedForPreAnalyzed}
+                disabled={isAnalyzing || isDemoLoading || !isAudioLoadedForPreAnalyzed}
                 title={
-                  isAnalyzing
+                  isAnalyzing || isDemoLoading
                     ? 'Please wait while loading...'
                     : !isAudioLoadedForPreAnalyzed
                     ? 'Please load an audio file first'
@@ -142,7 +164,7 @@ export default function GameControls({
                   px-6 py-3 shadow-[4px_4px_0px_#000] pixel-border cursor-pointer
                   flex items-center gap-2 min-w-[200px] justify-center
                   ${
-                    isAnalyzing || !isAudioLoadedForPreAnalyzed
+                    isAnalyzing || isDemoLoading || !isAudioLoadedForPreAnalyzed
                       ? 'opacity-50 cursor-not-allowed'
                       : 'hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200'
                   }
@@ -160,7 +182,7 @@ export default function GameControls({
               {/* Export Map Button */}
               <button
                 onClick={onExportMap}
-                disabled={isAnalyzing}
+                disabled={isAnalyzing || isDemoLoading}
                 className="bg-secondary text-white font-['Press_Start_2P'] text-sm border-2 border-secondary p-3 shadow-[4px_4px_0px_#000] pixel-border hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center w-12 h-12"
                 title="Export game map"
               >
@@ -170,7 +192,7 @@ export default function GameControls({
               {/* Regenerate Map Button */}
               <button
                 onClick={onRegenerateKeystrokeMap}
-                disabled={isAnalyzing}
+                disabled={isAnalyzing || isDemoLoading}
                 className="bg-secondary text-white font-['Press_Start_2P'] text-sm border-2 border-secondary p-3 shadow-[4px_4px_0px_#000] pixel-border hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center w-12 h-12"
                 title="Regenerate keystroke map"
               >
@@ -201,9 +223,9 @@ export default function GameControls({
               ) : (
                 <button
                   onClick={onStartGame}
-                  disabled={!canPlay}
+                  disabled={!canPlay || isDemoLoading}
                   className="bg-accent text-white font-['Press_Start_2P'] text-sm border-2 border-accent p-3 shadow-[4px_4px_0px_#000] pixel-border hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center w-12 h-12"
-                  title="Start game"
+                  title={isDemoLoading ? "Please wait while demo loads..." : "Start game"}
                 >
                   <FaPlay />
                 </button>

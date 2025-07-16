@@ -1,6 +1,6 @@
 import { audioAnalysisService, safeServiceCall } from '../services/audioAnalysisService'
 import { generateCompleteKeystrokeMap } from '../utils/keystrokeGeneration'
-import type { AnalysisResult } from '../types'
+import type { AnalysisResult, Priority } from '../types'
 
 export interface AudioActions {
   setAnalyzing: (isAnalyzing: boolean) => void
@@ -9,7 +9,7 @@ export interface AudioActions {
   setHiddenNotes: (notes: any[]) => void
   setAudioBuffer: (buffer: AudioBuffer | null) => void
   setAudioContext: (context: AudioContext | null) => void
-  analyzeAudio: (audioFile: File) => Promise<void>
+  analyzeAudio: (audioFile: File, priority?: Priority) => Promise<void>
   cancelAnalysis: () => void
   generateKeystrokeMap: () => void
   playKeystrokeSound: (key: string, type?: string) => void
@@ -63,7 +63,7 @@ export const createAudioActions = (set: any, get: any): AudioActions => ({
     }
   },
 
-  analyzeAudio: async (audioFile: File) => {
+  analyzeAudio: async (audioFile: File, priority: 'high' | 'normal' | 'batch' = 'normal') => {
     try {
       get().setAnalyzing(true)
       get().setError(null)
@@ -78,14 +78,22 @@ export const createAudioActions = (set: any, get: any): AudioActions => ({
 
       // Step 1: Upload file for analysis to get task ID
       const uploadResult = await safeServiceCall(() =>
-        audioAnalysisService.uploadForAnalysis(audioFile),
+        audioAnalysisService.uploadForAnalysis(audioFile, priority),
       )
 
       if (!uploadResult.success || !uploadResult.data) {
         throw new Error(uploadResult.error || 'Failed to upload file for analysis')
       }
 
-      const { task_id } = uploadResult.data
+      const { task_id, cache_hit, result } = uploadResult.data
+
+      // Handle cache hit - immediate result (no need to call getAnalysisResult)
+      if (cache_hit && result) {
+        get().setAnalysisResult(result)
+        get().generateKeystrokeMap()
+        get().setAnalyzing(false)
+        return
+      }
 
       // Step 2: Stream analysis results via SSE
       return new Promise<void>((resolve, reject) => {
@@ -114,8 +122,20 @@ export const createAudioActions = (set: any, get: any): AudioActions => ({
           // onError - handle errors
           (error) => {
             currentStreamCloseFunction = null // Clear the reference
-            const errorMessage =
-              error instanceof Error ? error.message : error.status || 'Analysis failed'
+            let errorMessage = 'Analysis failed'
+
+            if (error instanceof Error) {
+              errorMessage = error.message
+            } else if (error.state === 'FAILURE') {
+              errorMessage = error.status || 'Processing failed'
+            } else if (error.state === 'ERROR') {
+              errorMessage = error.status || 'System error occurred'
+            } else if (error.state === 'NOT_FOUND') {
+              errorMessage = 'Task not found - may have expired'
+            } else if (error.status) {
+              errorMessage = error.status
+            }
+
             get().setError('Audio analysis failed: ' + errorMessage)
             get().setAnalyzing(false)
             reject(new Error(errorMessage))

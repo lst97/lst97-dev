@@ -22,24 +22,7 @@ export function KeystrokeNote({
   gameConfig = GAME_CONFIG,
   onKeystrokeUpdate,
 }: KeystrokeNoteProps) {
-  if (
-    !keystroke ||
-    !Number.isFinite(keystroke.startTime) ||
-    !keystroke.key ||
-    !keystroke.type ||
-    !Number.isFinite(gameTime)
-  ) {
-    console.error('Invalid KeystrokeNote props detected:', {
-      keystroke,
-      gameTime,
-      hasValidStartTime: keystroke ? Number.isFinite(keystroke.startTime) : false,
-      hasValidKey: keystroke ? !!keystroke.key : false,
-      hasValidType: keystroke ? !!keystroke.type : false,
-      hasValidGameTime: Number.isFinite(gameTime),
-    })
-    return null // Don't render if props are invalid
-  }
-
+  // Call all hooks unconditionally
   const groupRef = useRef<THREE.Group>(null)
   const boxRef = useRef<THREE.Mesh>(null)
   const [isBreaking, setIsBreaking] = useState(false)
@@ -58,16 +41,20 @@ export function KeystrokeNote({
     }>
   >([])
 
-  const prevStateRef = useRef(keystroke.state)
+  const prevStateRef = useRef(keystroke?.state)
 
   const uniqueId = useMemo(() => {
     // Ensure startTime is valid before using toFixed
-    const timeStr = Number.isFinite(keystroke.startTime) ? keystroke.startTime.toFixed(4) : '0.0000'
+    const timeStr = keystroke && Number.isFinite(keystroke.startTime) ? keystroke.startTime.toFixed(4) : '0.0000'
+    const key = keystroke?.key || ''
+    const type = keystroke?.type || ''
 
-    return `${timeStr}-${keystroke.key}-${keystroke.type}-${Math.random().toString(36).substr(2, 9)}`
-  }, [keystroke.startTime, keystroke.key, keystroke.type])
+    return `${timeStr}-${key}-${type}-${Math.random().toString(36).substr(2, 9)}`
+  }, [keystroke?.startTime, keystroke?.key, keystroke?.type])
 
   const displayKey = useMemo(() => {
+    if (!keystroke?.key) return ''
+    
     switch (keystroke.key) {
       case '[Space]':
         return '▭'
@@ -76,9 +63,11 @@ export function KeystrokeNote({
       default:
         return keystroke.key
     }
-  }, [keystroke.key])
+  }, [keystroke?.key])
 
   const boxColor = useMemo(() => {
+    if (!keystroke?.state) return 'rgb(252, 211, 77)'
+    
     switch (keystroke.state) {
       case 'hit':
         return gameConfig.COLORS.HIT
@@ -89,9 +78,11 @@ export function KeystrokeNote({
       default:
         return 'rgb(252, 211, 77)'
     }
-  }, [keystroke.state, gameConfig])
+  }, [keystroke?.state, gameConfig])
 
   const textColor = useMemo(() => {
+    if (!keystroke?.state) return '#000000'
+    
     switch (keystroke.state) {
       case 'hit':
         return '#000000'
@@ -102,7 +93,26 @@ export function KeystrokeNote({
       default:
         return '#000000'
     }
-  }, [keystroke.state])
+  }, [keystroke?.state])
+
+  // Validation check - ensure all required props are valid
+  const isValidProps = keystroke &&
+    Number.isFinite(keystroke.startTime) &&
+    keystroke.key &&
+    keystroke.type &&
+    Number.isFinite(gameTime)
+
+  if (!isValidProps) {
+    console.error('Invalid KeystrokeNote props detected:', {
+      keystroke,
+      gameTime,
+      hasValidStartTime: keystroke ? Number.isFinite(keystroke.startTime) : false,
+      hasValidKey: keystroke ? !!keystroke.key : false,
+      hasValidType: keystroke ? !!keystroke.type : false,
+      hasValidGameTime: Number.isFinite(gameTime),
+    })
+    return null // Don't render if props are invalid
+  }
 
   useEffect(() => {
     const prevState = prevStateRef.current
