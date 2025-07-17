@@ -23,9 +23,10 @@ export const PixelProgressBar = ({
   height = 20,
   animated = true,
 }: PixelProgressBarProps) => {
-  // Ensure value is between 0 and max
-  const safeValue = Math.min(Math.max(0, value), max)
-  const percentage = (safeValue / max) * 100
+  // Ensure value is between 0 and max, handle NaN and edge cases
+  const safeValue = Math.min(Math.max(0, isNaN(value) ? 0 : value), max)
+  const safeMax = Math.max(max, 1) // Ensure max is never 0
+  const percentage = (safeValue / safeMax) * 100
 
   return (
     <div className={`w-full flex items-center gap-2 ${className}`}>
@@ -35,14 +36,14 @@ export const PixelProgressBar = ({
           height: `${height}px`,
           imageRendering: 'pixelated',
         }}
-        value={percentage}
+        value={isNaN(percentage) ? 0 : percentage}
       >
         <Progress.Indicator asChild>
           {animated ? (
             <motion.div
               className={`h-full ${progressClassName}`}
               initial={{ width: 0 }}
-              animate={{ width: `${percentage}%` }}
+              animate={{ width: `${isNaN(percentage) ? 0 : percentage}%` }}
               transition={{
                 duration: 0.3,
                 ease: 'easeOut',
@@ -62,7 +63,7 @@ export const PixelProgressBar = ({
             <div
               className={`h-full ${progressClassName}`}
               style={{
-                width: `${percentage}%`,
+                width: `${isNaN(percentage) ? 0 : percentage}%`,
                 backgroundColor: 'var(--color-accent)',
                 backgroundImage: `repeating-linear-gradient(
                   to right,
@@ -99,7 +100,7 @@ export const PixelProgressBar = ({
           className="font-['Press_Start_2P'] text-xs min-w-[3rem] text-right"
           style={{ color: 'var(--color-accent)' }}
         >
-          {Math.round(percentage)}%
+          {Math.round(isNaN(percentage) ? 0 : percentage)}%
         </span>
       )}
     </div>

@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const uberCommentFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50, 'Name must be less than 50 characters'),
   type: z.enum(['Food Delivery', 'Package Delivery', 'Pack & Deliver'], {
-    required_error: 'Please select a delivery type',
+    message: 'Please select a delivery type',
   }),
   comment: z
     .string()

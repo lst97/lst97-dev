@@ -1,0 +1,1289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Beat Detector Example</title>
+    <style>
+      /* Phase 2: Game UI Styling */
+      body {
+        background-color: #121212; /* Dark background */
+        color: #ffffff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      #game-canvas {
+        background-color: #282828; /* Slightly lighter game area */
+        border: 2px solid #ffffff;
+        margin: 10px 0;
+      }
+
+      #ui-container {
+        width: 800px; /* Match canvas width */
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 24px;
+      }
+
+      /* Style existing elements to match dark theme */
+      h1,
+      h3 {
+        color: #ffffff;
+        text-align: center;
+      }
+
+      button {
+        background-color: #333333;
+        color: #ffffff;
+        border: 1px solid #555555;
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      button:hover {
+        background-color: #555555;
+      }
+
+      button:disabled {
+        background-color: #222222;
+        color: #666666;
+        cursor: not-allowed;
+      }
+
+      input[type='file'] {
+        background-color: #333333;
+        color: #ffffff;
+        border: 1px solid #555555;
+        padding: 10px;
+        margin: 10px;
+      }
+
+      pre {
+        background-color: #1e1e1e;
+        color: #ffffff;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        max-width: 800px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Typing Rhythm Game Analyzer</h1>
+    <p>Choose an audio file (MP3, WAV, etc.) to analyze.</p>
+    <input type="file" id="audio-file" accept="audio/*" />
+    <hr />
+    <button id="play-button" disabled>Play with Metronome</button>
+    <button id="play-melody-button" disabled>Play Melody</button>
+    <button id="generate-keystroke-map-button" disabled>Generate Keystroke Map</button>
+    <h3>Analysis Results:</h3>
+    <pre id="results"></pre>
+    <h3>Keystroke Map:</h3>
+    <pre id="keystroke-map-results"></pre>
+
+    <!-- Phase 2: Game UI Elements -->
+    <hr />
+    <h3>Game Interface:</h3>
+    <canvas id="game-canvas"></canvas>
+    <div id="ui-container">
+      <div id="score-display">Score: 0</div>
+      <div id="feedback-display"></div>
+    </div>
+    <!-- We'll display the results here -->
+
+    <script>
+      // Mock random-words functionality for browser compatibility
+      const mockWords = {
+        1: ['a', 'i'],
+        2: ['is', 'at', 'be', 'go', 'up', 'me', 'we', 'my', 'no', 'so'],
+        3: ['cat', 'dog', 'run', 'big', 'red', 'hot', 'new', 'old', 'yes', 'way'],
+        4: ['code', 'word', 'time', 'work', 'home', 'love', 'game', 'life', 'blue', 'fast'],
+        5: [
+          'house',
+          'water',
+          'music',
+          'plant',
+          'happy',
+          'world',
+          'light',
+          'sound',
+          'green',
+          'quick',
+        ],
+        6: [
+          'coding',
+          'typing',
+          'rhythm',
+          'melody',
+          'guitar',
+          'python',
+          'simple',
+          'bright',
+          'strong',
+          'smooth',
+        ],
+        7: [
+          'amazing',
+          'journey',
+          'rainbow',
+          'perfect',
+          'science',
+          'freedom',
+          'kitchen',
+          'machine',
+          'nothing',
+          'example',
+        ],
+        8: [
+          'computer',
+          'keyboard',
+          'software',
+          'database',
+          'function',
+          'variable',
+          'document',
+          'language',
+          'creative',
+          'powerful',
+        ],
+        9: [
+          'algorithm',
+          'developer',
+          'interface',
+          'framework',
+          'generator',
+          'processor',
+          'structure',
+          'debugging',
+          'efficient',
+          'beautiful',
+        ],
+        10: [
+          'javascript',
+          'programming',
+          'technology',
+          'automation',
+          'generation',
+          'application',
+          'development',
+          'optimization',
+          'integration',
+          'systematic',
+        ],
+        11: [
+          'engineering',
+          'performance',
+          'interactive',
+          'architecture',
+          'computation',
+          'specification',
+          'implementation',
+          'collaboration',
+          'sophisticated',
+          'functionality',
+        ],
+        12: [
+          'revolutionary',
+          'computational',
+          'implementation',
+          'sophisticated',
+          'technological',
+          'organizational',
+          'architectural',
+          'environmental',
+          'international',
+          'philosophical',
+        ],
+      }
+
+      function generate(options) {
+        const length = options.maxLength || options.minLength || 5
+
+        // Find the closest available word list in our mock data
+        const availableLengths = Object.keys(mockWords).map(Number)
+        const closestLength = availableLengths.reduce((prev, curr) => {
+          return Math.abs(curr - length) < Math.abs(prev - length) ? curr : prev
+        })
+
+        let word =
+          mockWords[closestLength][Math.floor(Math.random() * mockWords[closestLength].length)]
+
+        // Adjust word to match target length, but DO NOT extend it.
+        // The calling function is responsible for truncation or handling length differences.
+        return [word]
+      }
+
+      const fileInput = document.getElementById('audio-file')
+      const resultsOutput = document.getElementById('results')
+      const keystrokeMapOutput = document.getElementById('keystroke-map-results')
+      const playButton = document.getElementById('play-button')
+      const playMelodyButton = document.getElementById('play-melody-button')
+      const generateKeystrokeMapButton = document.getElementById('generate-keystroke-map-button')
+
+      let analysisBpm = null
+      let analysisTimestamps = null
+      let analysisMelodyMap = null
+      let userAudioFile = null
+      let eventSource = null
+      let keystrokeMap = null
+      let hiddenNotes = [] // For hidden tambourine notes
+      let sfxBuffers = {
+        // To store decoded audio buffers for sound effects
+        base: null,
+        hiHat: null,
+        tambourine: null,
+      }
+
+      // ===== PHASE 2: GAME RENDERING AND ANIMATION =====
+
+      // Game canvas and UI elements
+      const canvas = document.getElementById('game-canvas')
+      const ctx = canvas.getContext('2d')
+      const scoreDisplay = document.getElementById('score-display')
+      const feedbackDisplay = document.getElementById('feedback-display')
+
+      // Set canvas dimensions
+      canvas.width = 800
+      canvas.height = 150
+
+      // Game configuration constants
+      const GAME_CONFIG = {
+        NOTE_SPEED_PPS: 200, // Note speed in pixels per second
+        HIT_ZONE_X: 100, // The X-coordinate of the hit zone line
+        NOTE_FONT: '32px Consolas',
+        COLORS: {
+          UPCOMING: '#FFFFFF', // White
+          HIT: '#00FF00', // Green
+          MISSED: '#FF0000', // Red
+          TYPO: '#FFA500', // Orange
+          HIT_ZONE: '#00FFFF', // Cyan
+        },
+        TIMING_WINDOWS: {
+          SYNC: 0.05, // +/- 50ms for "Sync"
+          LATE_EARLY: 0.15, // +/- 150ms for "Late" or "Early"
+        },
+        SCORING: {
+          SYNC: 100,
+          LATE_EARLY: 50,
+          TYPO: -25,
+          OFF: -50,
+        },
+      }
+
+      // Game state variables
+      let gameLoopActive = false
+      let gameStartTime = null
+      let score = 0
+      let gameIsActive = false
+
+      // ===== PHASE 1: GAME MAP GENERATION (DATA PROCESSING) =====
+
+      /**
+       * Configuration constants for keystroke map generation
+       */
+      const KEYSTROKE_CONFIG = {
+        CONFLICT_THRESHOLD: 0.05, // 50ms conflict threshold
+        BEAT_DURATION: 0.1, // Default beat duration
+        SYMBOL_CHANCE: 0.2, // 20% chance to add symbols
+        SYMBOLS: ['.', ','], // Available symbols
+        EVERY_NTH_BEAT_ENTER: 8, // Every 8th beat becomes Enter
+      }
+
+      /**
+       * Step 1: Create unified event array from beats and melody
+       */
+      function createUnifiedEvents(beatTimestamps, melodyMap) {
+        const unifiedEvents = []
+
+        // Process beat timestamps
+        beatTimestamps.forEach((timestamp) => {
+          unifiedEvents.push({
+            type: 'beat',
+            startTime: timestamp,
+            duration: KEYSTROKE_CONFIG.BEAT_DURATION,
+          })
+        })
+
+        // Process melody map
+        melodyMap.forEach((note) => {
+          unifiedEvents.push({
+            type: 'pitch',
+            startTime: note.start_time,
+            duration: note.duration,
+            pitch: note.pitch,
+          })
+        })
+
+        return unifiedEvents
+      }
+
+      /**
+       * Determines the length of a word to generate based on a note's duration.
+       */
+      function getWordLength(duration) {
+        if (duration < 0.3) return 3
+        if (duration < 0.7) return 5
+        return 7
+      }
+
+      /**
+       * Generates a keystroke map for typing practice using dynamic word lengths:
+       * 1. Characters come from melody notes (in order)
+       * 2. Word length is random 1-12 characters
+       * 3. After each word we insert the NEXT available beat as [Space] (10% chance [Enter])
+       * 4. Next word starts immediately after the delimiter
+       * 5. No consecutive delimiters are allowed
+       */
+      function generateKeystrokeMapWithWordSpacing(unifiedEvents) {
+        const pitchEvents = unifiedEvents
+          .filter((e) => e.type === 'pitch')
+          .sort((a, b) => a.startTime - b.startTime)
+        const beatEvents = unifiedEvents
+          .filter((e) => e.type === 'beat')
+          .sort((a, b) => a.startTime - b.startTime)
+
+        console.log(
+          `Step 2a: Starting with ${pitchEvents.length} pitches and ${beatEvents.length} beats`,
+        )
+
+        // Step 1: Create initial keystroke map with all beats as delimiters
+        const keystrokeMap = []
+
+        // Add all beats as delimiters (10% chance for Enter, 90% for Space)
+        beatEvents.forEach((beat) => {
+          const delimiterKey = Math.random() < 0.1 ? '[Enter]' : '[Space]'
+          keystrokeMap.push({
+            key: delimiterKey,
+            startTime: beat.startTime,
+            duration: beat.duration,
+            state: 'upcoming',
+            type: 'delimiter',
+          })
+        })
+
+        // Add all pitches as melody placeholders
+        pitchEvents.forEach((pitch) => {
+          keystrokeMap.push({
+            key: 'm', // placeholder
+            startTime: pitch.startTime,
+            duration: 0.05,
+            state: 'upcoming',
+            type: 'melody',
+          })
+        })
+
+        console.log(`Step 2b: Created ${keystrokeMap.length} total events`)
+
+        // Step 2: Sort by time
+        keystrokeMap.sort((a, b) => a.startTime - b.startTime)
+
+        // Step 3: Remove beats that are too close to melody notes
+        const CONFLICT_THRESHOLD = 0.05 // 50ms
+        const filteredMap = keystrokeMap.filter((event, index, arr) => {
+          if (event.type !== 'delimiter') {
+            return true // Keep all melody events
+          }
+
+          // Check if this delimiter is too close to any melody event
+          const prevEvent = arr[index - 1]
+          const nextEvent = arr[index + 1]
+
+          let tooClose = false
+          if (
+            prevEvent &&
+            prevEvent.type === 'melody' &&
+            Math.abs(event.startTime - prevEvent.startTime) < CONFLICT_THRESHOLD
+          ) {
+            tooClose = true
+          }
+          if (
+            nextEvent &&
+            nextEvent.type === 'melody' &&
+            Math.abs(event.startTime - nextEvent.startTime) < CONFLICT_THRESHOLD
+          ) {
+            tooClose = true
+          }
+
+          return !tooClose
+        })
+
+        console.log(`Step 2c: After removing conflicts: ${filteredMap.length} events`)
+
+        // Step 4: Remove consecutive delimiters
+        const noConsecutiveDelimiters = []
+        let lastWasDelimiter = false
+
+        filteredMap.forEach((event) => {
+          if (event.type === 'delimiter') {
+            if (!lastWasDelimiter) {
+              noConsecutiveDelimiters.push(event)
+              lastWasDelimiter = true
+            }
+            // Skip consecutive delimiters
+          } else {
+            noConsecutiveDelimiters.push(event)
+            lastWasDelimiter = false
+          }
+        })
+
+        console.log(
+          `Step 2d: After removing consecutive delimiters: ${noConsecutiveDelimiters.length} events`,
+        )
+
+        // Step 5: Group melody events between delimiters and generate words
+        const finalKeystrokeMap = []
+        let currentMelodyGroup = []
+
+        noConsecutiveDelimiters.forEach((event, index) => {
+          if (event.type === 'melody') {
+            currentMelodyGroup.push(event)
+          } else if (event.type === 'delimiter') {
+            // Process the current melody group if it exists
+            if (currentMelodyGroup.length > 0) {
+              const wordLength = currentMelodyGroup.length
+              const wordList = mockWords[wordLength] || mockWords[Math.min(wordLength, 12)]
+              const randomWord = wordList[Math.floor(Math.random() * wordList.length)]
+
+              // Place characters for this word
+              for (let i = 0; i < currentMelodyGroup.length && i < randomWord.length; i++) {
+                finalKeystrokeMap.push({
+                  key: randomWord[i],
+                  startTime: currentMelodyGroup[i].startTime,
+                  duration: 0.05,
+                  state: 'upcoming',
+                  type: 'melody',
+                })
+              }
+
+              currentMelodyGroup = []
+            }
+
+            // Add the delimiter
+            finalKeystrokeMap.push({
+              key: event.key,
+              startTime: event.startTime,
+              duration: event.duration,
+              state: 'upcoming',
+              type: 'beat',
+            })
+          }
+        })
+
+        // Handle any remaining melody group at the end
+        if (currentMelodyGroup.length > 0) {
+          const wordLength = currentMelodyGroup.length
+          const wordList = mockWords[wordLength] || mockWords[Math.min(wordLength, 12)]
+          const randomWord = wordList[Math.floor(Math.random() * wordList.length)]
+
+          for (let i = 0; i < currentMelodyGroup.length && i < randomWord.length; i++) {
+            finalKeystrokeMap.push({
+              key: randomWord[i],
+              startTime: currentMelodyGroup[i].startTime,
+              duration: 0.05,
+              state: 'upcoming',
+              type: 'melody',
+            })
+          }
+        }
+
+        console.log(`Step 2e: Final keystroke map: ${finalKeystrokeMap.length} events`)
+
+        // Sort final result by time
+        finalKeystrokeMap.sort((a, b) => a.startTime - b.startTime)
+        return finalKeystrokeMap
+      }
+
+      /**
+       * Final validation and statistics
+       */
+      function finalizeKeystrokeMap(keystrokeMap) {
+        // The keystroke map is already properly processed, just validate and log statistics
+        const finalizedMap = [...keystrokeMap]
+
+        // Validate and log statistics
+        console.log('Keystroke Map Statistics:')
+        console.log(`Total keystrokes: ${finalizedMap.length}`)
+        console.log(
+          `Time span: ${finalizedMap[0]?.startTime?.toFixed(2)}s - ${finalizedMap[
+            finalizedMap.length - 1
+          ]?.startTime?.toFixed(2)}s`,
+        )
+
+        const keyTypes = finalizedMap.reduce(
+          (acc, keystroke) => {
+            if (keystroke.key === '[Space]') acc.spaces++
+            else if (keystroke.key === '[Enter]') acc.enters++
+            else if (KEYSTROKE_CONFIG.SYMBOLS.includes(keystroke.key)) acc.symbols++
+            else acc.letters++
+            return acc
+          },
+          { spaces: 0, enters: 0, symbols: 0, letters: 0 },
+        )
+
+        console.log('Key distribution:', keyTypes)
+
+        return finalizedMap
+      }
+
+      /**
+       * Main function to generate complete keystroke map
+       */
+      function generateCompleteKeystrokeMap(bpm, beatTimestamps, melodyMap) {
+        console.log('Starting Phase 1: Game Map Generation')
+        console.log(
+          `Input: BPM=${bpm}, Beats=${beatTimestamps.length}, Melody notes=${melodyMap.length}`,
+        )
+
+        // Step 1: Create a unified list of all pitch and beat events.
+        const unifiedEvents = createUnifiedEvents(beatTimestamps, melodyMap)
+        console.log(`Step 1: Created ${unifiedEvents.length} total raw events.`)
+
+        // Step 2: Generate the keystroke map, intelligently pairing words with beats.
+        const rawKeystrokeMap = generateKeystrokeMapWithWordSpacing(unifiedEvents)
+        console.log(
+          `Step 2: Generated ${rawKeystrokeMap.length} keystrokes by pairing words with beats.`,
+        )
+
+        // Step 3: Finalize the map by sorting and gathering statistics.
+        const finalKeystrokeMap = finalizeKeystrokeMap(rawKeystrokeMap)
+        console.log(`Step 3: Finalized and sorted the keystroke map.`)
+
+        // Step 4: Generate hidden notes from unused beat timestamps
+        const delimiterTimes = new Set(
+          finalKeystrokeMap.filter((k) => k.type === 'beat').map((k) => k.startTime.toFixed(4)), // Use toFixed for float comparison
+        )
+
+        const generatedHiddenNotes = beatTimestamps
+          .filter((t) => !delimiterTimes.has(t.toFixed(4)))
+          .map((t) => ({
+            key: '[Space]',
+            startTime: t,
+            duration: 0.1, // Default beat duration
+            state: 'upcoming',
+            type: 'hidden',
+          }))
+
+        console.log(`Step 4: Generated ${generatedHiddenNotes.length} hidden notes.`)
+
+        console.log('Phase 1 Complete: Keystroke Map Generated')
+        return {
+          keystrokeMap: finalKeystrokeMap,
+          hiddenNotes: generatedHiddenNotes,
+        }
+      }
+
+      // ===== END PHASE 1 IMPLEMENTATION =====
+
+      // ===== PHASE 2: GAME LOOP AND RENDERING =====
+
+      /**
+       * Draws the static hit zone line on the canvas
+       */
+      function drawHitZone() {
+        ctx.strokeStyle = GAME_CONFIG.COLORS.HIT_ZONE
+        ctx.lineWidth = 3
+        ctx.beginPath()
+        ctx.moveTo(GAME_CONFIG.HIT_ZONE_X, 0)
+        ctx.lineTo(GAME_CONFIG.HIT_ZONE_X, canvas.height)
+        ctx.stroke()
+      }
+
+      /**
+       * Draws all keystrokes on the canvas based on their timing
+       */
+      function drawKeystrokes(masterTime) {
+        if (!keystrokeMap || keystrokeMap.length === 0) {
+          return
+        }
+
+        ctx.font = GAME_CONFIG.NOTE_FONT
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+
+        // Iterate through every keystroke in the map
+        for (const keystroke of keystrokeMap) {
+          // Calculate the time until the note is "due"
+          const timeDifference = keystroke.startTime - (masterTime - gameStartTime)
+
+          // Convert that time into a pixel distance based on speed
+          const distance = timeDifference * GAME_CONFIG.NOTE_SPEED_PPS
+
+          // Calculate the final X position
+          const xPosition = GAME_CONFIG.HIT_ZONE_X + distance
+
+          // Optimization: Only draw notes that are visible on the canvas
+          if (xPosition < -50 || xPosition > canvas.width + 50) {
+            continue
+          }
+
+          // Set the note color based on its state
+          const colorKey = keystroke.state ? keystroke.state.toUpperCase() : 'UPCOMING'
+          ctx.fillStyle = GAME_CONFIG.COLORS[colorKey] || GAME_CONFIG.COLORS.UPCOMING
+
+          // Draw the character onto the canvas
+          const displayKey =
+            keystroke.key === '[Space]' ? '␣' : keystroke.key === '[Enter]' ? '⏎' : keystroke.key
+          ctx.fillText(displayKey, xPosition, canvas.height / 2)
+        }
+      }
+
+      /**
+       * Main game loop function
+       */
+      function gameLoop() {
+        if (!gameLoopActive) {
+          return
+        }
+
+        // 1. Get the master time from the audio context
+        const masterTime = audioContext.currentTime
+
+        // 2. Check for missed notes (Phase 3: Miss Detection)
+        if (keystrokeMap && gameIsActive) {
+          const gameTime = masterTime - gameStartTime
+
+          for (const keystroke of keystrokeMap) {
+            // Check if note is decisively past the hit zone and hasn't been dealt with
+            if (
+              keystroke.state === 'upcoming' &&
+              gameTime > keystroke.startTime + GAME_CONFIG.TIMING_WINDOWS.LATE_EARLY
+            ) {
+              // Player has missed this note
+              updateFeedback('OFF', keystroke)
+            }
+          }
+        }
+
+        // 3. Clear the canvas for the new frame
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        // 4. Draw static UI elements
+        drawHitZone()
+
+        // 5. Draw dynamic elements (the keystrokes)
+        drawKeystrokes(masterTime)
+
+        // 6. Request the next frame
+        requestAnimationFrame(gameLoop)
+      }
+
+      /**
+       * Starts the game loop
+       */
+      function startGameLoop(startTime) {
+        gameLoopActive = true
+        gameStartTime = startTime
+        requestAnimationFrame(gameLoop)
+      }
+
+      /**
+       * Stops the game loop
+       */
+      function stopGameLoop() {
+        gameLoopActive = false
+      }
+
+      // ===== PHASE 3: USER INTERACTION AND SCORING =====
+
+      /**
+       * Plays a pre-loaded audio buffer
+       */
+      function playSoundEffect(buffer) {
+        if (!buffer || !window.audioContext) return
+        const source = window.audioContext.createBufferSource()
+        source.buffer = buffer
+        source.connect(window.audioContext.destination)
+        source.start(0)
+      }
+
+      /**
+       * Main keyboard input handler
+       */
+      function handlePlayerInput(event) {
+        // Check if game is active
+        if (!gameIsActive) {
+          return
+        }
+
+        // Prevent default browser actions for game keys
+        if (event.key === ' ' || event.key === 'Enter') {
+          event.preventDefault()
+        }
+
+        // Capture the key pressed and precise timing
+        const pressedKey =
+          event.key === ' ' ? '[Space]' : event.key === 'Enter' ? '[Enter]' : event.key
+        const pressTime = audioContext.currentTime
+        const gameTime = pressTime - gameStartTime
+
+        // Check for hidden note hits independently
+        if (pressedKey === '[Space]') {
+          const hiddenNote = findMatchingHiddenNote(gameTime)
+          if (hiddenNote) {
+            playSoundEffect(sfxBuffers.tambourine)
+            // If we hit a hidden note, don't process it as a regular hit
+            return
+          }
+        }
+
+        // Process the hit for the main game
+        processHit(pressedKey, pressTime)
+      }
+
+      /**
+       * Activates input listening for the game
+       */
+      function activateInputListener() {
+        gameIsActive = true
+        window.addEventListener('keydown', handlePlayerInput)
+        console.log('Phase 3: Input listener activated - Game is ready for input!')
+      }
+
+      /**
+       * Deactivates input listening for the game
+       */
+      function deactivateInputListener() {
+        gameIsActive = false
+        window.removeEventListener('keydown', handlePlayerInput)
+        console.log('Phase 3: Input listener deactivated - Game input disabled.')
+      }
+
+      /**
+       * Core hit detection and processing logic
+       */
+      function processHit(pressedKey, pressTime) {
+        // Find the target keystroke (first upcoming note)
+        const target = keystrokeMap.find((keystroke) => keystroke.state === 'upcoming')
+
+        // If no upcoming notes, ignore the input
+        if (!target) {
+          console.log('Phase 3: No upcoming notes found, ignoring input:', pressedKey)
+          return
+        }
+
+        // Calculate game time (relative to when the song started)
+        const gameTime = pressTime - gameStartTime
+        const timeDiff = gameTime - target.startTime
+
+        // Ignore inputs that are far too early for the next note
+        if (timeDiff < -GAME_CONFIG.TIMING_WINDOWS.LATE_EARLY) {
+          console.log(`Input '${pressedKey}' ignored: too early for target '${target.key}'`)
+          return // Don't penalize for presses far from the target time
+        }
+
+        console.log(
+          `Phase 3: Processing hit - Key: '${pressedKey}', Target: '${
+            target.key
+          }', GameTime: ${gameTime.toFixed(3)}s, TargetTime: ${target.startTime.toFixed(3)}s`,
+        )
+
+        // Check for typo first (highest priority)
+        if (pressedKey !== target.key) {
+          updateFeedback('TYPO', target)
+          return
+        }
+
+        // Key was correct, check timing accuracy
+        if (Math.abs(timeDiff) <= GAME_CONFIG.TIMING_WINDOWS.SYNC) {
+          // Perfect timing
+          updateFeedback('SYNC', target)
+        } else if (Math.abs(timeDiff) <= GAME_CONFIG.TIMING_WINDOWS.LATE_EARLY) {
+          // Good timing but not perfect
+          if (timeDiff > 0) {
+            updateFeedback('LATE', target)
+          } else {
+            updateFeedback('EARLY', target)
+          }
+        } else {
+          // Right key but too far outside timing window
+          updateFeedback('OFF', target)
+        }
+      }
+
+      /**
+       * Finds a matching hidden note based on timing, if one exists.
+       */
+      function findMatchingHiddenNote(gameTime) {
+        if (!hiddenNotes) return null
+
+        for (const note of hiddenNotes) {
+          if (note.state === 'upcoming') {
+            const timeDiff = gameTime - note.startTime
+            // Use a generous timing window for these fun notes
+            if (Math.abs(timeDiff) <= GAME_CONFIG.TIMING_WINDOWS.LATE_EARLY) {
+              note.state = 'hit' // Mark as hit to prevent re-triggering
+              return note
+            }
+          }
+        }
+        return null
+      }
+
+      /**
+       * Updates game state and provides feedback based on hit result
+       */
+      function updateFeedback(result, target) {
+        // Update keystroke state
+        if (result === 'SYNC' || result === 'LATE' || result === 'EARLY') {
+          target.state = 'hit'
+
+          // Play sound effect on correct hits
+          if (target.type === 'beat') {
+            playSoundEffect(sfxBuffers.base)
+          } else if (target.type === 'melody') {
+            playSoundEffect(sfxBuffers.hiHat)
+          }
+        } else if (result === 'TYPO' || result === 'OFF') {
+          target.state = 'missed'
+        }
+
+        // Update score based on result
+        let scoreChange = 0
+        switch (result) {
+          case 'SYNC':
+            scoreChange = GAME_CONFIG.SCORING.SYNC
+            break
+          case 'LATE':
+          case 'EARLY':
+            scoreChange = GAME_CONFIG.SCORING.LATE_EARLY
+            break
+          case 'TYPO':
+            scoreChange = GAME_CONFIG.SCORING.TYPO
+            break
+          case 'OFF':
+            scoreChange = GAME_CONFIG.SCORING.OFF
+            break
+        }
+
+        score += scoreChange
+
+        // Update UI
+        scoreDisplay.textContent = `Score: ${score}`
+
+        // Display feedback message
+        const feedbackMessages = {
+          SYNC: 'Sync! ✨',
+          LATE: 'Late ⏰',
+          EARLY: 'Early ⚡',
+          TYPO: 'Typo! ❌',
+          OFF: 'Missed! 💔',
+        }
+
+        feedbackDisplay.textContent = feedbackMessages[result] || result
+        feedbackDisplay.style.color =
+          result === 'SYNC'
+            ? '#00FF00'
+            : result === 'LATE' || result === 'EARLY'
+              ? '#FFFF00'
+              : '#FF0000'
+
+        // Clear feedback message after 1 second
+        setTimeout(() => {
+          feedbackDisplay.textContent = ''
+        }, 1000)
+      }
+
+      // ===== END PHASE 3 IMPLEMENTATION =====
+
+      // ===== END PHASE 2 IMPLEMENTATION =====
+
+      // ===== EXISTING FUNCTIONALITY (UPDATED) =====
+
+      fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0]
+        if (!file) {
+          return
+        }
+
+        userAudioFile = file
+        resultsOutput.textContent = 'Uploading file...'
+        keystrokeMapOutput.textContent = ''
+        playButton.disabled = true
+        playMelodyButton.disabled = true
+        generateKeystrokeMapButton.disabled = true
+        if (eventSource) {
+          eventSource.close()
+          eventSource = null
+        }
+
+        const formData = new FormData()
+        formData.append('file', file)
+
+        fetch('http://127.0.0.1:8000/analyze', {
+          method: 'POST',
+          body: formData,
+        })
+          .then((response) => {
+            if (response.status !== 200) {
+              // Note: The initial response is 200 now
+              throw new Error(`HTTP error! status: ${response.status}`)
+            }
+            return response.json()
+          })
+          .then((data) => {
+            resultsOutput.textContent = `Analysis started (Task ID: ${data.task_id}). Streaming results...`
+            streamResults(data.task_id)
+          })
+          .catch((err) => {
+            console.error(err)
+            resultsOutput.textContent =
+              'Error starting analysis. Please check the console and make sure the server is running.'
+          })
+      })
+
+      function streamResults(taskId) {
+        // Close any existing EventSource connection
+        if (eventSource) {
+          eventSource.close()
+        }
+
+        // Create new EventSource connection to SSE endpoint
+        eventSource = new EventSource(`http://127.0.0.1:8000/stream/${taskId}`)
+
+        eventSource.onmessage = function (event) {
+          try {
+            const data = JSON.parse(event.data)
+
+            if (data.state === 'SUCCESS') {
+              eventSource.close()
+              eventSource = null
+
+              analysisBpm = data.result.bpm
+              analysisTimestamps = data.result.beat_timestamps
+              analysisMelodyMap = data.result.melody_map
+
+              const resultsText = `
+Analyzed Song: ${userAudioFile.name}
+-----------------------------------
+Calculated BPM: ${analysisBpm.toFixed(2)}
+Total Beats Found: ${analysisTimestamps.length}
+
+Beat Timestamps (seconds):
+[${analysisTimestamps
+                .slice(0, 15)
+                .map((b) => b.toFixed(2))
+                .join(', ')}, ...]
+
+Melody Map (first 10 notes):
+${analysisMelodyMap
+  .slice(0, 10)
+  .map(
+    (note) =>
+      `  ${note.pitch} (start: ${note.start_time.toFixed(
+        2,
+      )}, duration: ${note.duration.toFixed(2)})`,
+  )
+  .join('\n')}
+                        `
+              resultsOutput.textContent = resultsText
+              playButton.disabled = false
+              playMelodyButton.disabled = false
+              generateKeystrokeMapButton.disabled = false
+            } else if (data.state === 'FAILURE') {
+              eventSource.close()
+              eventSource = null
+              resultsOutput.textContent = `Analysis failed: ${data.status}`
+            } else {
+              resultsOutput.textContent = `Status: ${data.state}... ${data.status || ''}`
+            }
+          } catch (error) {
+            console.error('Error parsing SSE data:', error)
+            resultsOutput.textContent = 'Error parsing server response.'
+          }
+        }
+
+        eventSource.onerror = function (event) {
+          console.error('SSE connection error:', event)
+          eventSource.close()
+          eventSource = null
+          resultsOutput.textContent = 'Error connecting to server stream.'
+        }
+
+        eventSource.onopen = function (event) {
+          console.log('SSE connection opened')
+        }
+      }
+
+      // Cleanup function to close EventSource connection
+      window.addEventListener('beforeunload', function () {
+        if (eventSource) {
+          eventSource.close()
+          eventSource = null
+        }
+      })
+
+      // New keystroke map generation button handler
+      generateKeystrokeMapButton.addEventListener('click', () => {
+        if (!analysisBpm || !analysisTimestamps || !analysisMelodyMap) {
+          alert('Please analyze a file first.')
+          return
+        }
+
+        try {
+          // Generate the keystroke map using Phase 1 logic
+          const generationResult = generateCompleteKeystrokeMap(
+            analysisBpm,
+            analysisTimestamps,
+            analysisMelodyMap,
+          )
+
+          // Store both the visible keystroke map and the hidden notes
+          keystrokeMap = generationResult.keystrokeMap
+          hiddenNotes = generationResult.hiddenNotes
+
+          // Display the keystroke map results
+          const keystrokeMapText = `
+PHASE 1 COMPLETE: Keystroke Map Generated
+==========================================
+Total Keystrokes: ${keystrokeMap.length}
+Time Span: ${keystrokeMap[0]?.startTime?.toFixed(2)}s - ${keystrokeMap[
+            keystrokeMap.length - 1
+          ]?.startTime?.toFixed(2)}s
+
+First 20 Keystrokes:
+${keystrokeMap
+  .slice(0, 20)
+  .map(
+    (k, i) =>
+      `${i + 1}. '${k.key}' at ${k.startTime.toFixed(2)}s (${k.duration.toFixed(2)}s) [${k.state}]`,
+  )
+  .join('\n')}
+
+Key Distribution:
+- Letters: ${keystrokeMap.filter((k) => /[a-zA-Z]/.test(k.key)).length}
+- Spaces: ${keystrokeMap.filter((k) => k.key === '[Space]').length}
+- Enters: ${keystrokeMap.filter((k) => k.key === '[Enter]').length}
+- Symbols: ${keystrokeMap.filter((k) => ['.', ','].includes(k.key)).length}
+- Hidden Notes: ${hiddenNotes.length} (for bonus tambourine sounds)
+
+Sample Keystroke Objects:
+${keystrokeMap
+  .slice(0, 5)
+  .map((k) => JSON.stringify(k, null, 2))
+  .join('\n')}
+					`
+
+          keystrokeMapOutput.textContent = keystrokeMapText
+
+          // Log to console for debugging
+          console.log('Generated Keystroke Map:', keystrokeMap)
+        } catch (error) {
+          console.error('Error generating keystroke map:', error)
+          keystrokeMapOutput.textContent = `Error generating keystroke map: ${error.message}`
+        }
+      })
+
+      playButton.addEventListener('click', async () => {
+        if (!userAudioFile || !analysisBpm || !analysisTimestamps) {
+          alert('Please analyze a file first.')
+          return
+        }
+
+        // Check if keystroke map is available for Phase 2 rendering
+        if (!keystrokeMap || keystrokeMap.length === 0) {
+          alert('Please generate a keystroke map first.')
+          return
+        }
+
+        playButton.disabled = true
+        playButton.textContent = 'Loading sounds...'
+
+        // Create or reuse the audio context
+        if (!window.audioContext) {
+          window.audioContext = new AudioContext()
+        }
+        const audioContext = window.audioContext
+
+        try {
+          const [songBuffer, beatBuffer, baseSfx, hiHatSfx, tambourineSfx] = await Promise.all([
+            fetch(URL.createObjectURL(userAudioFile))
+              .then((res) => res.arrayBuffer())
+              .then((buffer) => audioContext.decodeAudioData(buffer)),
+            fetch('beat.wav')
+              .then((res) => res.arrayBuffer())
+              .then((buffer) => audioContext.decodeAudioData(buffer)),
+            // Pre-load sound effects
+            fetch('base.mp3')
+              .then((res) => res.arrayBuffer())
+              .then((buffer) => audioContext.decodeAudioData(buffer)),
+            fetch('hi-hat.mp3')
+              .then((res) => res.arrayBuffer())
+              .then((buffer) => audioContext.decodeAudioData(buffer)),
+            fetch('tambourine.mp3')
+              .then((res) => res.arrayBuffer())
+              .then((buffer) => audioContext.decodeAudioData(buffer)),
+          ])
+
+          // Store decoded buffers
+          sfxBuffers.base = baseSfx
+          sfxBuffers.hiHat = hiHatSfx
+          sfxBuffers.tambourine = tambourineSfx
+
+          playButton.textContent = 'Playing...'
+
+          const startTime = audioContext.currentTime + 0.1
+
+          // Schedule the main song
+          const songSource = audioContext.createBufferSource()
+          songSource.buffer = songBuffer
+          songSource.connect(audioContext.destination)
+          songSource.start(startTime)
+
+          // Schedule the beat timestamps
+          analysisTimestamps.forEach((timestamp) => {
+            const beatSource = audioContext.createBufferSource()
+            beatSource.buffer = beatBuffer
+            beatSource.connect(audioContext.destination)
+            beatSource.start(startTime + timestamp)
+          })
+
+          // Phase 2: Start the game loop
+          startGameLoop(startTime)
+
+          // Phase 3: Activate input listener and reset game state
+          score = 0
+          scoreDisplay.textContent = `Score: ${score}`
+          feedbackDisplay.textContent = ''
+
+          // Reset all keystroke states to 'upcoming'
+          keystrokeMap.forEach((keystroke) => {
+            keystroke.state = 'upcoming'
+          })
+          hiddenNotes.forEach((note) => {
+            note.state = 'upcoming'
+          })
+
+          activateInputListener()
+
+          songSource.onended = () => {
+            playButton.textContent = 'Play with Metronome'
+            playButton.disabled = false
+            // Stop the game loop when audio ends
+            stopGameLoop()
+            // Phase 3: Deactivate input listener
+            deactivateInputListener()
+          }
+        } catch (error) {
+          console.error('Error loading or playing audio:', error)
+          alert('Error loading audio files. Make sure beat.wav is in the same directory.')
+          playButton.textContent = 'Play with Metronome'
+          playButton.disabled = false
+          // Phase 3: Deactivate input listener on error
+          deactivateInputListener()
+        }
+      })
+
+      playMelodyButton.addEventListener('click', async () => {
+        if (!userAudioFile || !analysisMelodyMap) {
+          alert('Please analyze a file first.')
+          return
+        }
+
+        // Check if keystroke map is available for Phase 2 rendering
+        if (!keystrokeMap || keystrokeMap.length === 0) {
+          alert('Please generate a keystroke map first.')
+          return
+        }
+
+        playMelodyButton.disabled = true
+        playMelodyButton.textContent = 'Loading melody...'
+
+        // Create or reuse the audio context
+        if (!window.audioContext) {
+          window.audioContext = new AudioContext()
+        }
+        const audioContext = window.audioContext
+
+        try {
+          const [songBuffer, melodyNoteBuffer, baseSfx, hiHatSfx, tambourineSfx] =
+            await Promise.all([
+              fetch(URL.createObjectURL(userAudioFile))
+                .then((res) => res.arrayBuffer())
+                .then((buffer) => audioContext.decodeAudioData(buffer)),
+              fetch('melody_note.wav')
+                .then((res) => res.arrayBuffer())
+                .then((buffer) => audioContext.decodeAudioData(buffer)),
+              // Pre-load sound effects
+              fetch('base.mp3')
+                .then((res) => res.arrayBuffer())
+                .then((buffer) => audioContext.decodeAudioData(buffer)),
+              fetch('hi-hat.mp3')
+                .then((res) => res.arrayBuffer())
+                .then((buffer) => audioContext.decodeAudioData(buffer)),
+              fetch('tambourine.mp3')
+                .then((res) => res.arrayBuffer())
+                .then((buffer) => audioContext.decodeAudioData(buffer)),
+            ])
+
+          // Store decoded buffers
+          sfxBuffers.base = baseSfx
+          sfxBuffers.hiHat = hiHatSfx
+          sfxBuffers.tambourine = tambourineSfx
+
+          playMelodyButton.textContent = 'Playing melody...'
+
+          const startTime = audioContext.currentTime + 0.1
+
+          // Schedule the main song
+          const songSource = audioContext.createBufferSource()
+          songSource.buffer = songBuffer
+          songSource.connect(audioContext.destination)
+          songSource.start(startTime)
+
+          // Schedule the melody notes
+          analysisMelodyMap.forEach((note) => {
+            const melodySource = audioContext.createBufferSource()
+            melodySource.buffer = melodyNoteBuffer
+            melodySource.connect(audioContext.destination)
+            melodySource.start(startTime + note.start_time, 0, note.duration)
+          })
+
+          // Phase 2: Start the game loop
+          startGameLoop(startTime)
+
+          // Phase 3: Activate input listener and reset game state
+          score = 0
+          scoreDisplay.textContent = `Score: ${score}`
+          feedbackDisplay.textContent = ''
+
+          // Reset all keystroke states to 'upcoming'
+          keystrokeMap.forEach((keystroke) => {
+            keystroke.state = 'upcoming'
+          })
+          hiddenNotes.forEach((note) => {
+            note.state = 'upcoming'
+          })
+
+          activateInputListener()
+
+          songSource.onended = () => {
+            playMelodyButton.textContent = 'Play Melody'
+            playMelodyButton.disabled = false
+            // Stop the game loop when audio ends
+            stopGameLoop()
+            // Phase 3: Deactivate input listener
+            deactivateInputListener()
+          }
+        } catch (error) {
+          console.error('Error loading or playing melody audio:', error)
+          alert(
+            'Error loading melody audio file. Make sure melody_note.wav is in the same directory.',
+          )
+          playMelodyButton.textContent = 'Play Melody'
+          playMelodyButton.disabled = false
+          // Phase 3: Deactivate input listener on error
+          deactivateInputListener()
+        }
+      })
+    </script>
+  </body>
+</html>

@@ -89,7 +89,7 @@ export const validateContactForm = (
     if (error instanceof ZodError) {
       const formattedErrors: { [key in keyof ContactSubmissionForm]?: string } = {}
 
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         const field = err.path[0] as keyof ContactSubmissionForm
         formattedErrors[field] = err.message
       })

@@ -10,5 +10,6 @@ export const routes = {
   services: '/pages/services',
   uber: '/pages/services/uber',
   tools: '/pages/tools',
+  games: '/pages/games',
   guestBook: '/pages/welcome/guest-book',
 }

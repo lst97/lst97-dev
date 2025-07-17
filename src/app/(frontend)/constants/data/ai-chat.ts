@@ -96,6 +96,12 @@ By using this AI chat service, you agree to:
 
 • Commercial use without explicit permission
 
+**Rate Limit:**
+
+• This chat service is limited to 15 requests per minute (RPM) shared across all users.
+
+• If you encounter a rate limit, please wait for a minute before trying again.
+
 **Service Limitations:**
 
 • Service availability is not guaranteed 24/7

@@ -2,11 +2,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 
-// FlipDigit: animates a single digit flip when value changes
+// FlipDigit: animates a single digit flip when value changes with pixel art style
 const FlipDigit = ({ value, className }: { value: string; className?: string }) => {
   const [displayValue, setDisplayValue] = useState(value)
-  const [flipping, setFlipping] = useState(false)
-  const [flipDirection, setFlipDirection] = useState<'out' | 'in' | null>(null)
+  const [isAnimating, setIsAnimating] = useState(false)
   const prev = useRef(value)
   const spanRef = useRef<HTMLSpanElement>(null)
   const [digitSize, setDigitSize] = useState<{ width: number; height: number }>({
@@ -24,22 +23,17 @@ const FlipDigit = ({ value, className }: { value: string; className?: string }) 
 
   useEffect(() => {
     if (value !== prev.current) {
-      setFlipping(true)
-      setFlipDirection('out')
+      setIsAnimating(true)
+      // Pixel art style quick flip animation
+      setTimeout(() => {
+        setDisplayValue(value)
+        setTimeout(() => {
+          setIsAnimating(false)
+          prev.current = value
+        }, 100)
+      }, 50)
     }
   }, [value])
-
-  // Handle the flip animation sequence
-  const handleAnimationComplete = () => {
-    if (flipDirection === 'out') {
-      setDisplayValue(value)
-      setFlipDirection('in')
-    } else if (flipDirection === 'in') {
-      setFlipping(false)
-      setFlipDirection(null)
-      prev.current = value
-    }
-  }
 
   return (
     <span
@@ -50,7 +44,6 @@ const FlipDigit = ({ value, className }: { value: string; className?: string }) 
         width: digitSize.width ? digitSize.width : '1ch',
         height: digitSize.height ? digitSize.height : '1em',
         verticalAlign: 'middle',
-        perspective: 400,
       }}
     >
       {/* Hidden static digit for sizing */}
@@ -62,20 +55,36 @@ const FlipDigit = ({ value, className }: { value: string; className?: string }) 
       </span>
       <motion.span
         initial={false}
-        animate={{ rotateX: flipping ? (flipDirection === 'out' ? -90 : 0) : 0 }}
-        transition={{ duration: 0.2, ease: 'easeInOut' }}
+        animate={{
+          scale: isAnimating ? [1, 1.2, 1] : 1,
+          rotateY: isAnimating ? [0, 180, 360] : 0,
+        }}
+        transition={{
+          duration: 0.15,
+          ease: 'linear',
+          times: [0, 0.5, 1],
+        }}
         style={{
           display: 'inline-block',
-          backfaceVisibility: 'hidden',
           position: 'absolute',
           left: 0,
           top: 0,
           width: '100%',
           height: '100%',
+          transformStyle: 'preserve-3d',
         }}
-        onAnimationComplete={handleAnimationComplete}
+        className="pixel-border"
       >
-        {displayValue}
+        <span
+          style={{
+            display: 'inline-block',
+            backfaceVisibility: 'hidden',
+            filter: isAnimating ? 'brightness(1.5)' : 'brightness(1)',
+            textShadow: isAnimating ? '0 0 8px currentColor' : 'none',
+          }}
+        >
+          {displayValue}
+        </span>
       </motion.span>
     </span>
   )
