@@ -53,7 +53,7 @@
     "eslint-plugin-react": "^7.37.5",
     "exifreader": "^4.31.1",
     "figlet": "^1.8.2",
-    "file-type": "^20.5.0",
+    "file-type": "^21.3.2",
     "filesize": "^10.1.6",
     "framer-motion": "^12.23.6",
     "gif.js": "^0.2.0",
