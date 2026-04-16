@@ -48,7 +48,7 @@
     "clsx": "^2.1.1",
     "cross-env": "^7.0.3",
     "date-fns": "^4.1.0",
-    "dompurify": "^3.2.6",
+    "dompurify": "^3.4.0",
     "echarts": "^5.6.0",
     "eslint-plugin-react": "^7.37.5",
     "exifreader": "^4.31.1",
